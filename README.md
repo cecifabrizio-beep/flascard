@@ -1274,5 +1274,17 @@
         });
 
     </script>
+    // ... all'interno dell'if (quizDirection === 'JPN_TO_ITA') { ... }
+
+// Pulisci il testo giapponese prendendo solo la prima opzione
+const jpnClean = parolaCorrente.jpn.split('/')[0];
+
+// ...
+// L'elemento chiave che chiama la funzione 'parla' con un tocco diretto
+const audioBtnHtml = `<button class="btn-audio" onclick="parla('${jpnClean}')">🔊</button>`;
+                        
+promptPrincipale.innerHTML = `${jpnColorato} ${audioBtnHtml}`;
+// ...
+
 </body>
 </html>
