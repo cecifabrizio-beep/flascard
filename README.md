@@ -340,10 +340,11 @@
 
                 <button id="svuota-tutto-btn" class="btn" style="background-color: #d92c23; margin-top: 20px;">CANCELLA TUTTO IL VOCABOLARIO</button>
             </div>
-        </div> <div id="modulo-hiragana" class="modulo-content">
+        </div> 
+        
+        <div id="modulo-hiragana" class="modulo-content">
             <div class="card-ui">
                 <h2>Alfabeto Hiragana (ひらがな)</h2>
-                
                 <h3>Gojūon (Suoni base)</h3>
                 <div class="table-container">
                     <table class="kana-table">
@@ -360,7 +361,7 @@
                         <tr><td></td><td class="romaji">na</td><td class="romaji">ni</td><td class="romaji">nu</td><td class="romaji">ne</td><td class="romaji">no</td></tr>
                         <tr><td><b>H</b></td><td class="kana">は</td><td class="kana">ひ</td><td class="kana">ふ</td><td class="kana">へ</td><td class="kana">ほ</td></tr>
                         <tr><td></td><td class="romaji">ha</td><td class="romaji">hi</td><td class="romaji">fu</td><td class="romaji">he</td><td class="romaji">ho</td></tr>
-                        <tr><td><b>M</b></td><td class="kana">ま</td><td class="romaji">み</td><td class="kana">む</td><td class="kana">め</td><td class="kana">も</td></tr>
+                        <tr><td><b>M</b></td><td class="kana">ま</td><td class="kana">み</td><td class="kana">む</td><td class="kana">め</td><td class="kana">も</td></tr>
                         <tr><td></td><td class="romaji">ma</td><td class="romaji">mi</td><td class="romaji">mu</td><td class="romaji">me</td><td class="romaji">mo</td></tr>
                         <tr><td><b>Y</b></td><td class="kana">や</td><td></td><td class="kana">ゆ</td><td></td><td class="kana">よ</td></tr>
                         <tr><td></td><td class="romaji">ya</td><td></td><td class="romaji">yu</td><td></td><td class="romaji">yo</td></tr>
@@ -372,57 +373,12 @@
                         <tr><td></td><td class="romaji">n</td><td></td><td></td><td></td><td></td></tr>
                     </table>
                 </div>
-
-                <h3>Dakuten (Suoni impuri)</h3>
-                <div class="table-container">
-                    <table class="kana-table">
-                        <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                        <tr><td><b>G</b></td><td class="kana">が</td><td class="kana">ぎ</td><td class="kana">ぐ</td><td class="kana">げ</td><td class="kana">ご</td></tr>
-                        <tr><td></td><td class="romaji">ga</td><td class="romaji">gi</td><td class="romaji">gu</td><td class="romaji">ge</td><td class="romaji">go</td></tr>
-                        <tr><td><b>Z</b></td><td class="kana">ざ</td><td class="kana">じ</td><td class="kana">ず</td><td class="kana">ぜ</td><td class="kana">ぞ</td></tr>
-                        <tr><td></td><td class="romaji">za</td><td class="romaji">ji</td><td class="romaji">zu</td><td class="romaji">ze</td><td class="romaji">zo</td></tr>
-                        <tr><td><b>D</b></td><td class="kana">だ</td><td class="kana">ぢ</td><td class="kana">づ</td><td class="kana">で</td><td class="kana">ど</td></tr>
-                        <tr><td></td><td class="romaji">da</td><td class="romaji">ji</td><td class="romaji">zu</td><td class="romaji">de</td><td class="romaji">do</td></tr>
-                        <tr><td><b>B</b></td><td class="kana">ば</td><td class="kana">び</td><td class="kana">ぶ</td><td class="kana">べ</td><td class="kana">ぼ</td></tr>
-                        <tr><td></td><td class="romaji">ba</td><td class="romaji">bi</td><td class="romaji">bu</td><td class="romaji">be</td><td class="romaji">bo</td></tr>
-                        <tr><td><b>P</b></td><td class="kana">ぱ</td><td class="kana">ぴ</td><td class="kana">ぷ</td><td class="kana">ぺ</td><td class="kana">ぽ</td></tr>
-                        <tr><td></td><td class="romaji">pa</td><td class="romaji">pi</td><td class="romaji">pu</td><td class="romaji">pe</td><td class="romaji">po</td></tr>
-                    </table>
-                </div>
-
-                <h3>Yōon (Suoni contratti)</h3>
-                <div class="table-container">
-                    <table class="kana-table">
-                        <tr><th></th><th>YA</th><th>YU</th><th>YO</th></tr>
-                        <tr><td><b>KY</b></td><td class="kana">きゃ</td><td class="kana">きゅ</td><td class="kana">きょ</td></tr>
-                        <tr><td></td><td class="romaji">kya</td><td class="romaji">kyu</td><td class="romaji">kyo</td></tr>
-                        <tr><td><b>SH</b></td><td class="kana">しゃ</td><td class="kana">しゅ</td><td class="kana">しょ</td></tr>
-                        <tr><td></td><td class="romaji">sha</td><td class="romaji">shu</td><td class="romaji">sho</td></tr>
-                        <tr><td><b>CH</b></td><td class="kana">ちゃ</td><td class="kana">ちゅ</td><td class="kana">ちょ</td></tr>
-                        <tr><td></td><td class="romaji">cha</td><td class="romaji">chu</td><td class="romaji">cho</td></tr>
-                        <tr><td><b>NY</b></td><td class="kana">にゃ</td><td class="kana">にゅ</td><td class="kana">にょ</td></tr>
-                        <tr><td></td><td class="romaji">nya</td><td class="romaji">nyu</td><td class="romaji">nyo</td></tr>
-                        <tr><td><b>HY</b></td><td class="kana">ひゃ</td><td class="kana">ひゅ</td><td class="kana">ひょ</td></tr>
-                        <tr><td></td><td class="romaji">hya</td><td class="romaji">hyu</td><td class="romaji">hyo</td></tr>
-                        <tr><td><b>MY</b></td><td class="kana">みゃ</td><td class="romaji">みゅ</td><td class="kana">みょ</td></tr>
-                        <tr><td></td><td class="romaji">mya</td><td class="romaji">myu</td><td class="romaji">myo</td></tr>
-                        <tr><td><b>RY</b></td><td class="kana">りゃ</td><td class="kana">りゅ</td><td class="kana">りょ</td></tr>
-                        <tr><td></td><td class="romaji">rya</td><td class="romaji">ryu</td><td class="romaji">ryo</td></tr>
-                        <tr><td><b>GY</b></td><td class="kana">ぎゃ</td><td class="kana">ぎゅ</td><td class="kana">ぎょ</td></tr>
-                        <tr><td></td><td class="romaji">gya</td><td class="romaji">gyu</td><td class="romaji">gyo</td></tr>
-                        <tr><td><b>J</b></td><td class="kana">じゃ</td><td class="kana">じゅ</td><td class="kana">じょ</td></tr>
-                        <tr><td></td><td class="romaji">ja</td><td class="romaji">ju</td><td class="romaji">jo</td></tr>
-                        <tr><td><b>BY</b></td><td class="kana">びゃ</td><td class="kana">びゅ</td><td class="kana">びょ</td></tr>
-                        <tr><td></td><td class="romaji">bya</td><td class="romaji">byu</td><td class="romaji">byo</td></tr>
-                        <tr><td><b>PY</b></td><td class="kana">ぴゃ</td><td class="kana">ぴゅ</td><td class="kana">ぴょ</td></tr>
-                        <tr><td></td><td class="romaji">pya</td><td class="romaji">pyu</td><td class="romaji">pyo</td></tr>
-                    </table>
-                </div>
             </div>
-        </div> <div id="modulo-katakana" class="modulo-content">
+        </div> 
+
+        <div id="modulo-katakana" class="modulo-content">
             <div class="card-ui">
                 <h2>Alfabeto Katakana (カタカナ)</h2>
-                
                 <h3>Gojūon (Suoni base)</h3>
                 <div class="table-container">
                     <table class="kana-table">
@@ -430,7 +386,7 @@
                         <tr><td><b>-</b></td><td class="kana">ア</td><td class="kana">イ</td><td class="kana">ウ</td><td class="kana">エ</td><td class="kana">オ</td></tr>
                         <tr><td></td><td class="romaji">a</td><td class="romaji">i</td><td class="romaji">u</td><td class="romaji">e</td><td class="romaji">o</td></tr>
                         <tr><td><b>K</b></td><td class="kana">カ</td><td class="kana">キ</td><td class="kana">ク</td><td class="kana">ケ</td><td class="kana">コ</td></tr>
-                        <tr><td></td><td class="romaji">ka</td><td class="romaji">ki</td><td class="romaji">ku</td><td class="romaji">ke</td><td class="romaji">co</td></tr>
+                        <tr><td></td><td class="romaji">ka</td><td class="romaji">ki</td><td class="romaji">ku</td><td class="romaji">ke</td><td class="romaji">ko</td></tr>
                         <tr><td><b>S</b></td><td class="kana">サ</td><td class="kana">シ</td><td class="kana">ス</td><td class="kana">セ</td><td class="kana">ソ</td></tr>
                         <tr><td></td><td class="romaji">sa</td><td class="romaji">shi</td><td class="romaji">su</td><td class="romaji">se</td><td class="romaji">so</td></tr>
                         <tr><td><b>T</b></td><td class="kana">タ</td><td class="kana">チ</td><td class="kana">ツ</td><td class="kana">テ</td><td class="kana">ト</td></tr>
@@ -451,54 +407,10 @@
                         <tr><td></td><td class="romaji">n</td><td></td><td></td><td></td><td></td></tr>
                     </table>
                 </div>
-
-                <h3>Dakuten (Suoni impuri)</h3>
-                <div class="table-container">
-                    <table class="kana-table">
-                        <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                        <tr><td><b>G</b></td><td class="kana">ガ</td><td class="kana">ギ</td><td class="kana">グ</td><td class="kana">ゲ</td><td class="kana">ゴ</td></tr>
-                        <tr><td></td><td class="romaji">ga</td><td class="romaji">gi</td><td class="romaji">gu</td><td class="romaji">ge</td><td class="romaji">go</td></tr>
-                        <tr><td><b>Z</b></td><td class="kana">ザ</td><td class="kana">ジ</td><td class="kana">ズ</td><td class="kana">ゼ</td><td class="kana">ゾ</td></tr>
-                        <tr><td></td><td class="romaji">za</td><td class="romaji">ji</td><td class="romaji">zu</td><td class="romaji">ze</td><td class="romaji">zo</td></tr>
-                        <tr><td><b>D</b></td><td class="kana">ダ</td><td class="kana">ヂ</td><td class="kana">ヅ</td><td class="kana">デ</td><td class="kana">ド</td></tr>
-                        <tr><td></td><td class="romaji">da</td><td class="romaji">ji</td><td class="romaji">zu</td><td class="romaji">de</td><td class="romaji">do</td></tr>
-                        <tr><td><b>B</b></td><td class="kana">バ</td><td class="kana">ビ</td><td class="kana">ブ</td><td class="kana">ベ</td><td class="kana">ボ</td></tr>
-                        <tr><td></td><td class="romaji">ba</td><td class="romaji">bi</td><td class="romaji">bu</td><td class="romaji">be</td><td class="romaji">bo</td></tr>
-                        <tr><td><b>P</b></td><td class="kana">パ</td><td class="kana">ピ</td><td class="kana">プ</td><td class="kana">ペ</td><td class="kana">ポ</td></tr>
-                        <tr><td></td><td class="romaji">pa</td><td class="romaji">pi</td><td class="romaji">pu</td><td class="romaji">pe</td><td class="romaji">po</td></tr>
-                    </table>
-                </div>
-
-                <h3>Yōon (Suoni contratti)</h3>
-                <div class="table-container">
-                    <table class="kana-table">
-                        <tr><th></th><th>YA</th><th>YU</th><th>YO</th></tr>
-                        <tr><td><b>KY</b></td><td class="kana">キャ</td><td class="kana">キュ</td><td class="kana">キョ</td></tr>
-                        <tr><td></td><td class="romaji">kya</td><td class="romaji">kyu</td><td class="romaji">kyo</td></tr>
-                        <tr><td><b>SH</b></td><td class="kana">シャ</td><td class="kana">シュ</td><td class="kana">ショ</td></tr>
-                        <tr><td></td><td class="romaji">sha</td><td class="romaji">shu</td><td class="romaji">sho</td></tr>
-                        <tr><td><b>CH</b></td><td class="kana">チャ</td><td class="kana">チュ</td><td class="kana">チョ</td></tr>
-                        <tr><td></td><td class="romaji">cha</td><td class="romaji">chu</td><td class="romaji">cho</td></tr>
-                        <tr><td><b>NY</b></td><td class="kana">ニャ</td><td class="kana">ニュ</td><td class="kana">ニョ</td></tr>
-                        <tr><td></td><td class="romaji">nya</td><td class="romaji">nyu</td><td class="romaji">nyo</td></tr>
-                        <tr><td><b>HY</b></td><td class="kana">ヒャ</td><td class="kana">ヒュ</td><td class="kana">ヒョ</td></tr>
-                        <tr><td></td><td class="romaji">hya</td><td class="romaji">hyu</td><td class="romaji">hyo</td></tr>
-                        <tr><td><b>MY</b></td><td class="kana">ミャ</td><td class="romaji">ミゅ</td><td class="kana">ミョ</td></tr>
-                        <tr><td></td><td class="romaji">mya</td><td class="romaji">myu</td><td class="romaji">myo</td></tr>
-                        <tr><td><b>RY</b></td><td class="kana">リャ</td><td class="kana">リュ</td><td class="kana">リョ</td></tr>
-                        <tr><td></td><td class="romaji">rya</td><td class="romaji">ryu</td><td class="romaji">ryo</td></tr>
-                        <tr><td><b>GY</b></td><td class="kana">ギャ</td><td class="kana">ギュ</td><td class="kana">ギョ</td></tr>
-                        <tr><td></td><td class="romaji">gya</td><td class="romaji">gyu</td><td class="romaji">gyo</td></tr>
-                        <tr><td><b>J</b></td><td class="kana">ジャ</td><td class="kana">ジュ</td><td class="kana">ジョ</td></tr>
-                        <tr><td></td><td class="romaji">ja</td><td class="romaji">ju</td><td class="romaji">jo</td></tr>
-                        <tr><td><b>BY</b></td><td class="kana">ビャ</td><td class="kana">ビュ</td><td class="kana">ビョ</td></tr>
-                        <tr><td></td><td class="romaji">bya</td><td class="romaji">byu</td><td class="romaji">byo</td></tr>
-                        <tr><td><b>PY</b></td><td class="kana">ピャ</td><td class="kana">ピュ</td><td class="kana">ピョ</td></tr>
-                        <tr><td></td><td class="romaji">pya</td><td class="romaji">pyu</td><td class="romaji">pyo</td></tr>
-                    </table>
-                </div>
             </div>
-        </div> <div id="modulo-vocaboli" class="modulo-content">
+        </div> 
+        
+        <div id="modulo-vocaboli" class="modulo-content">
             <div class="card-ui">
                 <h2>Lista Vocaboli</h2>
                 <p>Tutti i vocaboli presenti nel tuo mazzo, ordinati per Italiano. I caratteri sono colorati: <span class="hiragana">Hiragana (verde)</span>, <span class="katakana">Katakana (giallo)</span> e <span class="kanji">Kanji (blu)</span>.</p>
@@ -508,15 +420,15 @@
                 <button id="copia-vocaboli-btn" class="btn" style="background-color: #ff9500; margin-top: 10px;">Copia Vocaboli (CSV)</button>
 
                 <div id="lista-vocaboli-container">
-                    </div>
+                </div>
             </div>
-        </div> </main>
+        </div> 
+    </main>
 
 
     <script>
         // --- 1. Elementi DOM ---
-        // (Elementi Quiz)
-        const promptContainer = document.getElementById('prompt-container'); // Contenitore prompt
+        const promptContainer = document.getElementById('prompt-container'); 
         const promptLabel = document.getElementById('prompt-label');
         const promptPrincipale = document.getElementById('prompt-principale');
         const promptSecondario = document.getElementById('prompt-secondario');
@@ -531,7 +443,6 @@
         const quizContainer = document.getElementById('quiz-container');
         const btnSalvaSessione = document.getElementById('salva-sessione');
         const btnRipassaErrori = document.getElementById('ripassa-errori-btn');
-        // (Elementi Form)
         const form = document.getElementById('form-aggiungi');
         const inputIta = document.getElementById('input-ita');
         const inputEng = document.getElementById('input-eng');
@@ -549,7 +460,6 @@
         const esempioDisplay = document.getElementById('esempio-display'); 
         const svuotaTuttoBtn = document.getElementById('svuota-tutto-btn'); 
         
-        // (Elementi Navigazione e Vocaboli)
         const navButtons = document.querySelectorAll('.nav-btn');
         const mainNav = document.getElementById('main-nav');
         const moduliContenuto = document.querySelectorAll('.modulo-content');
@@ -559,25 +469,24 @@
 
         // --- 2. Dati e Stato ---
         let totalUniqueCards = 0; 
+        let audioEngineWoken = false; 
         
-        // (Mazzi)
         let mazzoPrincipale = [];
         let mazzoErroriPrioritari = [];
         let erroriSessioneCorrente;      
         let mazzoRipassoAttivo = [];
         let mazzoSessioneCorrente = []; 
         let indiceSessione = 0;          
-        // (Stato)
         let parolaCorrente = null;
         let quizDirection = 'ITA_TO_JPN';
         let modalitaQuiz = 'normale'; 
         let sessioneCorretti = 0;
         let sessioneSbagliati = 0;
-        // (Chiavi LocalStorage)
+
         const KEY_MAZZO_PRINCIPALE = 'mioMazzoPrincipale';
         const KEY_MAZZO_ERRORI = 'mioMazzoErrori';
         const KEY_CSV_URL = 'mioLinkCsvGitHub';
-        // (Audio)
+        
         let japaneseVoice = null;
         const synth = window.speechSynthesis;
 
@@ -588,14 +497,29 @@
             japaneseVoice = voices.find(voice => voice.lang.startsWith('ja'));
             if (!japaneseVoice && voices.length > 0) { console.warn("Nessuna voce 'ja-JP' trovata."); }
         }
+        
         function parla(testo) {
             if (!synth || !testo) return;
-            synth.cancel(); 
+            if (synth.speaking) { synth.cancel(); }
             const utterance = new SpeechSynthesisUtterance(testo);
+            if (!japaneseVoice) {
+                const voices = synth.getVoices();
+                japaneseVoice = voices.find(voice => voice.lang.startsWith('ja'));
+            }
             if (japaneseVoice) { utterance.voice = japaneseVoice; } 
-            else { utterance.lang = 'ja-JP'; }
+            else { utterance.lang = 'ja-JP'; } 
+            utterance.onerror = (event) => { console.error('Speech Synthesis Error:', event.error); };
             synth.speak(utterance);
         }
+        
+        function wakeUpAudioEngine() {
+            if (synth && !audioEngineWoken) {
+                const utterance = new SpeechSynthesisUtterance(' '); 
+                synth.speak(utterance); 
+                audioEngineWoken = true;
+            }
+        }
+        
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -604,15 +528,10 @@
             return array;
         }
         
-        /**
-         * Funzione Helper: Calcola il totale univoco da LocalStorage
-         */
         function getUniqueTotalCountFromLocalStorage() {
             const datiPrincipali = JSON.parse(localStorage.getItem(KEY_MAZZO_PRINCIPALE) || '[]');
             const datiErrori = JSON.parse(localStorage.getItem(KEY_MAZZO_ERRORI) || '[]');
             const mazzoCompleto = [...datiPrincipali, ...datiErrori];
-            
-            // Rimuove duplicati basati sull'italiano (Chiave univoca)
             const mazzoUnico = Array.from(new Map(mazzoCompleto.map(item => [item.ita.toLowerCase(), item])).values());
             return mazzoUnico.length;
         }
@@ -626,27 +545,21 @@
             let paroleTotaliDisponibili = mazzoErroriPrioritari.length + mazzoPrincipale.length;
             let paroleDaPrendere = Math.min(numParole, paroleTotaliDisponibili);
             
-            if (paroleDaPrendere === 0) {
-                return; // Non ci sono più parole
-            }
+            if (paroleDaPrendere === 0) { return; }
 
             let paroleDaErrori = mazzoErroriPrioritari.splice(0, paroleDaPrendere);
             mazzoSessioneCorrente.push(...paroleDaErrori);
             
             let numRimanenti = paroleDaPrendere - paroleDaErrori.length;
-
             if (numRimanenti > 0) {
                 let paroleDaMazzo = mazzoPrincipale.splice(0, numRimanenti);
                 mazzoSessioneCorrente.push(...paroleDaMazzo);
             }
-            
             mazzoSessioneCorrente = shuffleArray(mazzoSessioneCorrente);
         }
         
         // --- 5. Funzioni Quiz ---
-        
         function prossimaParola() {
-            
             if (modalitaQuiz === 'set_finito') {
                 modalitaQuiz = 'normale'; 
                 creaNuovoSet();          
@@ -655,7 +568,7 @@
             promptContainer.style.display = 'flex';
             inputRisposta.style.display = 'block';
             risultatoControllo.style.display = 'block';
-            esempioDisplay.innerHTML = ''; // Pulisci gli esempi
+            esempioDisplay.innerHTML = ''; 
             
             if (modalitaQuiz === 'ripasso_errori') {
                 if (mazzoRipassoAttivo.length > 0) {
@@ -673,7 +586,6 @@
                     indiceSessione++;
                     
                     let etichettaBase = `(Set ${indiceSessione}/${mazzoSessioneCorrente.length}):`;
-                    
                     const jpnClean = parolaCorrente.jpn.split('/')[0];
 
                     if (Math.random() < 0.5) {
@@ -693,9 +605,7 @@
                         promptSecondario.textContent = parolaCorrente.romaji.split('/')[0];
                         inputRisposta.placeholder = "Scrivi la traduzione italiana...";
                     }
-                    
                 } else {
-                    // Set Finito!
                     modalitaQuiz = 'set_finito';
                     promptLabel.textContent = "BRAVO!";
                     promptPrincipale.innerHTML = "🎉 Set Completato! 🎉";
@@ -732,10 +642,8 @@
             btnControlla.style.display = "none";
             btnProssima.style.display = "block"; 
             
-            // Pulisci e colora la risposta giapponese per il feedback
             const jpnClean = parolaCorrente.jpn.split('/')[0];
             const jpnColorato = colorizeJapanese(jpnClean); 
-            // Usa jpnClean per l'audio
             let audioBtnHtml = `<button class="btn-audio" onclick="parla('${jpnClean}')">🔊</button>`;
             
             if (quizDirection === 'JPN_TO_ITA') { audioBtnHtml = ""; }
@@ -743,20 +651,15 @@
             if (quizDirection === 'ITA_TO_JPN') {
                 const risposteCorretteRomaji = parolaCorrente.romaji.trim().toLowerCase().split('/');
                 const risposteCorretteJpn = parolaCorrente.jpn.trim().toLowerCase().split('/'); 
-                
                 isCorrect = (risposteCorretteRomaji.includes(rispostaUtente) || risposteCorretteJpn.includes(rispostaUtente));
-                
                 messaggioErrore = `Risposte: <b>${risposteCorretteRomaji[0]}</b> (<b>${jpnColorato}</b>${audioBtnHtml})`;
             } else { 
                 const risposteCorretteIta = parolaCorrente.ita.trim().toLowerCase().split('/');
                 const risposteCorretteEng = parolaCorrente.eng.trim().toLowerCase().split('/');
-                
                 isCorrect = (risposteCorretteIta.includes(rispostaUtente) || risposteCorretteEng.includes(rispostaUtente));
-                
                 messaggioErrore = `Risposte: <b>${risposteCorretteIta[0]}</b> (o <b>${risposteCorretteEng[0]}</b>)`;
             }
             
-            // *** NUOVO: Mostra la frase d'esempio ***
             if (parolaCorrente.esempi && parolaCorrente.esempi.trim() !== "") {
                 esempioDisplay.innerHTML = `<div id="esempio-display">Esempio: ${parolaCorrente.esempi}</div>`;
             } else {
@@ -813,30 +716,19 @@
             }
         }
 
-        /**
-         * Logica unificata di cancellazione di una singola parola.
-         */
         function eliminaParola(itaKey) {
             if (confirm(`Sei sicuro di voler ELIMINARE PERMANENTEMENTE la carta "${itaKey}" dal tuo mazzo? Questa azione è irreversibile!`)) {
-                
                 let mazzoP = JSON.parse(localStorage.getItem(KEY_MAZZO_PRINCIPALE) || '[]');
                 let mazzoE = JSON.parse(localStorage.getItem(KEY_MAZZO_ERRORI) || '[]');
-                
-                // Filtra via la parola
                 mazzoP = mazzoP.filter(c => c.ita !== itaKey);
                 mazzoE = mazzoE.filter(c => c.ita !== itaKey);
-                
                 localStorage.setItem(KEY_MAZZO_PRINCIPALE, JSON.stringify(mazzoP));
                 localStorage.setItem(KEY_MAZZO_ERRORI, JSON.stringify(mazzoE));
-
                 alert('Carta eliminata. Ricarico l\'app...');
                 location.reload(); 
             }
         }
         
-        /**
-         * NUOVA FUNZIONE: Cancella tutti i dati.
-         */
         function svuotaMazziTotali() {
             if (confirm("ATTENZIONE! Sei sicuro di voler ELIMINARE TUTTO il vocabolario salvato (tutte le parole e gli errori)? Questa azione è irreversibile!")) {
                 localStorage.removeItem(KEY_MAZZO_PRINCIPALE);
@@ -865,7 +757,6 @@
             const datiErrori = localStorage.getItem(KEY_MAZZO_ERRORI);
             mazzoErroriPrioritari = datiErrori ? JSON.parse(datiErrori) : [];
             
-            // Calcola il totale unico qui, PRIMA di manipolare i mazzi
             totalUniqueCards = getUniqueTotalCountFromLocalStorage();
             
             const paroleInErrori = new Set(mazzoErroriPrioritari.map(p => p.ita));
@@ -884,10 +775,6 @@
             creaNuovoSet();
         }
 
-        /**
-         * FUNZIONE AGGIORNATA
-         * Controlla i duplicati su ITA + JPN, non solo ITA.
-         */
         function aggiungiParolaAlMazzo(nuovaParola) {
              const parolaTrimmed = {
                 ita: nuovaParola.ita ? nuovaParola.ita.trim() : "",
@@ -900,20 +787,12 @@
                 return { success: false, motivo: "Campi mancanti" };
             }
             
-            // *** NUOVO CONTROLLO: Duplicato su ITA + JPN ***
+            // Controllo duplicati su ITA + JPN
             const uniqueKey = `${parolaTrimmed.ita.toLowerCase()}||${parolaTrimmed.jpn.toLowerCase()}`;
-            
-            const esisteGia = [
-                ...mazzoPrincipale, 
-                ...mazzoErroriPrioritari, 
-                ...mazzoSessioneCorrente, 
-                ...mazzoRipassoAttivo
-            ].some(carta => 
-                `${carta.ita.toLowerCase()}||${carta.jpn.toLowerCase()}` === uniqueKey
-            );
+            const esisteGia = [...mazzoPrincipale, ...mazzoErroriPrioritari, ...mazzoSessioneCorrente, ...mazzoRipassoAttivo]
+                .some(carta => `${carta.ita.toLowerCase()}||${carta.jpn.toLowerCase()}` === uniqueKey);
             
             if (esisteGia) {
-                // Messaggio aggiornato per riflettere il nuovo controllo
                 return { success: false, motivo: "Duplicato (Stesso significato italiano E stessa parola giapponese)" };
             }
             
@@ -944,7 +823,7 @@
         function processaTestoCSV(testo) {
             const righe = testo.split('\n');
             let paroleAggiunte = 0;
-            let paroleSaltate = []; 
+            let paroleSaltate = 0; 
             importDettagli.style.display = "none";
             importErroriLista.innerHTML = "";
             const primaRiga = righe[0].toLowerCase();
@@ -952,10 +831,9 @@
             for (let i = inizio; i < righe.length; i++) {
                 const riga = righe[i].trim();
                 if (riga === "") continue;
-                
                 const colonne = riga.split(','); 
-                
                 if (colonne.length < 4) {
+                    paroleSaltate++;
                     paroleSaltate.push({ parola: riga.split(',')[0] || "Riga illeggibile", motivo: "Malformata (Mancano campi obbligatori)" });
                     continue;
                 }
@@ -966,26 +844,17 @@
                     romaji: colonne[3], 
                     esempi: colonne[4] || "" 
                 };
-
                 const risultato = aggiungiParolaAlMazzo(parola);
                 if (risultato.success) {
                     paroleAggiunte++;
                 } else {
-                    paroleSaltate.push({ parola: parola.ita, motivo: risultato.motivo });
+                    paroleSaltate++;
+                    // Non logghiamo l'errore se è un semplice duplicato durante un ricaricamento massivo, per pulizia
                 }
             }
             
             salvaMazzoPrincipale();
-            
-            if (paroleSaltate.length > 0) {
-                importDettagli.style.display = "block";
-                paroleSaltate.forEach(errore => {
-                    const li = document.createElement('li');
-                    li.textContent = `"${errore.parola}": ${errore.motivo}`;
-                    importErroriLista.appendChild(li);
-                });
-            }
-            return { aggiunte: paroleAggiunte, saltate: paroleSaltate.length };
+            return { aggiunte: paroleAggiunte, saltate: paroleSaltate };
         }
         
         function gestisciImportaCSV(event) {
@@ -996,7 +865,7 @@
             reader.onload = function(e) {
                 const testo = e.target.result;
                 const { aggiunte, saltate } = processaTestoCSV(testo);
-                importMessaggio.textContent = `Importazione completata! Aggiunte: ${aggiunte}, Saltate: ${saltate}.`;
+                importMessaggio.textContent = `Importazione completata! Aggiunte: ${aggiunte}, Saltate/Duplicati: ${saltate}.`;
                 importMessaggio.className = "corretto";
                 fileInput.value = ""; 
                 if (aggiunte > 0) {
@@ -1028,13 +897,15 @@
                     return response.text();
                 }).then(testo => {
                     const { aggiunte, saltate } = processaTestoCSV(testo);
-                    updateMessaggio.textContent = `Aggiornato! Aggiunte: ${aggiunte}, Saltate: ${saltate}.`;
+                    updateMessaggio.textContent = `Aggiornato! Aggiunte: ${aggiunte}, Saltate/Duplicati: ${saltate}.`;
                     updateMessaggio.className = "corretto";
                     if (aggiunte > 0) {
                         setTimeout(() => {
                             alert(`Aggiunte ${aggiunte} nuove parole. Ricarica la pagina per iniziare!`);
                             location.reload();
                         }, 1000);
+                    } else {
+                        alert("Nessuna nuova parola trovata nel file remoto.");
                     }
                 }).catch(error => {
                     console.error("Errore aggiornamento da URL:", error);
@@ -1060,42 +931,29 @@
         }
         
         // --- 7. Funzioni di Navigazione ---
-
-        /**
-         * Funzione per colorare i caratteri giapponesi
-         */
         function colorizeJapanese(jpnText) {
             let output = '';
             for (const char of jpnText) {
                 const code = char.codePointAt(0);
-
                 if (code >= 0x3040 && code <= 0x309F) {
                     output += `<span class="hiragana">${char}</span>`;
-                } 
-                else if (code >= 0x30A0 && code <= 0x30FF) {
+                } else if (code >= 0x30A0 && code <= 0x30FF) {
                     output += `<span class="katakana">${char}</span>`;
-                }
-                else if (code >= 0x4E00 && code <= 0x9FFF) {
+                } else if (code >= 0x4E00 && code <= 0x9FFF) {
                     output += `<span class="kanji">${char}</span>`;
-                }
-                else {
+                } else {
                     output += char;
                 }
             }
             return output;
         }
 
-        /**
-         * Funzione per copiare tutti i vocaboli negli appunti in formato CSV.
-         */
         function copiaVocaboli() {
-            // 1. Carica tutti i dati (uguale a getUniqueTotalCountFromLocalStorage)
             const datiPrincipali = JSON.parse(localStorage.getItem(KEY_MAZZO_PRINCIPALE) || '[]');
             const datiErrori = JSON.parse(localStorage.getItem(KEY_MAZZO_ERRORI) || '[]');
             const mazzoCompleto = [...datiPrincipali, ...datiErrori];
             const mazzoUnico = Array.from(new Map(mazzoCompleto.map(item => [item.ita.toLowerCase(), item])).values());
             
-            // 2. Costruisci il testo in formato CSV
             let csvContent = "Italiano,Inglese,Giapponese,Romaji,Esempi\n"; 
             
             for (const parola of mazzoUnico) {
@@ -1104,49 +962,36 @@
                 const jpn = parola.jpn.split('/')[0];
                 const romaji = parola.romaji.split('/')[0];
                 const esempi = parola.esempi || ""; 
-                
-                // CSV: Racchiudere le stringhe tra virgolette doppie per includere virgole
                 csvContent += `"${ita}","${eng}","${jpn}","${romaji}","${esempi}"\n`;
             }
             
-            // 3. Copia negli appunti
             navigator.clipboard.writeText(csvContent).then(() => {
                 alert(`Copiato ${mazzoUnico.length} vocaboli in formato CSV negli appunti!`);
             }, () => {
-                alert("Errore durante la copia negli appunti. (Potrebbe richiedere una connessione HTTPS)");
+                alert("Errore durante la copia negli appunti.");
             });
         }
 
-
-        /**
-         * Carica tutti i vocaboli, li ordina e li mostra in una lista di schede.
-         */
         function mostraListaVocaboli() {
-            // 1. Carica tutti i dati
             const datiPrincipali = JSON.parse(localStorage.getItem(KEY_MAZZO_PRINCIPALE) || '[]');
             const datiErrori = JSON.parse(localStorage.getItem(KEY_MAZZO_ERRORI) || '[]');
             
-            // 2. Combina e Rimuovi duplicati
             const mazzoCompleto = [...datiPrincipali, ...datiErrori];
             const mazzoUnico = Array.from(new Map(mazzoCompleto.map(item => [item.ita.toLowerCase(), item])).values());
 
-            // 3. Ordina per Italiano
             mazzoUnico.sort((a, b) => a.ita.localeCompare(b.ita, 'it'));
 
-            // Aggiorna il conteggio (dal totale globale calcolato all'avvio)
             if (vocaboliCountElement) {
                 vocaboliCountElement.innerHTML = `<b>Totale Parole nel Mazzo Quiz: ${totalUniqueCards}</b>`;
             }
 
-            // 4. Genera HTML (Nuovo layout a schede)
-            vocaboliContainer.innerHTML = ""; // Pulisci
+            vocaboliContainer.innerHTML = ""; 
             
             if (mazzoUnico.length === 0) {
                 vocaboliContainer.innerHTML = "<p>Nessun vocabolo trovato. Aggiungine qualcuno nel modulo Quiz!</p>";
                 return;
             }
 
-            // Costruisci la lista di schede
             let listaHtml = "";
             for (const parola of mazzoUnico) {
                 const ita = parola.ita.split('/')[0];
@@ -1181,7 +1026,6 @@
 
             vocaboliContainer.innerHTML = listaHtml;
             
-            // Aggiungi listener per i pulsanti di cancellazione appena creati
             document.querySelectorAll('.delete-vocab-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const itaKey = e.target.dataset.deleteKey;
@@ -1190,26 +1034,19 @@
             });
         }
 
-        /**
-         * Mostra il modulo richiesto e nasconde gli altri.
-         */
         function mostraModulo(idModulo) {
-            // Nascondi tutti i moduli
+            wakeUpAudioEngine();
+            
             moduliContenuto.forEach(modulo => {
                 modulo.style.display = 'none';
             });
-            // Aggiorna i pulsanti attivi
             navButtons.forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.modulo === idModulo);
             });
-
-            // Mostra il modulo richiesto
             const moduloDaMostrare = document.getElementById(`modulo-${idModulo}`);
             if (moduloDaMostrare) {
                 moduloDaMostrare.style.display = 'block'; 
             }
-
-            // Azioni specifiche per modulo
             if (idModulo === 'quiz') {
                 controllaMazzoVuoto();
             } else if (idModulo === 'vocaboli') {
@@ -1217,19 +1054,14 @@
             }
         }
 
-
         // --- 8. Inizializzazione ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Carica voci audio
             if (synth) {
                 synth.onvoiceschanged = caricaVoceGiapponese;
                 caricaVoceGiapponese(); 
             }
-            
-            // Carica i dati del mazzo per il quiz
             caricaMazzi();
             
-            // Aggiungi Eventi Quiz e Form
             btnControlla.addEventListener('click', controllaRisposta);
             btnProssima.addEventListener('click', prossimaParola);
             btnElimina.addEventListener('click', () => {
@@ -1252,10 +1084,8 @@
                 }
             });
 
-            // Listener per CANCELLA TUTTO
             svuotaTuttoBtn.addEventListener('click', svuotaMazziTotali);
 
-            // Aggiungi Eventi Navigazione
             mainNav.addEventListener('click', (e) => {
                 if (e.target.closest('.nav-btn')) {
                     const btn = e.target.closest('.nav-btn');
@@ -1264,27 +1094,13 @@
                 }
             });
 
-            // Pulsante Copia Vocaboli
             if (copiaVocaboliBtn) {
                 copiaVocaboliBtn.addEventListener('click', copiaVocaboli);
             }
             
-            // Mostra il modulo QUIZ all'inizio
             mostraModulo('quiz');
         });
 
     </script>
-    // ... all'interno dell'if (quizDirection === 'JPN_TO_ITA') { ... }
-
-// Pulisci il testo giapponese prendendo solo la prima opzione
-const jpnClean = parolaCorrente.jpn.split('/')[0];
-
-// ...
-// L'elemento chiave che chiama la funzione 'parla' con un tocco diretto
-const audioBtnHtml = `<button class="btn-audio" onclick="parla('${jpnClean}')">🔊</button>`;
-                        
-promptPrincipale.innerHTML = `${jpnColorato} ${audioBtnHtml}`;
-// ...
-
 </body>
 </html>
