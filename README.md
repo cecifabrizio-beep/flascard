@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set di Studio Giapponese SRS (Random Rows)</title>
+    <title>Set di Studio Giapponese SRS (Con Categorie)</title>
     <style>
         /* --- Stile Generale --- */
         body {
@@ -43,6 +43,14 @@
 
         /* --- Sezione Quiz --- */
         #quiz-container { margin-top: 20px; }
+        
+        /* FILTRO CATEGORIA */
+        .filtro-container { margin-bottom: 15px; text-align: center; }
+        #filtro-categoria { 
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; 
+            font-size: 1rem; background-color: #f8f8f8; font-weight: 600; color: #333;
+        }
+
         #prompt-container { text-align: center; margin-bottom: 20px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
         #prompt-label { font-size: 0.9rem; color: #777; margin-bottom: 10px; font-weight: bold; }
         #prompt-principale { font-size: 2.5rem; color: #333; margin: 0; }
@@ -106,6 +114,7 @@
         
         .vocab-group-right { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
         .vocab-romaji { font-size: 0.85rem; color: #888; font-style: italic; font-weight: normal; margin-top: 2px; }
+        .vocab-tag { font-size: 0.75rem; color: #fff; background-color: #aaa; padding: 2px 6px; border-radius: 4px; margin-top: 4px; font-weight: bold; }
 
         .hiragana { color: #34c759; } .katakana { color: #ffcc00; } .kanji { color: #007aff; }
         .delete-vocab-btn { background: #ff3b30; color: white; border: none; border-radius: 6px; padding: 5px 12px; font-size: 0.9rem; cursor: pointer; }
@@ -128,6 +137,13 @@
             <div class="container card-ui-small" id="punteggio-container"></div>
 
             <div class="container card-ui" id="quiz-container">
+                
+                <div class="filtro-container">
+                    <select id="filtro-categoria" onchange="cambiaCategoriaQuiz()">
+                        <option value="TUTTI">📚 TUTTI I VOCABOLI</option>
+                    </select>
+                </div>
+
                 <div id="prompt-container">
                     <div id="prompt-label"></div> 
                     <h2 id="prompt-principale"></h2>
@@ -145,7 +161,7 @@
                 </div>
                 <button id="pulsante-elimina" class="btn">Elimina Carta</button>
                 
-                <div id="nessuna-carta" style="display: none;"><p>Non ci sono carte! Aggiungine qualcuna.</p></div>
+                <div id="nessuna-carta" style="display: none;"><p>Non ci sono carte in questa categoria!</p></div>
                 
                 <div id="salva-sessione-container">
                     <button id="ripassa-errori-btn" class="btn" disabled>Ripassa Errori Sessione (0)</button>
@@ -176,6 +192,7 @@
                         <div><label>Inglese:</label><input type="text" id="input-eng" required></div>
                         <div><label>Giapponese:</label><input type="text" id="input-jpn" required></div>
                         <div><label>Romaji:</label><input type="text" id="input-romaji" required></div>
+                        <div><label>Categoria (Tag):</label><input type="text" id="input-tag" placeholder="Es. Saluti, Lezione 1..."></div>
                         <div><label>Esempio:</label><input type="text" id="input-esempi"></div>
                         <button type="submit" class="btn">Salva</button>
                     </form>
@@ -321,6 +338,7 @@
         const formContainer = document.getElementById('form-container'); 
         const esempioDisplay = document.getElementById('esempio-display'); 
         const virtualKeyboard = document.getElementById('virtual-keyboard');
+        const filtroCategoria = document.getElementById('filtro-categoria');
         
         // --- STATE ---
         let mazzoPrincipale = [];
@@ -384,6 +402,7 @@
                         formContainer.style.display = 'block'; 
                         btnElimina.style.display = 'block';
                         virtualKeyboard.style.display = 'none';
+                        filtroCategoria.parentElement.style.display = 'block'; // Mostra filtro
                         caricaMazzi(); 
                     }
                     mostraModulo(targetModulo);
@@ -415,7 +434,7 @@
             document.getElementById('copia-vocaboli-btn').addEventListener('click', copiaVocaboli);
         }
 
-        // --- GESTIONE KANA (HIRAGANA & KATAKANA) ---
+        // --- GESTIONE KANA ---
         function generaPannelloConfigurazione(type) {
             const containerId = type === 'hiragana' ? 'h-config-grid' : 'k-config-grid';
             const storageKey = type === 'hiragana' ? KEY_HIRAGANA_CONFIG : KEY_KATAKANA_CONFIG;
@@ -425,7 +444,7 @@
             const savedConfig = JSON.parse(localStorage.getItem(storageKey) || '{}');
             
             for (const [label, range] of Object.entries(KANA_ROWS)) {
-                const isChecked = savedConfig[label] !== false; // Default true
+                const isChecked = savedConfig[label] !== false; 
                 const div = document.createElement('label');
                 div.className = 'checkbox-label';
                 div.innerHTML = `<input type="checkbox" value="${label}" ${isChecked ? 'checked' : ''} onchange="salvaConfigurazioneKana('${type}')"> ${label}`;
@@ -436,7 +455,6 @@
         function salvaConfigurazioneKana(type) {
             const containerId = type === 'hiragana' ? 'h-config-grid' : 'k-config-grid';
             const storageKey = type === 'hiragana' ? KEY_HIRAGANA_CONFIG : KEY_KATAKANA_CONFIG;
-            
             const checkboxes = document.querySelectorAll(`#${containerId} input[type="checkbox"]`);
             const config = {};
             checkboxes.forEach(cb => { config[cb.value] = cb.checked; });
@@ -454,7 +472,6 @@
             const containerId = type === 'hiragana' ? 'h-config-grid' : 'k-config-grid';
             const dataset = type === 'hiragana' ? HIRAGANA_DATA : KATAKANA_DATA;
             const checkboxes = document.querySelectorAll(`#${containerId} input[type="checkbox"]`);
-            
             let subset = [];
             checkboxes.forEach(cb => {
                 if (cb.checked) {
@@ -469,7 +486,6 @@
             virtualKeyboard.innerHTML = '';
             const dataset = type === 'hiragana' ? HIRAGANA_DATA : KATAKANA_DATA;
             
-            // Definiamo le righe con gli spazi vuoti ESPLICITI ('') per mantenere l'allineamento delle colonne (A, I, U, E, O)
             let rows = [
                 ['A','I','U','E','O'],
                 ['KA','KI','KU','KE','KO'],
@@ -478,13 +494,12 @@
                 ['NA','NI','NU','NE','NO'],
                 ['HA','HI','FU','HE','HO'],
                 ['MA','MI','MU','ME','MO'],
-                ['YA','','YU','','YO'],      // Nota gli spazi vuoti per allineare YU sotto U e YO sotto O
+                ['YA','','YU','','YO'],      
                 ['RA','RI','RU','RE','RO'],
-                ['WA','','','','WO'],        // WA sotto A, WO sotto O
-                ['N','','','','']            // N nella prima colonna (o a caso)
+                ['WA','','','','WO'],        
+                ['N','','','','']            
             ];
             
-            // Mescoliamo l'ordine delle righe (Randomizzazione)
             rows = shuffleArray(rows);
             
             const findChar = (romaji) => {
@@ -496,7 +511,6 @@
             rows.forEach(row => {
                row.forEach(r => {
                    if (r === '') {
-                       // Crea uno spazio vuoto invisibile per mantenere la griglia allineata
                        const emptyDiv = document.createElement('div');
                        emptyDiv.className = 'key-empty';
                        virtualKeyboard.appendChild(emptyDiv);
@@ -527,7 +541,7 @@
                 jpn: char.k, 
                 romaji: char.r,
                 level: 0,
-                type: type // 'hiragana' o 'katakana'
+                type: type 
             }));
 
             mazzoSessioneCorrente = shuffleArray(mazzoKana);
@@ -540,6 +554,7 @@
             mostraModulo('quiz');
             formContainer.style.display = 'none'; 
             btnElimina.style.display = 'none';
+            filtroCategoria.parentElement.style.display = 'none'; // Nascondi filtro vocaboli
             prossimaParola();
         }
 
@@ -547,7 +562,7 @@
         function prossimaParola() {
             if (modalitaQuiz === 'set_finito') {
                 modalitaQuiz = 'normale'; 
-                caricaMazzi(); 
+                caricaMazzi(); // Ricarica e applica filtro
                 return;
             }
 
@@ -565,9 +580,8 @@
             let etichetta = "";
             const isKanaMode = modalitaQuiz.includes('_mode');
 
-            // 1. GESTIONE KANA O RIPASSO KANA
             if (isKanaMode || (modalitaQuiz === 'ripasso_errori' && parolaCorrente && (parolaCorrente.type === 'hiragana' || parolaCorrente.type === 'katakana'))) {
-                
+                // ... (Logica Kana Invariata) ...
                 if (isKanaMode) {
                     if (indiceSessione >= mazzoSessioneCorrente.length) {
                         promptPrincipale.innerHTML = "🎉 Fine Pratica!";
@@ -580,7 +594,6 @@
                     indiceSessione++;
                     etichetta = `${parolaCorrente.type.toUpperCase()} (${indiceSessione}/${mazzoSessioneCorrente.length})`;
                 } else {
-                    // Ripasso
                     if (mazzoRipassoAttivo.length > 0) {
                         parolaCorrente = mazzoRipassoAttivo.shift();
                         etichetta = `RIPASSO (${mazzoRipassoAttivo.length + 1})`;
@@ -600,7 +613,6 @@
                     promptLabel.innerHTML = `${etichetta} - Che carattere è?`;
                     promptPrincipale.textContent = parolaCorrente.romaji;
                     promptSecondario.textContent = "(Usa la tastiera qui sotto)";
-                    
                     generaTastieraVirtuale(parolaCorrente.type);
                     virtualKeyboard.style.display = 'grid'; 
                 }
@@ -639,18 +651,19 @@
 
                 const stelle = "⭐".repeat(parolaCorrente.level || 0);
                 const jpnClean = parolaCorrente.jpn.split('/')[0];
+                const tagInfo = parolaCorrente.tag ? `<br><small style="color:#aaa; font-size:0.6rem;">${parolaCorrente.tag}</small>` : '';
                 
                 if (Math.random() < 0.5) {
                     quizDirection = 'ITA_TO_JPN';
                     promptLabel.innerHTML = `TRADUCI ${etichetta} <small>${stelle}</small>`;
                     promptPrincipale.textContent = parolaCorrente.ita.split('/')[0];
-                    promptSecondario.textContent = parolaCorrente.eng.split('/')[0];
+                    promptSecondario.innerHTML = parolaCorrente.eng.split('/')[0] + tagInfo;
                 } else {
                     quizDirection = 'JPN_TO_ITA';
                     promptLabel.innerHTML = `TRADUCI ${etichetta} <small>${stelle}</small>`;
                     const btnAudio = `<button class="btn-audio" onclick="parla('${jpnClean}')">🔊</button>`;
                     promptPrincipale.innerHTML = `${colorizeJapanese(jpnClean)} ${btnAudio}`;
-                    promptSecondario.textContent = parolaCorrente.romaji.split('/')[0];
+                    promptSecondario.innerHTML = parolaCorrente.romaji.split('/')[0] + tagInfo;
                 }
             }
             aggiornaPunteggio();
@@ -782,13 +795,52 @@
                 if(typeof c.level==='undefined') c.level=0;
                 c.type = 'vocab';
             });
-            mazzoErroriPrioritari.forEach(c => {
-                if(typeof c.level==='undefined') c.level=0;
-                c.type = 'vocab';
+            
+            aggiornaFiltroCategorie(); // Aggiorna il dropdown con i tag trovati
+            creaNuovoSet();
+            
+            if(modalitaQuiz === 'normale') {
+                // Se non ci sono carte nel filtro corrente
+                if(mazzoSessioneCorrente.length === 0 && (mazzoPrincipale.length > 0 || mazzoErroriPrioritari.length > 0)) {
+                    document.getElementById('nessuna-carta').style.display = 'block';
+                    document.getElementById('quiz-container').querySelector('.controlli').style.display = 'none';
+                    document.getElementById('input-risposta').style.display = 'none';
+                    document.getElementById('prompt-container').style.display = 'none';
+                } else {
+                    document.getElementById('nessuna-carta').style.display = 'none';
+                    document.getElementById('quiz-container').querySelector('.controlli').style.display = 'flex';
+                    prossimaParola();
+                }
+            }
+        }
+        
+        function aggiornaFiltroCategorie() {
+            // Salva selezione corrente per non perderla al reload
+            const currentSelection = filtroCategoria.value;
+            
+            // Trova tutti i tag unici
+            const allTags = new Set();
+            mazzoPrincipale.forEach(c => { if(c.tag) allTags.add(c.tag); });
+            
+            // Pulisci (mantieni solo TUTTI)
+            filtroCategoria.innerHTML = '<option value="TUTTI">📚 TUTTI I VOCABOLI</option>';
+            
+            // Ordina e aggiungi
+            Array.from(allTags).sort().forEach(tag => {
+                const opt = document.createElement('option');
+                opt.value = tag;
+                opt.textContent = `📂 ${tag}`;
+                filtroCategoria.appendChild(opt);
             });
             
-            creaNuovoSet();
-            if(modalitaQuiz === 'normale') prossimaParola();
+            // Ripristina selezione se esiste ancora
+            if(currentSelection && Array.from(filtroCategoria.options).some(o => o.value === currentSelection)) {
+                filtroCategoria.value = currentSelection;
+            }
+        }
+
+        function cambiaCategoriaQuiz() {
+            caricaMazzi();
         }
         
         function creaNuovoSet() {
@@ -796,8 +848,23 @@
             indiceSessione = 0;
             if (mazzoPrincipale.length === 0 && mazzoErroriPrioritari.length === 0) return;
 
-            const pool = [...mazzoErroriPrioritari];
-            const sortedMain = [...mazzoPrincipale].sort((a,b) => (a.level||0) - (b.level||0));
+            const categoriaScelta = filtroCategoria.value;
+            
+            // Filtra mazzo principale
+            let filteredMain = mazzoPrincipale;
+            if (categoriaScelta !== 'TUTTI') {
+                filteredMain = mazzoPrincipale.filter(c => c.tag === categoriaScelta);
+            }
+
+            const sortedMain = [...filteredMain].sort((a,b) => (a.level||0) - (b.level||0));
+            
+            // Aggiungi errori (se sono pertinenti alla categoria, opzionale, qui li metto tutti per semplicità di ripasso)
+            // Se vuoi filtrare anche gli errori: mazzoErroriPrioritari.filter(c => c.tag === categoriaScelta)
+            let pool = [...mazzoErroriPrioritari];
+            if(categoriaScelta !== 'TUTTI') {
+                 pool = pool.filter(c => c.tag === categoriaScelta);
+            }
+            
             pool.push(...sortedMain);
             
             mazzoSessioneCorrente = pool.slice(0, 10);
@@ -843,6 +910,7 @@
                 eng:document.getElementById('input-eng').value,
                 jpn:document.getElementById('input-jpn').value,
                 romaji:document.getElementById('input-romaji').value,
+                tag:document.getElementById('input-tag').value || "Generale",
                 esempi:document.getElementById('input-esempi').value,
                 level: 0,
                 type: 'vocab'
@@ -861,7 +929,8 @@
                     if(!line.trim()) return;
                     const c = parseCSVLine(line);
                     if(c.length < 4) return;
-                    mazzoPrincipale.push({ita:c[0], eng:c[1], jpn:c[2], romaji:c[3], esempi:c[4]||"", level:0, type:'vocab'});
+                    // Mappa colonna 5 a tag
+                    mazzoPrincipale.push({ita:c[0], eng:c[1], jpn:c[2], romaji:c[3], tag:c[4]||"Generale", esempi:c[5]||"", level:0, type:'vocab'});
                 });
                 salvaMazzoPrincipale(); 
                 location.reload();
@@ -877,7 +946,7 @@
                     if(!line.trim()) return;
                     const c = parseCSVLine(line);
                     if(c.length < 4) return;
-                    mazzoPrincipale.push({ita:c[0],eng:c[1],jpn:c[2],romaji:c[3],esempi:c[4]||"",level:0,type:'vocab'});
+                    mazzoPrincipale.push({ita:c[0],eng:c[1],jpn:c[2],romaji:c[3],tag:c[4]||"Generale",esempi:c[5]||"",level:0,type:'vocab'});
                  });
                  salvaMazzoPrincipale(); 
                  location.reload();
@@ -888,8 +957,8 @@
         
         function copiaVocaboli(){ 
             const all = [...mazzoPrincipale, ...mazzoErroriPrioritari];
-            let csv = "Italiano,Inglese,Giapponese,Romaji,Esempi\n";
-            all.forEach(p => { csv += `"${p.ita}","${p.eng}","${p.jpn}","${p.romaji}","${p.esempi || ''}"\n`; });
+            let csv = "Italiano,Inglese,Giapponese,Romaji,Tag,Esempi\n";
+            all.forEach(p => { csv += `"${p.ita}","${p.eng}","${p.jpn}","${p.romaji}","${p.tag||''}","${p.esempi || ''}"\n`; });
             navigator.clipboard.writeText(csv).then(() => alert("Copiato negli appunti!"));
         }
         
@@ -902,7 +971,7 @@
             if(document.getElementById('modulo-vocaboli').style.display === 'block') {
                 mostraListaVocaboli();
             } else {
-                location.reload();
+                location.reload(); // Ricarica per aggiornare filtri e liste
             }
         }
         
@@ -923,6 +992,7 @@
                         <div class="vocab-group-right">
                             <span class="vocab-jpn">${colorizeJapanese(p.jpn)}</span>
                             <span class="vocab-romaji">${p.romaji}</span>
+                            ${p.tag ? `<span class="vocab-tag">${p.tag}</span>` : ''}
                         </div>
                     </div>
                 `;
