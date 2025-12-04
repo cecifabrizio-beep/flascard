@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set di Studio Giapponese SRS (A blocchi di 10)</title>
+    <title>Set di Studio Giapponese SRS (Random Puro)</title>
     <style>
         /* --- Stile Generale --- */
         body {
@@ -62,8 +62,21 @@
         .corretto { color: #2ca049; } .sbagliato { color: #d92c23; }
 
         /* --- TASTIERA VIRTUALE --- */
-        #virtual-keyboard { display: none; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 20px; background: #f8f8f8; padding: 10px; border-radius: 12px; }
-        .key-btn { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 12px 0; font-size: 1.3rem; cursor: pointer; font-weight: bold; color: #333; transition: background 0.1s; text-align: center; min-height: 45px; }
+        #virtual-keyboard { 
+            display: none; 
+            grid-template-columns: repeat(5, 1fr); /* Sempre 5 colonne per ordine visivo */
+            gap: 8px; 
+            margin-bottom: 20px; 
+            background: #f8f8f8; 
+            padding: 10px; 
+            border-radius: 12px; 
+        }
+        .key-btn { 
+            background: white; border: 1px solid #ddd; border-radius: 6px; 
+            padding: 10px 0; font-size: 1.4rem; cursor: pointer; font-weight: bold; 
+            color: #333; transition: background 0.1s; text-align: center; min-height: 50px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
         .key-btn:active { background: #e5e5ea; transform: scale(0.95); }
         .key-empty { pointer-events: none; border: none; background: transparent; }
 
@@ -519,6 +532,7 @@ Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
         let mazzoErroriPrioritari = [];
         let mazzoBacklog = []; // Coda di parole da fare (tutte quelle della categoria)
         let mazzoSessioneCorrente = []; // Le 10 attuali
+        let subsetKanaAttivo = []; // I Kana selezionati per il quiz attuale
         let erroriSessioneCorrente = new Set();       
         let mazzoRipassoAttivo = [];
         let indiceSessione = 0;           
@@ -676,50 +690,27 @@ Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
             return subset;
         }
 
-        function generaTastieraVirtuale(type) {
+        function generaTastieraVirtuale() {
             virtualKeyboard.innerHTML = '';
-            const dataset = type === 'hiragana' ? HIRAGANA_DATA : KATAKANA_DATA;
             
-            let rows = [
-                ['A','I','U','E','O'],
-                ['KA','KI','KU','KE','KO'],
-                ['SA','SHI','SU','SE','SO'],
-                ['TA','CHI','TSU','TE','TO'],
-                ['NA','NI','NU','NE','NO'],
-                ['HA','HI','FU','HE','HO'],
-                ['MA','MI','MU','ME','MO'],
-                ['YA','','YU','','YO'],      
-                ['RA','RI','RU','RE','RO'],
-                ['WA','','','','WO'],        
-                ['N','','','','']            
-            ];
+            // Usiamo il subset attivo definito all'avvio del quiz (filtrato dall'utente)
+            // Se è vuoto, usa tutto (fallback)
+            let caratteriDaMostrare = subsetKanaAttivo.length > 0 ? subsetKanaAttivo : (modalitaQuiz.startsWith('hiragana') ? HIRAGANA_DATA : KATAKANA_DATA);
             
-            rows = shuffleArray(rows);
+            // Estraiamo solo i caratteri .k
+            let listaTasti = caratteriDaMostrare.map(x => x.k);
             
-            const findChar = (romaji) => {
-                if(!romaji) return null;
-                const found = dataset.find(d => d.r === romaji.toLowerCase());
-                return found ? found.k : '';
-            };
+            // Mescoliamo COMPLETAMENTE l'array (nessuna colonna fissa)
+            listaTasti = shuffleArray(listaTasti);
             
-            rows.forEach(row => {
-               row.forEach(r => {
-                   if (r === '') {
-                       const emptyDiv = document.createElement('div');
-                       emptyDiv.className = 'key-empty';
-                       virtualKeyboard.appendChild(emptyDiv);
-                   } else {
-                       const char = findChar(r);
-                       if(char) {
-                           const btn = document.createElement('button');
-                           btn.className = 'key-btn';
-                           btn.textContent = char;
-                           btn.onclick = () => { inputRisposta.value += char; inputRisposta.focus(); };
-                           virtualKeyboard.appendChild(btn);
-                       }
-                   }
-               }); 
+            listaTasti.forEach(char => {
+               const btn = document.createElement('button');
+               btn.className = 'key-btn';
+               btn.textContent = char;
+               btn.onclick = () => { inputRisposta.value += char; inputRisposta.focus(); };
+               virtualKeyboard.appendChild(btn);
             });
+            
             virtualKeyboard.style.gridTemplateColumns = 'repeat(5, 1fr)';
         }
 
@@ -727,7 +718,8 @@ Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
             const subset = getKanaSubset(type);
             if (subset.length === 0) { alert("Seleziona almeno una riga!"); return; }
 
-            generaTastieraVirtuale(type);
+            // Salviamo il subset attivo per usarlo nella generazione della tastiera
+            subsetKanaAttivo = subset;
 
             const mazzoKana = subset.map(char => ({
                 ita: char.r, 
@@ -749,6 +741,10 @@ Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
             formContainer.style.display = 'none'; 
             btnElimina.style.display = 'none';
             filtroCategoria.parentElement.style.display = 'none'; // Nascondi filtro vocaboli
+            
+            // Genera la tastiera subito
+            generaTastieraVirtuale();
+            
             prossimaParola();
         }
 
@@ -814,7 +810,10 @@ Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
                     promptLabel.innerHTML = `${etichetta} - Che carattere è?`;
                     promptPrincipale.textContent = parolaCorrente.romaji;
                     promptSecondario.textContent = "(Usa la tastiera qui sotto)";
-                    generaTastieraVirtuale(parolaCorrente.type);
+                    
+                    // Rigenera tastiera mescolata per ogni domanda (opzionale, ma aumenta difficoltà)
+                    // Se vuoi tastiera fissa per sessione, muovi questa chiamata fuori da prossimaParola
+                    generaTastieraVirtuale(); 
                     virtualKeyboard.style.display = 'grid'; 
                 }
 
