@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set di Studio Giapponese SRS (Con Categorie)</title>
+    <title>Set di Studio Giapponese SRS (A blocchi di 10)</title>
     <style>
         /* --- Stile Generale --- */
         body {
@@ -47,8 +47,8 @@
         /* FILTRO CATEGORIA */
         .filtro-container { margin-bottom: 15px; text-align: center; }
         #filtro-categoria { 
-            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; 
-            font-size: 1rem; background-color: #f8f8f8; font-weight: 600; color: #333;
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #007aff; 
+            font-size: 1rem; background-color: #f0f8ff; font-weight: 600; color: #333; cursor: pointer;
         }
 
         #prompt-container { text-align: center; margin-bottom: 20px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
@@ -171,11 +171,16 @@
             </div>
 
             <div class="container card-ui" id="form-container">
-                <h2>Aggiornamento Online</h2>
+                <h2>Gestione Dati</h2>
                 <div>
+                    <button id="reset-dati-btn" class="btn" style="background-color: #34c759; margin-bottom:10px;">🔄 Ripristina Dati Vocaboli</button>
+                    <p class="messaggio-feedback" style="font-weight:normal; font-size:0.9rem;">(Clicca qui se non vedi le categorie nel menu)</p>
+                </div>
+                
+                <div class="sezione-gestione">
                     <label for="csv-url-input" class="label-sezione">Link al file .csv su GitHub:</label>
                     <input type="text" id="csv-url-input" class="input-text" placeholder="https://raw.githubusercontent.com/...">
-                    <button id="update-url-btn" class="btn" style="margin-top:10px; background:#34c759;">Aggiorna da Link</button>
+                    <button id="update-url-btn" class="btn" style="margin-top:10px; background:#007aff;">Aggiorna da Link</button>
                     <p id="messaggio-update" class="messaggio-feedback"></p>
                 </div>
 
@@ -283,6 +288,175 @@
     </main>
 
     <script>
+        // --- DATI INIZIALI (CSV EMBEDDED) ---
+        const DATI_INIZIALI_CSV = `
+Buongiorno,Good morning,おはよう,Ohayoo,Intro - Saluti e Espressioni
+Buongiorno (cortese),Good morning (polite),おはようございます,Ohayoo gozaimasu,Intro - Saluti e Espressioni
+Buon pomeriggio,Good afternoon,こんにちは,Konnichiwa,Intro - Saluti e Espressioni
+Buonasera,Good evening,こんばんは,Konbanwa,Intro - Saluti e Espressioni
+Arrivederci,Good-bye,さようなら,Sayoonara,Intro - Saluti e Espressioni
+Buonanotte,Good night,おやすみ（なさい）,Oyasumi (nasai),Intro - Saluti e Espressioni
+Grazie,Thank you,ありがとう,Arigatoo,Intro - Saluti e Espressioni
+Grazie (cortese),Thank you (polite),ありがとうございます,Arigatoo gozaimasu,Intro - Saluti e Espressioni
+Mi scusi / Mi dispiace,Excuse me / I'm sorry,すみません,Sumimasen,Intro - Saluti e Espressioni
+No / Di nulla,No / Not at all,いいえ,Iie,Intro - Saluti e Espressioni
+Vado e torno,I'll go and come back,いってきます,Itte kimasu,Intro - Saluti e Espressioni
+Vai e torna,Please go and come back,いってらっしゃい,Itterasshai,Intro - Saluti e Espressioni
+Sono a casa,I'm home,ただいま,Tadaima,Intro - Saluti e Espressioni
+Bentornato,Welcome home,おかえり（なさい）,Okaeri (nasai),Intro - Saluti e Espressioni
+Grazie per il cibo (prima di mangiare),Thank you for the meal (before eating),いただきます,Itadakimasu,Intro - Saluti e Espressioni
+Grazie per il cibo (dopo aver mangiato),Thank you for the meal (after eating),ごちそうさま（でした）,Gochisoosama (deshita),Intro - Saluti e Espressioni
+Piacere di conoscerti,How do you do?,はじめまして,Hajimemashite,Intro - Saluti e Espressioni
+Sono...,I am...,～です,... desu,Intro - Saluti e Espressioni
+Piacere,Nice to meet you,よろしく おねがいします,Yoroshiku onegai shimasu,Intro - Saluti e Espressioni
+Zero,Zero,ゼロ / れい,zero / ree,Intro - Numeri (0-100)
+Uno,One,いち,ichi,Intro - Numeri (0-100)
+Due,Two,に,ni,Intro - Numeri (0-100)
+Tre,Three,さん,san,Intro - Numeri (0-100)
+Quattro,Four,よん / し / (よ),yon / shi / (yo),Intro - Numeri (0-100)
+Cinque,Five,ご,go,Intro - Numeri (0-100)
+Sei,Six,ろく,roku,Intro - Numeri (0-100)
+Sette,Seven,なな / しち,nana / shichi,Intro - Numeri (0-100)
+Otto,Eight,はち,hachi,Intro - Numeri (0-100)
+Nove,Nine,きゅう / く,kyuu / ku,Intro - Numeri (0-100)
+Dieci,Ten,じゅう,juu,Intro - Numeri (0-100)
+Undici,Eleven,じゅういち,juuichi,Intro - Numeri (0-100)
+Dodici,Twelve,じゅうに,juuni,Intro - Numeri (0-100)
+Tredici,Thirteen,じゅうさん,juusan,Intro - Numeri (0-100)
+Quattordici,Fourteen,じゅうよん / しゅうよん,juuyon / shuuyon,Intro - Numeri (0-100)
+Quindici,Fifteen,じゅうご,juugo,Intro - Numeri (0-100)
+Sedici,Sixteen,じゅうろく,juuroku,Intro - Numeri (0-100)
+Diciassette,Seventeen,じゅうなな / じゅうしち,juunana / juushichi,Intro - Numeri (0-100)
+Diciotto,Eighteen,じゅうはち,juuhachi,Intro - Numeri (0-100)
+Diciannove,Nineteen,じゅうきゅう / じゅうく,juukyuu / juuku,Intro - Numeri (0-100)
+Venti,Twenty,にじゅう,nijuu,Intro - Numeri (0-100)
+Trenta,Thirty,さんじゅう,sanjuu,Intro - Numeri (0-100)
+Quaranta,Forty,よんじゅう,yonjuu,Intro - Numeri (0-100)
+Cinquanta,Fifty,ごじゅう,gojuu,Intro - Numeri (0-100)
+Sessanta,Sixty,ろくじゅう,rokujuu,Intro - Numeri (0-100)
+Settanta,Seventy,ななじゅう,nanajuu,Intro - Numeri (0-100)
+Ottanta,Eighty,はちじゅう,hachijuu,Intro - Numeri (0-100)
+Novanta,Ninety,きゅうじゅう,kyuujuu,Intro - Numeri (0-100)
+Cento,One hundred,ひゃく,hyaku,Intro - Numeri (0-100)
+Università,college; university,だいがく,daigaku,L1 - Scuola Persone e Lingua
+Scuola superiore,high school,こうこう,kookoo,L1 - Scuola Persone e Lingua
+Studente,student,がくせい,gakusee,L1 - Scuola Persone e Lingua
+Studente universitario,college student,だいがくせい,daigakusee,L1 - Scuola Persone e Lingua
+Studente internazionale,international student,りゅうがくせい,ryuugakusee,L1 - Scuola Persone e Lingua
+Insegnante / Professore,teacher; Professor...,せんせい,sensee,L1 - Scuola Persone e Lingua
+Studente del ... anno,...year student,～ねんせい,... nensee,L1 - Scuola Persone e Lingua
+Studente del primo anno,first-year student,いちねんせい,ichinensee,L1 - Scuola Persone e Lingua
+Specializzazione,major,せんこう,senkoo,L1 - Scuola Persone e Lingua
+Io,I,わたし,watashi,L1 - Scuola Persone e Lingua
+Amico,friend,ともだち,tomodachi,L1 - Scuola Persone e Lingua
+Sig./Sig.ra,Mr./Ms.,～さん,... san,L1 - Scuola Persone e Lingua
+Persona ... (nazionalità),... people,～じん,... jin,L1 - Scuola Persone e Lingua
+Giapponese (persona),Japanese people,にほんじん,nihonjin,L1 - Scuola Persone e Lingua
+Adesso,now,いま,ima,L1 - Scuola Persone e Lingua
+Mattina (A.M.),A.M.,ごぜん,gozen,L1 - Scuola Persone e Lingua
+Pomeriggio (P.M.),P.M.,ごご,gogo,L1 - Scuola Persone e Lingua
+Ore ...,...o'clock,～じ,... ji,L1 - Scuola Persone e Lingua
+L'una (orario),one o'clock,いちじ,ichiji,L1 - Scuola Persone e Lingua
+Mezza,half,はん,han,L1 - Scuola Persone e Lingua
+Due e mezza,half past two,にじはん,niji han,L1 - Scuola Persone e Lingua
+Giappone,Japan,にほん,Nihon,L1 - Scuola Persone e Lingua
+USA,U.S.A.,アメリカ,Amerika,L1 - Scuola Persone e Lingua
+Lingua ...,... language,～ご,... go,L1 - Scuola Persone e Lingua
+Lingua giapponese,Japanese language,にほんご,nihongo,L1 - Scuola Persone e Lingua
+... anni,... years old,～さい,... sai,L1 - Scuola Persone e Lingua
+Telefono,telephone,でんわ,denwa,L1 - Scuola Persone e Lingua
+Numero ...,number...,～ばん,... ban,L1 - Scuola Persone e Lingua
+L'una,One o'clock,いちじ,ichiji,Intro - Orario (Ore e Minuti)
+Le due,Two o'clock,にじ,niji,Intro - Orario (Ore e Minuti)
+Le tre,Three o'clock,さんじ,sanji,Intro - Orario (Ore e Minuti)
+Le quattro,Four o'clock,よじ,yoji,Intro - Orario (Ore e Minuti)
+Le cinque,Five o'clock,ごじ,goji,Intro - Orario (Ore e Minuti)
+Le sei,Six o'clock,ろくじ,rokuji,Intro - Orario (Ore e Minuti)
+Le sette,Seven o'clock,しちじ,shichiji,Intro - Orario (Ore e Minuti)
+Le otto,Eight o'clock,はちじ,hachiji,Intro - Orario (Ore e Minuti)
+Le nove,Nine o'clock,くじ,kuji,Intro - Orario (Ore e Minuti)
+Le dieci,Ten o'clock,じゅうじ,juuji,Intro - Orario (Ore e Minuti)
+Le undici,Eleven o'clock,じゅういちじ,juuichiji,Intro - Orario (Ore e Minuti)
+Le dodici,Twelve o'clock,じゅうにじ,juuniji,Intro - Orario (Ore e Minuti)
+Un minuto,One minute,いっぷん,ippun,Intro - Orario (Ore e Minuti)
+Due minuti,Two minutes,にふん,nifun,Intro - Orario (Ore e Minuti)
+Tre minuti,Three minutes,さんぷん,sanpun,Intro - Orario (Ore e Minuti)
+Quattro minuti,Four minutes,よんぷん,yonpun,Intro - Orario (Ore e Minuti)
+Cinque minuti,Five minutes,ごふん,gofun,Intro - Orario (Ore e Minuti)
+Sei minuti,Six minutes,ろっぷん,roppun,Intro - Orario (Ore e Minuti)
+Sette minuti,Seven minutes,ななふん,nanafun,Intro - Orario (Ore e Minuti)
+Otto minuti,Eight minutes,はっぷん / はちふん,happun / hachifun,Intro - Orario (Ore e Minuti)
+Nove minuti,Nine minutes,きゅうふん,kyuufun,Intro - Orario (Ore e Minuti)
+Dieci minuti,Ten minutes,じゅっぷん,juppun,Intro - Orario (Ore e Minuti)
+Undici minuti,Eleven minutes,じゅういっぷん,juuippun,Intro - Orario (Ore e Minuti)
+Dodici minuti,Twelve minutes,じゅうにふん,juunifun,Intro - Orario (Ore e Minuti)
+Tredici minuti,Thirteen minutes,じゅうさんぷん,juusanpun,Intro - Orario (Ore e Minuti)
+Quattordici minuti,Fourteen minutes,じゅうよんぷん,juuyonpun,Intro - Orario (Ore e Minuti)
+Quindici minuti,Fifteen minutes,じゅうごふん,juugofun,Intro - Orario (Ore e Minuti)
+Sedici minuti,Sixteen minutes,じゅうろっぷん,juuroppun,Intro - Orario (Ore e Minuti)
+Diciassette minuti,Seventeen minutes,じゅうななふん,juunanafun,Intro - Orario (Ore e Minuti)
+Diciotto minuti,Eighteen minutes,じゅうはっぷん / じゅうはちふん,juuhappun / juuhachifun,Intro - Orario (Ore e Minuti)
+Diciannove minuti,Nineteen minutes,じゅうきゅうふん,juukyuufun,Intro - Orario (Ore e Minuti)
+Venti minuti,Twenty minutes,にじゅっぷん,nijuppun,Intro - Orario (Ore e Minuti)
+Trenta minuti,Thirty minutes,さんじゅっぷん,sanjuppun,Intro - Orario (Ore e Minuti)
+Numero,number,ばんごう,bangoo,L1 - Altro e Espressioni
+Nome,name,なまえ,namae,L1 - Altro e Espressioni
+Cosa / Che,what,なん／なに,nan/nani,L1 - Altro e Espressioni
+Ehm...,um...,あのう,anoo,L1 - Altro e Espressioni
+Sì,yes,はい,hai,L1 - Altro e Espressioni
+È così / Giusto,That's right,そうです,soo desu,L1 - Altro e Espressioni
+Capisco / È così?,I see.; Is that so?,そうですか,soo desu ka,L1 - Altro e Espressioni
+Gran Bretagna,Britain,イギリス,Igirisu,L1 - Altro e Espressioni
+Australia,Australia,オーストラリア,Oosutoraria,L1 - Altro e Espressioni
+Corea,Korea,かんこく,Kankoku,L1 - Altro e Espressioni
+Canada,Canada,カナダ,Kanada,L1 - Altro e Espressioni
+Cina,China,ちゅうごく,Chuugoku,L1 - Altro e Espressioni
+India,India,インド,Indo,L1 - Altro e Espressioni
+Egitto,Egypt,エジプト,Ejiputo,L1 - Altro e Espressioni
+Filippine,Philippines,フィリピン,Firipin,L1 - Altro e Espressioni
+Studi asiatici,Asian studies,アジアけんきゅう,ajia kenkyuu,L1 - Altro e Espressioni
+Economia,economics,けいざい,keezai,L1 - Altro e Espressioni
+Ingegneria,engineering,こうがく,koogaku,L1 - Altro e Espressioni
+Relazioni internazionali,international relations,こくさいかんけい,kokusaikankee,L1 - Altro e Espressioni
+Computer,computer,コンピューター,konpyuutaa,L1 - Altro e Espressioni
+Politica,politics,せいじ,seeji,L1 - Altro e Espressioni
+Biologia,biology,せいぶつがく,seebutsugaku,L1 - Altro e Espressioni
+Affari / Business,business,ビジネス,bijinesu,L1 - Altro e Espressioni
+Letteratura,literature,ぶんがく,bungaku,L1 - Altro e Espressioni
+Storia,history,れきし,rekishi,L1 - Altro e Espressioni
+Dottore,doctor,いしゃ,isha,L1 - Altro e Espressioni
+Impiegato,office worker,かいしゃいん,kaishain,L1 - Altro e Espressioni
+Questo (vicino a me),this one,これ,kore,L2 - Cose Luoghi e Cibo
+Quello (vicino a te),that one,それ,sore,L2 - Cose Luoghi e Cibo
+Quello (laggiù),that one (over there),あれ,are,L2 - Cose Luoghi e Cibo
+Quale,which one,どれ,dore,L2 - Cose Luoghi e Cibo
+Questo...,this...,この,kono,L2 - Cose Luoghi e Cibo
+Quello...,that...,その,sono,L2 - Cose Luoghi e Cibo
+Quello... (laggiù),that... (over there),あの,ano,L2 - Cose Luoghi e Cibo
+Quale...,which...,どの,dono,L2 - Cose Luoghi e Cibo
+Qui,here,ここ,koko,L2 - Cose Luoghi e Cibo
+Lì,there,そこ,soko,L2 - Cose Luoghi e Cibo
+Laggiù,over there,あそこ,asoko,L2 - Cose Luoghi e Cibo
+Dove,where,どこ,doko,L2 - Cose Luoghi e Cibo
+Chi,who,だれ,dare,L2 - Cose Luoghi e Cibo
+Delizioso,delicious,おいしい,oishii,L2 - Cose Luoghi e Cibo
+Pesce,fish,さかな,sakana,L2 - Cose Luoghi e Cibo
+Cotoletta di maiale,pork cutlet,とんかつ,tonkatsu,L2 - Cose Luoghi e Cibo
+Carne,meat,にく,niku,L2 - Cose Luoghi e Cibo
+Menu,menu,メニュー,menyuu,L2 - Cose Luoghi e Cibo
+Verdura,vegetable,やさい,yasai,L2 - Cose Luoghi e Cibo
+Ombrello,umbrella,かさ,kasa,L2 - Cose Luoghi e Cibo
+Borsa,bag,かばん,kaban,L2 - Cose Luoghi e Cibo
+Scarpe,shoes,くつ,kutsu,L2 - Cose Luoghi e Cibo
+Portafoglio,wallet,さいふ,saifu,L2 - Cose Luoghi e Cibo
+Jeans,jeans,ジーンズ,jiinzu,L2 - Cose Luoghi e Cibo
+Bicicletta,bicycle,じてんしゃ,jitensha,L2 - Cose Luoghi e Cibo
+Giornale,newspaper,しんぶん,shinbun,L2 - Cose Luoghi e Cibo
+Smartphone / Cellulare,smartphone; mobile,スマホ,sumaho,L2 - Cose Luoghi e Cibo
+Maglietta,T-shirt,Tシャツ,tiishatsu,L2 - Cose Luoghi e Cibo
+Orologio,watch; clock,とけい,tokee,L2 - Cose Luoghi e Cibo
+Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
+
         // --- DATASETS KANA ---
         const HIRAGANA_DATA = [
             {k:'あ',r:'a'}, {k:'い',r:'i'}, {k:'う',r:'u'}, {k:'え',r:'e'}, {k:'お',r:'o'},
@@ -343,13 +517,14 @@
         // --- STATE ---
         let mazzoPrincipale = [];
         let mazzoErroriPrioritari = [];
+        let mazzoBacklog = []; // Coda di parole da fare (tutte quelle della categoria)
+        let mazzoSessioneCorrente = []; // Le 10 attuali
         let erroriSessioneCorrente = new Set();       
         let mazzoRipassoAttivo = [];
-        let mazzoSessioneCorrente = []; 
         let indiceSessione = 0;           
         let parolaCorrente = null;
         let quizDirection = 'ITA_TO_JPN';
-        let modalitaQuiz = 'normale'; // 'normale', 'hiragana_mode', 'katakana_mode', 'ripasso_errori', 'set_finito'
+        let modalitaQuiz = 'normale'; 
         let sessioneCorretti = 0;
         let sessioneSbagliati = 0;
 
@@ -402,7 +577,7 @@
                         formContainer.style.display = 'block'; 
                         btnElimina.style.display = 'block';
                         virtualKeyboard.style.display = 'none';
-                        filtroCategoria.parentElement.style.display = 'block'; // Mostra filtro
+                        filtroCategoria.parentElement.style.display = 'block'; 
                         caricaMazzi(); 
                     }
                     mostraModulo(targetModulo);
@@ -427,11 +602,30 @@
                 eliminaParola(parolaCorrente.ita);
             });
             
+            document.getElementById('reset-dati-btn').addEventListener('click', ripristinaDatiVocaboli);
             document.getElementById('form-aggiungi').addEventListener('submit', gestisciSalvataggioForm);
             document.getElementById('import-csv-file').addEventListener('change', gestisciImportaCSV);
             document.getElementById('update-url-btn').addEventListener('click', gestisciAggiornaDaUrl);
             document.getElementById('svuota-tutto-btn').addEventListener('click', svuotaMazziTotali);
             document.getElementById('copia-vocaboli-btn').addEventListener('click', copiaVocaboli);
+        }
+
+        function ripristinaDatiVocaboli() {
+            if(confirm("Questo caricherà i dati predefiniti (sovrascrivendo eventuali duplicati). Vuoi procedere?")) {
+                importaDatiDaStringa(DATI_INIZIALI_CSV);
+            }
+        }
+
+        function importaDatiDaStringa(csvText) {
+             const lines = csvText.split('\n');
+             lines.forEach(line => {
+                if(!line.trim()) return;
+                const c = parseCSVLine(line);
+                if(c.length < 4) return;
+                mazzoPrincipale.push({ita:c[0], eng:c[1], jpn:c[2], romaji:c[3], tag:c[4]||"Generale", esempi:c[5]||"", level:0, type:'vocab'});
+             });
+             salvaMazzoPrincipale(); 
+             location.reload();
         }
 
         // --- GESTIONE KANA ---
@@ -560,10 +754,17 @@
 
         // --- CORE QUIZ LOGIC ---
         function prossimaParola() {
+            // GESTIONE FINE SET VOCABOLI (BATCHING)
             if (modalitaQuiz === 'set_finito') {
-                modalitaQuiz = 'normale'; 
-                caricaMazzi(); // Ricarica e applica filtro
-                return;
+                if (mazzoBacklog.length > 0) {
+                    caricaProssimoBatch();
+                    return;
+                } else {
+                    // Davvero finito tutto
+                    modalitaQuiz = 'normale'; 
+                    caricaMazzi(); // Ricomincia tutto
+                    return;
+                }
             }
 
             promptContainer.style.display = 'flex';
@@ -633,20 +834,34 @@
                         alert("Ripasso finito!"); modalitaQuiz = 'normale'; caricaMazzi(); return;
                     }
                 } else {
+                    // QUIZ NORMALE (CON BATCH DA 10)
                     if (indiceSessione >= mazzoSessioneCorrente.length) {
                         if (mazzoSessioneCorrente.length === 0) {
                             document.getElementById('nessuna-carta').style.display = 'block';
-                            document.getElementById('quiz-container').style.display = 'none';
+                            document.getElementById('quiz-container').querySelector('.controlli').style.display = 'none';
                             return;
                         }
+                        
                         modalitaQuiz = 'set_finito';
                         promptPrincipale.innerHTML = "Set Completato!";
-                        btnProssima.textContent = "Prossimo Set";
+                        
+                        // Controllo se ci sono altre carte nel backlog
+                        if(mazzoBacklog.length > 0) {
+                            promptSecondario.innerHTML = `Ne rimangono altre ${mazzoBacklog.length} in questa categoria.`;
+                            btnProssima.textContent = "Carica prossime 10";
+                        } else {
+                            promptSecondario.innerHTML = "Hai finito tutte le parole di questa categoria!";
+                            btnProssima.textContent = "Ricomincia da capo";
+                        }
+                        
+                        inputRisposta.style.display = 'none';
+                        btnControlla.style.display = 'none';
+                        btnProssima.style.display = 'block'; // Mostra il tasto per avanzare
                         return;
                     }
                     parolaCorrente = mazzoSessioneCorrente[indiceSessione];
                     indiceSessione++;
-                    etichetta = `Set ${indiceSessione}`;
+                    etichetta = `Set ${indiceSessione}/10`;
                 }
 
                 const stelle = "⭐".repeat(parolaCorrente.level || 0);
@@ -746,7 +961,7 @@
         function aggiornaPunteggio() {
             let html = `<span class="punteggio-info">Corretti: ${sessioneCorretti} | Errori: ${sessioneSbagliati}</span>`;
             if (!modalitaQuiz.includes('_mode')) {
-                html += `<br><span style="font-size:0.8em">Mazzo Totale: ${getUniqueTotalCountFromLocalStorage()} | Da Rivedere: ${mazzoErroriPrioritari.length}</span>`;
+                html += `<br><span style="font-size:0.8em">In attesa (Backlog): ${mazzoBacklog.length} | Da Rivedere: ${mazzoErroriPrioritari.length}</span>`;
             }
             punteggioDisplay.innerHTML = html;
             
@@ -795,12 +1010,17 @@
                 if(typeof c.level==='undefined') c.level=0;
                 c.type = 'vocab';
             });
+
+            // Se il mazzo è vuoto, carica i dati di default!
+            if (mazzoPrincipale.length === 0) {
+                importaDatiDaStringa(DATI_INIZIALI_CSV);
+                return; // l'import ricaricherà la pagina
+            }
             
-            aggiornaFiltroCategorie(); // Aggiorna il dropdown con i tag trovati
+            aggiornaFiltroCategorie(); 
             creaNuovoSet();
             
             if(modalitaQuiz === 'normale') {
-                // Se non ci sono carte nel filtro corrente
                 if(mazzoSessioneCorrente.length === 0 && (mazzoPrincipale.length > 0 || mazzoErroriPrioritari.length > 0)) {
                     document.getElementById('nessuna-carta').style.display = 'block';
                     document.getElementById('quiz-container').querySelector('.controlli').style.display = 'none';
@@ -809,23 +1029,19 @@
                 } else {
                     document.getElementById('nessuna-carta').style.display = 'none';
                     document.getElementById('quiz-container').querySelector('.controlli').style.display = 'flex';
+                    document.getElementById('input-risposta').style.display = 'block';
+                    document.getElementById('prompt-container').style.display = 'flex';
                     prossimaParola();
                 }
             }
         }
         
         function aggiornaFiltroCategorie() {
-            // Salva selezione corrente per non perderla al reload
             const currentSelection = filtroCategoria.value;
-            
-            // Trova tutti i tag unici
             const allTags = new Set();
             mazzoPrincipale.forEach(c => { if(c.tag) allTags.add(c.tag); });
             
-            // Pulisci (mantieni solo TUTTI)
             filtroCategoria.innerHTML = '<option value="TUTTI">📚 TUTTI I VOCABOLI</option>';
-            
-            // Ordina e aggiungi
             Array.from(allTags).sort().forEach(tag => {
                 const opt = document.createElement('option');
                 opt.value = tag;
@@ -833,7 +1049,6 @@
                 filtroCategoria.appendChild(opt);
             });
             
-            // Ripristina selezione se esiste ancora
             if(currentSelection && Array.from(filtroCategoria.options).some(o => o.value === currentSelection)) {
                 filtroCategoria.value = currentSelection;
             }
@@ -844,31 +1059,51 @@
         }
         
         function creaNuovoSet() {
+            // 1. Resetta tutto
+            mazzoBacklog = [];
             mazzoSessioneCorrente = [];
             indiceSessione = 0;
+            modalitaQuiz = 'normale'; 
+
             if (mazzoPrincipale.length === 0 && mazzoErroriPrioritari.length === 0) return;
 
             const categoriaScelta = filtroCategoria.value;
-            
-            // Filtra mazzo principale
             let filteredMain = mazzoPrincipale;
+            
+            // 2. Filtra il mazzo in base alla selezione
             if (categoriaScelta !== 'TUTTI') {
                 filteredMain = mazzoPrincipale.filter(c => c.tag === categoriaScelta);
             }
 
+            // 3. Ordina per livello (così studiamo prima quelle che conosciamo meno)
+            // MA poi mescoleremo nel backlog per non avere blocchi noiosi
             const sortedMain = [...filteredMain].sort((a,b) => (a.level||0) - (b.level||0));
             
-            // Aggiungi errori (se sono pertinenti alla categoria, opzionale, qui li metto tutti per semplicità di ripasso)
-            // Se vuoi filtrare anche gli errori: mazzoErroriPrioritari.filter(c => c.tag === categoriaScelta)
             let pool = [...mazzoErroriPrioritari];
             if(categoriaScelta !== 'TUTTI') {
                  pool = pool.filter(c => c.tag === categoriaScelta);
             }
             
-            pool.push(...sortedMain);
+            // 4. Crea il "Backlog" (la coda totale di cose da fare)
+            // Mescoliamo qui per avere varietà, ma potremmo anche tenerle ordinate
+            mazzoBacklog = [...pool, ...sortedMain];
+            // shuffleArray(mazzoBacklog); // Decommenta se vuoi ordine totalmente casuale nel backlog
+
+            // 5. Carica il primo batch
+            caricaProssimoBatch();
+        }
+
+        function caricaProssimoBatch() {
+            modalitaQuiz = 'normale';
+            indiceSessione = 0;
+            // Prendi i primi 10 dalla coda
+            const batchSize = 10;
+            mazzoSessioneCorrente = mazzoBacklog.splice(0, batchSize);
             
-            mazzoSessioneCorrente = pool.slice(0, 10);
+            // Mescoliamo QUESTI 10 così non sono in ordine alfabetico/livello durante il quiz
             mazzoSessioneCorrente = shuffleArray(mazzoSessioneCorrente);
+            
+            prossimaParola();
         }
 
         function salvaErroriSessione() {
@@ -882,7 +1117,7 @@
 
         function salvaMazzoPrincipale() {
              const map = new Map();
-             [...mazzoPrincipale, ...mazzoErroriPrioritari, ...mazzoSessioneCorrente].forEach(item => {
+             [...mazzoPrincipale, ...mazzoErroriPrioritari, ...mazzoSessioneCorrente, ...mazzoBacklog].forEach(item => {
                  if(item.type === 'vocab') map.set(item.ita, item);
              });
              const errors = new Set(mazzoErroriPrioritari.map(i=>i.ita));
@@ -924,16 +1159,7 @@
             const f=e.target.files[0]; if(!f)return;
             const r=new FileReader();
             r.onload=function(ev){
-                const lines = ev.target.result.split('\n');
-                lines.forEach(line => {
-                    if(!line.trim()) return;
-                    const c = parseCSVLine(line);
-                    if(c.length < 4) return;
-                    // Mappa colonna 5 a tag
-                    mazzoPrincipale.push({ita:c[0], eng:c[1], jpn:c[2], romaji:c[3], tag:c[4]||"Generale", esempi:c[5]||"", level:0, type:'vocab'});
-                });
-                salvaMazzoPrincipale(); 
-                location.reload();
+                importaDatiDaStringa(ev.target.result);
             };
             r.readAsText(f);
         }
@@ -942,14 +1168,7 @@
              const url = document.getElementById('csv-url-input').value;
              if(!url) return alert("Inserisci URL");
              fetch(url).then(r=>r.text()).then(t => {
-                 t.split('\n').forEach(line=>{
-                    if(!line.trim()) return;
-                    const c = parseCSVLine(line);
-                    if(c.length < 4) return;
-                    mazzoPrincipale.push({ita:c[0],eng:c[1],jpn:c[2],romaji:c[3],tag:c[4]||"Generale",esempi:c[5]||"",level:0,type:'vocab'});
-                 });
-                 salvaMazzoPrincipale(); 
-                 location.reload();
+                 importaDatiDaStringa(t);
              });
         }
 
@@ -971,7 +1190,7 @@
             if(document.getElementById('modulo-vocaboli').style.display === 'block') {
                 mostraListaVocaboli();
             } else {
-                location.reload(); // Ricarica per aggiornare filtri e liste
+                location.reload(); 
             }
         }
         
