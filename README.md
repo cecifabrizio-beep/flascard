@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set di Studio Giapponese SRS (Random Puro)</title>
+    <title>Set di Studio Giapponese SRS (Completo Esteso)</title>
     <style>
         /* --- Stile Generale --- */
         body {
@@ -64,7 +64,7 @@
         /* --- TASTIERA VIRTUALE --- */
         #virtual-keyboard { 
             display: none; 
-            grid-template-columns: repeat(5, 1fr); /* Sempre 5 colonne per ordine visivo */
+            grid-template-columns: repeat(5, 1fr); 
             gap: 8px; 
             margin-bottom: 20px; 
             background: #f8f8f8; 
@@ -303,142 +303,161 @@
     <script>
         // --- DATI INIZIALI (CSV EMBEDDED) ---
         const DATI_INIZIALI_CSV = `
-Buongiorno,Good morning,おはよう,Ohayoo,Intro - Saluti e Espressioni
-Buongiorno (cortese),Good morning (polite),おはようございます,Ohayoo gozaimasu,Intro - Saluti e Espressioni
-Buon pomeriggio,Good afternoon,こんにちは,Konnichiwa,Intro - Saluti e Espressioni
-Buonasera,Good evening,こんばんは,Konbanwa,Intro - Saluti e Espressioni
-Arrivederci,Good-bye,さようなら,Sayoonara,Intro - Saluti e Espressioni
-Buonanotte,Good night,おやすみ（なさい）,Oyasumi (nasai),Intro - Saluti e Espressioni
-Grazie,Thank you,ありがとう,Arigatoo,Intro - Saluti e Espressioni
-Grazie (cortese),Thank you (polite),ありがとうございます,Arigatoo gozaimasu,Intro - Saluti e Espressioni
-Mi scusi / Mi dispiace,Excuse me / I'm sorry,すみません,Sumimasen,Intro - Saluti e Espressioni
-No / Di nulla,No / Not at all,いいえ,Iie,Intro - Saluti e Espressioni
-Vado e torno,I'll go and come back,いってきます,Itte kimasu,Intro - Saluti e Espressioni
-Vai e torna,Please go and come back,いってらっしゃい,Itterasshai,Intro - Saluti e Espressioni
-Sono a casa,I'm home,ただいま,Tadaima,Intro - Saluti e Espressioni
-Bentornato,Welcome home,おかえり（なさい）,Okaeri (nasai),Intro - Saluti e Espressioni
-Grazie per il cibo (prima di mangiare),Thank you for the meal (before eating),いただきます,Itadakimasu,Intro - Saluti e Espressioni
-Grazie per il cibo (dopo aver mangiato),Thank you for the meal (after eating),ごちそうさま（でした）,Gochisoosama (deshita),Intro - Saluti e Espressioni
-Piacere di conoscerti,How do you do?,はじめまして,Hajimemashite,Intro - Saluti e Espressioni
-Sono...,I am...,～です,... desu,Intro - Saluti e Espressioni
-Piacere,Nice to meet you,よろしく おねがいします,Yoroshiku onegai shimasu,Intro - Saluti e Espressioni
-Zero,Zero,ゼロ / れい,zero / ree,Intro - Numeri (0-100)
-Uno,One,いち,ichi,Intro - Numeri (0-100)
-Due,Two,に,ni,Intro - Numeri (0-100)
-Tre,Three,さん,san,Intro - Numeri (0-100)
-Quattro,Four,よん / し / (よ),yon / shi / (yo),Intro - Numeri (0-100)
-Cinque,Five,ご,go,Intro - Numeri (0-100)
-Sei,Six,ろく,roku,Intro - Numeri (0-100)
-Sette,Seven,なな / しち,nana / shichi,Intro - Numeri (0-100)
-Otto,Eight,はち,hachi,Intro - Numeri (0-100)
-Nove,Nine,きゅう / く,kyuu / ku,Intro - Numeri (0-100)
-Dieci,Ten,じゅう,juu,Intro - Numeri (0-100)
-Undici,Eleven,じゅういち,juuichi,Intro - Numeri (0-100)
-Dodici,Twelve,じゅうに,juuni,Intro - Numeri (0-100)
-Tredici,Thirteen,じゅうさん,juusan,Intro - Numeri (0-100)
-Quattordici,Fourteen,じゅうよん / しゅうよん,juuyon / shuuyon,Intro - Numeri (0-100)
-Quindici,Fifteen,じゅうご,juugo,Intro - Numeri (0-100)
-Sedici,Sixteen,じゅうろく,juuroku,Intro - Numeri (0-100)
-Diciassette,Seventeen,じゅうなな / じゅうしち,juunana / juushichi,Intro - Numeri (0-100)
-Diciotto,Eighteen,じゅうはち,juuhachi,Intro - Numeri (0-100)
-Diciannove,Nineteen,じゅうきゅう / じゅうく,juukyuu / juuku,Intro - Numeri (0-100)
-Venti,Twenty,にじゅう,nijuu,Intro - Numeri (0-100)
-Trenta,Thirty,さんじゅう,sanjuu,Intro - Numeri (0-100)
-Quaranta,Forty,よんじゅう,yonjuu,Intro - Numeri (0-100)
-Cinquanta,Fifty,ごじゅう,gojuu,Intro - Numeri (0-100)
-Sessanta,Sixty,ろくじゅう,rokujuu,Intro - Numeri (0-100)
-Settanta,Seventy,ななじゅう,nanajuu,Intro - Numeri (0-100)
-Ottanta,Eighty,はちじゅう,hachijuu,Intro - Numeri (0-100)
-Novanta,Ninety,きゅうじゅう,kyuujuu,Intro - Numeri (0-100)
-Cento,One hundred,ひゃく,hyaku,Intro - Numeri (0-100)
-Università,college; university,だいがく,daigaku,L1 - Scuola Persone e Lingua
-Scuola superiore,high school,こうこう,kookoo,L1 - Scuola Persone e Lingua
-Studente,student,がくせい,gakusee,L1 - Scuola Persone e Lingua
-Studente universitario,college student,だいがくせい,daigakusee,L1 - Scuola Persone e Lingua
-Studente internazionale,international student,りゅうがくせい,ryuugakusee,L1 - Scuola Persone e Lingua
-Insegnante / Professore,teacher; Professor...,せんせい,sensee,L1 - Scuola Persone e Lingua
-Studente del ... anno,...year student,～ねんせい,... nensee,L1 - Scuola Persone e Lingua
-Studente del primo anno,first-year student,いちねんせい,ichinensee,L1 - Scuola Persone e Lingua
-Specializzazione,major,せんこう,senkoo,L1 - Scuola Persone e Lingua
-Io,I,わたし,watashi,L1 - Scuola Persone e Lingua
-Amico,friend,ともだち,tomodachi,L1 - Scuola Persone e Lingua
-Sig./Sig.ra,Mr./Ms.,～さん,... san,L1 - Scuola Persone e Lingua
-Persona ... (nazionalità),... people,～じん,... jin,L1 - Scuola Persone e Lingua
-Giapponese (persona),Japanese people,にほんじん,nihonjin,L1 - Scuola Persone e Lingua
-Adesso,now,いま,ima,L1 - Scuola Persone e Lingua
-Mattina (A.M.),A.M.,ごぜん,gozen,L1 - Scuola Persone e Lingua
-Pomeriggio (P.M.),P.M.,ごご,gogo,L1 - Scuola Persone e Lingua
-Ore ...,...o'clock,～じ,... ji,L1 - Scuola Persone e Lingua
-L'una (orario),one o'clock,いちじ,ichiji,L1 - Scuola Persone e Lingua
-Mezza,half,はん,han,L1 - Scuola Persone e Lingua
-Due e mezza,half past two,にじはん,niji han,L1 - Scuola Persone e Lingua
-Giappone,Japan,にほん,Nihon,L1 - Scuola Persone e Lingua
-USA,U.S.A.,アメリカ,Amerika,L1 - Scuola Persone e Lingua
-Lingua ...,... language,～ご,... go,L1 - Scuola Persone e Lingua
-Lingua giapponese,Japanese language,にほんご,nihongo,L1 - Scuola Persone e Lingua
-... anni,... years old,～さい,... sai,L1 - Scuola Persone e Lingua
-Telefono,telephone,でんわ,denwa,L1 - Scuola Persone e Lingua
-Numero ...,number...,～ばん,... ban,L1 - Scuola Persone e Lingua
-L'una,One o'clock,いちじ,ichiji,Intro - Orario (Ore e Minuti)
-Le due,Two o'clock,にじ,niji,Intro - Orario (Ore e Minuti)
-Le tre,Three o'clock,さんじ,sanji,Intro - Orario (Ore e Minuti)
-Le quattro,Four o'clock,よじ,yoji,Intro - Orario (Ore e Minuti)
-Le cinque,Five o'clock,ごじ,goji,Intro - Orario (Ore e Minuti)
-Le sei,Six o'clock,ろくじ,rokuji,Intro - Orario (Ore e Minuti)
-Le sette,Seven o'clock,しちじ,shichiji,Intro - Orario (Ore e Minuti)
-Le otto,Eight o'clock,はちじ,hachiji,Intro - Orario (Ore e Minuti)
-Le nove,Nine o'clock,くじ,kuji,Intro - Orario (Ore e Minuti)
-Le dieci,Ten o'clock,じゅうじ,juuji,Intro - Orario (Ore e Minuti)
-Le undici,Eleven o'clock,じゅういちじ,juuichiji,Intro - Orario (Ore e Minuti)
-Le dodici,Twelve o'clock,じゅうにじ,juuniji,Intro - Orario (Ore e Minuti)
-Un minuto,One minute,いっぷん,ippun,Intro - Orario (Ore e Minuti)
-Due minuti,Two minutes,にふん,nifun,Intro - Orario (Ore e Minuti)
-Tre minuti,Three minutes,さんぷん,sanpun,Intro - Orario (Ore e Minuti)
-Quattro minuti,Four minutes,よんぷん,yonpun,Intro - Orario (Ore e Minuti)
-Cinque minuti,Five minutes,ごふん,gofun,Intro - Orario (Ore e Minuti)
-Sei minuti,Six minutes,ろっぷん,roppun,Intro - Orario (Ore e Minuti)
-Sette minuti,Seven minutes,ななふん,nanafun,Intro - Orario (Ore e Minuti)
-Otto minuti,Eight minutes,はっぷん / はちふん,happun / hachifun,Intro - Orario (Ore e Minuti)
-Nove minuti,Nine minutes,きゅうふん,kyuufun,Intro - Orario (Ore e Minuti)
-Dieci minuti,Ten minutes,じゅっぷん,juppun,Intro - Orario (Ore e Minuti)
-Undici minuti,Eleven minutes,じゅういっぷん,juuippun,Intro - Orario (Ore e Minuti)
-Dodici minuti,Twelve minutes,じゅうにふん,juunifun,Intro - Orario (Ore e Minuti)
-Tredici minuti,Thirteen minutes,じゅうさんぷん,juusanpun,Intro - Orario (Ore e Minuti)
-Quattordici minuti,Fourteen minutes,じゅうよんぷん,juuyonpun,Intro - Orario (Ore e Minuti)
-Quindici minuti,Fifteen minutes,じゅうごふん,juugofun,Intro - Orario (Ore e Minuti)
-Sedici minuti,Sixteen minutes,じゅうろっぷん,juuroppun,Intro - Orario (Ore e Minuti)
-Diciassette minuti,Seventeen minutes,じゅうななふん,juunanafun,Intro - Orario (Ore e Minuti)
-Diciotto minuti,Eighteen minutes,じゅうはっぷん / じゅうはちふん,juuhappun / juuhachifun,Intro - Orario (Ore e Minuti)
-Diciannove minuti,Nineteen minutes,じゅうきゅうふん,juukyuufun,Intro - Orario (Ore e Minuti)
-Venti minuti,Twenty minutes,にじゅっぷん,nijuppun,Intro - Orario (Ore e Minuti)
-Trenta minuti,Thirty minutes,さんじゅっぷん,sanjuppun,Intro - Orario (Ore e Minuti)
-Numero,number,ばんごう,bangoo,L1 - Altro e Espressioni
-Nome,name,なまえ,namae,L1 - Altro e Espressioni
-Cosa / Che,what,なん／なに,nan/nani,L1 - Altro e Espressioni
-Ehm...,um...,あのう,anoo,L1 - Altro e Espressioni
-Sì,yes,はい,hai,L1 - Altro e Espressioni
-È così / Giusto,That's right,そうです,soo desu,L1 - Altro e Espressioni
-Capisco / È così?,I see.; Is that so?,そうですか,soo desu ka,L1 - Altro e Espressioni
-Gran Bretagna,Britain,イギリス,Igirisu,L1 - Altro e Espressioni
-Australia,Australia,オーストラリア,Oosutoraria,L1 - Altro e Espressioni
-Corea,Korea,かんこく,Kankoku,L1 - Altro e Espressioni
-Canada,Canada,カナダ,Kanada,L1 - Altro e Espressioni
-Cina,China,ちゅうごく,Chuugoku,L1 - Altro e Espressioni
-India,India,インド,Indo,L1 - Altro e Espressioni
-Egitto,Egypt,エジプト,Ejiputo,L1 - Altro e Espressioni
-Filippine,Philippines,フィリピン,Firipin,L1 - Altro e Espressioni
-Studi asiatici,Asian studies,アジアけんきゅう,ajia kenkyuu,L1 - Altro e Espressioni
-Economia,economics,けいざい,keezai,L1 - Altro e Espressioni
-Ingegneria,engineering,こうがく,koogaku,L1 - Altro e Espressioni
-Relazioni internazionali,international relations,こくさいかんけい,kokusaikankee,L1 - Altro e Espressioni
-Computer,computer,コンピューター,konpyuutaa,L1 - Altro e Espressioni
-Politica,politics,せいじ,seeji,L1 - Altro e Espressioni
-Biologia,biology,せいぶつがく,seebutsugaku,L1 - Altro e Espressioni
-Affari / Business,business,ビジネス,bijinesu,L1 - Altro e Espressioni
-Letteratura,literature,ぶんがく,bungaku,L1 - Altro e Espressioni
-Storia,history,れきし,rekishi,L1 - Altro e Espressioni
-Dottore,doctor,いしゃ,isha,L1 - Altro e Espressioni
-Impiegato,office worker,かいしゃいん,kaishain,L1 - Altro e Espressioni
+Buongiorno,Good morning,おはよう,Ohayoo,Intro - Saluti
+Buongiorno (cortese),Good morning (polite),おはようございます,Ohayoo gozaimasu,Intro - Saluti
+Buon pomeriggio,Good afternoon,こんにちは,Konnichiwa,Intro - Saluti
+Buonasera,Good evening,こんばんは,Konbanwa,Intro - Saluti
+Arrivederci,Good-bye,さようなら,Sayoonara,Intro - Saluti
+Buonanotte,Good night,おやすみ（なさい）,Oyasumi (nasai),Intro - Saluti
+Grazie,Thank you,ありがとう,Arigatoo,Intro - Saluti
+Grazie (cortese),Thank you (polite),ありがとうございます,Arigatoo gozaimasu,Intro - Saluti
+Mi scusi / Mi dispiace,Excuse me / I'm sorry,すみません,Sumimasen,Intro - Saluti
+No / Di nulla,No / Not at all,いいえ,Iie,Intro - Saluti
+Vado e torno,I'll go and come back,いってきます,Itte kimasu,Intro - Saluti
+Vai e torna,Please go and come back,いってらっしゃい,Itterasshai,Intro - Saluti
+Sono a casa,I'm home,ただいま,Tadaima,Intro - Saluti
+Bentornato,Welcome home,おかえり（なさい）,Okaeri (nasai),Intro - Saluti
+Grazie per il cibo (prima),Thank you for the meal (before),いただきます,Itadakimasu,Intro - Saluti
+Grazie per il cibo (dopo),Thank you for the meal (after),ごちそうさま（でした）,Gochisoosama (deshita),Intro - Saluti
+Piacere di conoscerti,How do you do?,はじめまして,Hajimemashite,Intro - Saluti
+Sono...,I am...,～です,... desu,Intro - Saluti
+Piacere,Nice to meet you,よろしく おねがいします,Yoroshiku onegai shimasu,Intro - Saluti
+Zero,Zero,ゼロ / れい,zero / ree,Intro - Numeri
+Uno,One,いち,ichi,Intro - Numeri
+Due,Two,に,ni,Intro - Numeri
+Tre,Three,さん,san,Intro - Numeri
+Quattro,Four,よん / し / (よ),yon / shi / (yo),Intro - Numeri
+Cinque,Five,ご,go,Intro - Numeri
+Sei,Six,ろく,roku,Intro - Numeri
+Sette,Seven,なな / しち,nana / shichi,Intro - Numeri
+Otto,Eight,はち,hachi,Intro - Numeri
+Nove,Nine,きゅう / く,kyuu / ku,Intro - Numeri
+Dieci,Ten,じゅう,juu,Intro - Numeri
+Undici,Eleven,じゅういち,juuichi,Intro - Numeri
+Dodici,Twelve,じゅうに,juuni,Intro - Numeri
+Tredici,Thirteen,じゅうさん,juusan,Intro - Numeri
+Quattordici,Fourteen,じゅうよん / じゅうし,juuyon / juushi,Intro - Numeri
+Quindici,Fifteen,じゅうご,juugo,Intro - Numeri
+Sedici,Sixteen,じゅうろく,juuroku,Intro - Numeri
+Diciassette,Seventeen,じゅうなな / じゅうしち,juunana / juushichi,Intro - Numeri
+Diciotto,Eighteen,じゅうはち,juuhachi,Intro - Numeri
+Diciannove,Nineteen,じゅうきゅう / じゅうく,juukyuu / juuku,Intro - Numeri
+Venti,Twenty,にじゅう,nijuu,Intro - Numeri
+Trenta,Thirty,さんじゅう,sanjuu,Intro - Numeri
+Quaranta,Forty,よんじゅう,yonjuu,Intro - Numeri
+Cinquanta,Fifty,ごじゅう,gojuu,Intro - Numeri
+Sessanta,Sixty,ろくじゅう,rokujuu,Intro - Numeri
+Settanta,Seventy,ななじゅう,nanajuu,Intro - Numeri
+Ottanta,Eighty,はちじゅう,hachijuu,Intro - Numeri
+Novanta,Ninety,きゅうじゅう,kyuujuu,Intro - Numeri
+Cento,One hundred,ひゃく,hyaku,Intro - Numeri
+Duecento,Two hundred,にひゃく,nihyaku,Intro - Numeri
+Trecento,Three hundred,さんびゃく,sanbyaku,Intro - Numeri
+Quattrocento,Four hundred,よんひゃく,yonhyaku,Intro - Numeri
+Cinquecento,Five hundred,ごひゃく,gohyaku,Intro - Numeri
+Seicento,Six hundred,ろっぴゃく,roppyaku,Intro - Numeri
+Settecento,Seven hundred,ななひゃく,nanahyaku,Intro - Numeri
+Ottocento,Eight hundred,はっぴゃく,happyaku,Intro - Numeri
+Novecento,Nine hundred,きゅうひゃく,kyuuhyaku,Intro - Numeri
+Mille,One thousand,せん,sen,Intro - Numeri
+Duemila,Two thousand,にせん,nisen,Intro - Numeri
+Tremila,Three thousand,さんぜん,sanzen,Intro - Numeri
+Quattromila,Four thousand,よんせん,yonsen,Intro - Numeri
+Cinquemila,Five thousand,ごせん,gosen,Intro - Numeri
+Seimila,Six thousand,ろくせん,rokusen,Intro - Numeri
+Settemila,Seven thousand,ななせん,nanasen,Intro - Numeri
+Ottomila,Eight thousand,はっせん,hassen,Intro - Numeri
+Novemila,Nine thousand,きゅうせん,kyuusen,Intro - Numeri
+Diecimila,Ten thousand,いちまん,ichiman,Intro - Numeri
+Ventimila,Twenty thousand,にまん,niman,Intro - Numeri
+L'una,One o'clock,いちじ,ichiji,Intro - Orario
+Le due,Two o'clock,にじ,niji,Intro - Orario
+Le tre,Three o'clock,さんじ,sanji,Intro - Orario
+Le quattro,Four o'clock,よじ,yoji,Intro - Orario
+Le cinque,Five o'clock,ごじ,goji,Intro - Orario
+Le sei,Six o'clock,ろくじ,rokuji,Intro - Orario
+Le sette,Seven o'clock,しちじ,shichiji,Intro - Orario
+Le otto,Eight o'clock,はちじ,hachiji,Intro - Orario
+Le nove,Nine o'clock,くじ,kuji,Intro - Orario
+Le dieci,Ten o'clock,じゅうじ,juuji,Intro - Orario
+Le undici,Eleven o'clock,じゅういちじ,juuichiji,Intro - Orario
+Le dodici,Twelve o'clock,じゅうにじ,juuniji,Intro - Orario
+Un minuto,One minute,いっぷん,ippun,Intro - Orario
+Due minuti,Two minutes,にふん,nifun,Intro - Orario
+Tre minuti,Three minutes,さんぷん,sanpun,Intro - Orario
+Quattro minuti,Four minutes,よんぷん,yonpun,Intro - Orario
+Cinque minuti,Five minutes,ごふん,gofun,Intro - Orario
+Sei minuti,Six minutes,ろっぷん,roppun,Intro - Orario
+Sette minuti,Seven minutes,ななふん,nanafun,Intro - Orario
+Otto minuti,Eight minutes,はっぷん / はちふん,happun / hachifun,Intro - Orario
+Nove minuti,Nine minutes,きゅうふん,kyuufun,Intro - Orario
+Dieci minuti,Ten minutes,じゅっぷん,juppun,Intro - Orario
+Undici minuti,Eleven minutes,じゅういっぷん,juuippun,Intro - Orario
+Dodici minuti,Twelve minutes,じゅうにふん,juunifun,Intro - Orario
+Tredici minuti,Thirteen minutes,じゅうさんぷん,juusanpun,Intro - Orario
+Quattordici minuti,Fourteen minutes,じゅうよんぷん,juuyonpun,Intro - Orario
+Quindici minuti,Fifteen minutes,じゅうごふん,juugofun,Intro - Orario
+Sedici minuti,Sixteen minutes,じゅうろっぷん,juuroppun,Intro - Orario
+Diciassette minuti,Seventeen minutes,じゅうななふん,juunanafun,Intro - Orario
+Diciotto minuti,Eighteen minutes,じゅうはっぷん / じゅうはちふん,juuhappun / juuhachifun,Intro - Orario
+Diciannove minuti,Nineteen minutes,じゅうきゅうふん,juukyuufun,Intro - Orario
+Venti minuti,Twenty minutes,にじゅっぷん,nijuppun,Intro - Orario
+Trenta minuti,Thirty minutes,さんじゅっぷん,sanjuppun,Intro - Orario
+Università,college; university,だいがく,daigaku,L1 - Scuola e Persone
+Scuola superiore,high school,こうこう,kookoo,L1 - Scuola e Persone
+Studente,student,がくせい,gakusee,L1 - Scuola e Persone
+Studente universitario,college student,だいがくせい,daigakusee,L1 - Scuola e Persone
+Studente internazionale,international student,りゅうがくせい,ryuugakusee,L1 - Scuola e Persone
+Insegnante / Professore,teacher; Professor...,せんせい,sensee,L1 - Scuola e Persone
+Studente del ... anno,...year student,～ねんせい,... nensee,L1 - Scuola e Persone
+Studente del primo anno,first-year student,いちねんせい,ichinensee,L1 - Scuola e Persone
+Specializzazione,major,せんこう,senkoo,L1 - Scuola e Persone
+Io,I,わたし,watashi,L1 - Scuola e Persone
+Amico,friend,ともだち,tomodachi,L1 - Scuola e Persone
+Sig./Sig.ra,Mr./Ms.,～さん,... san,L1 - Scuola e Persone
+Persona ... (nazionalità),... people,～じん,... jin,L1 - Scuola e Persone
+Giapponese (persona),Japanese people,にほんじん,nihonjin,L1 - Scuola e Persone
+Adesso,now,いま,ima,L1 - Scuola e Persone
+Mattina (A.M.),A.M.,ごぜん,gozen,L1 - Scuola e Persone
+Pomeriggio (P.M.),P.M.,ごご,gogo,L1 - Scuola e Persone
+Ore ...,...o'clock,～じ,... ji,L1 - Scuola e Persone
+L'una (orario),one o'clock,いちじ,ichiji,L1 - Scuola e Persone
+Mezza,half,はん,han,L1 - Scuola e Persone
+Due e mezza,half past two,にじはん,niji han,L1 - Scuola e Persone
+Giappone,Japan,にほん,Nihon,L1 - Scuola e Persone
+USA,U.S.A.,アメリカ,Amerika,L1 - Scuola e Persone
+Lingua ...,... language,～ご,... go,L1 - Scuola e Persone
+Lingua giapponese,Japanese language,にほんご,nihongo,L1 - Scuola e Persone
+... anni,... years old,～さい,... sai,L1 - Scuola e Persone
+Telefono,telephone,でんわ,denwa,L1 - Scuola e Persone
+Numero ...,number...,～ばん,... ban,L1 - Scuola e Persone
+Numero,number,ばんごう,bangoo,L1 - Altro e Paesi
+Nome,name,なまえ,namae,L1 - Altro e Paesi
+Cosa / Che,what,なん／なに,nan/nani,L1 - Altro e Paesi
+Ehm...,um...,あのう,anoo,L1 - Altro e Paesi
+Sì,yes,はい,hai,L1 - Altro e Paesi
+È così / Giusto,That's right,そうです,soo desu,L1 - Altro e Paesi
+Capisco / È così?,I see.; Is that so?,そうですか,soo desu ka,L1 - Altro e Paesi
+Gran Bretagna,Britain,イギリス,Igirisu,L1 - Altro e Paesi
+Australia,Australia,オーストラリア,Oosutoraria,L1 - Altro e Paesi
+Corea,Korea,かんこく,Kankoku,L1 - Altro e Paesi
+Canada,Canada,カナダ,Kanada,L1 - Altro e Paesi
+Cina,China,ちゅうごく,Chuugoku,L1 - Altro e Paesi
+India,India,インド,Indo,L1 - Altro e Paesi
+Egitto,Egypt,エジプト,Ejiputo,L1 - Altro e Paesi
+Filippine,Philippines,フィリピン,Firipin,L1 - Altro e Paesi
+Studi asiatici,Asian studies,アジアけんきゅう,ajia kenkyuu,L1 - Altro e Paesi
+Economia,economics,けいざい,keezai,L1 - Altro e Paesi
+Ingegneria,engineering,こうがく,koogaku,L1 - Altro e Paesi
+Relazioni internazionali,international relations,こくさいかんけい,kokusaikankee,L1 - Altro e Paesi
+Computer,computer,コンピューター,konpyuutaa,L1 - Altro e Paesi
+Politica,politics,せいじ,seeji,L1 - Altro e Paesi
+Biologia,biology,せいぶつがく,seebutsugaku,L1 - Altro e Paesi
+Affari / Business,business,ビジネス,bijinesu,L1 - Altro e Paesi
+Letteratura,literature,ぶんがく,bungaku,L1 - Altro e Paesi
+Storia,history,れきし,rekishi,L1 - Altro e Paesi
+Dottore,doctor,いしゃ,isha,L1 - Altro e Paesi
+Impiegato,office worker,かいしゃいん,kaishain,L1 - Altro e Paesi
 Questo (vicino a me),this one,これ,kore,L2 - Cose Luoghi e Cibo
 Quello (vicino a te),that one,それ,sore,L2 - Cose Luoghi e Cibo
 Quello (laggiù),that one (over there),あれ,are,L2 - Cose Luoghi e Cibo
@@ -468,10 +487,22 @@ Giornale,newspaper,しんぶん,shinbun,L2 - Cose Luoghi e Cibo
 Smartphone / Cellulare,smartphone; mobile,スマホ,sumaho,L2 - Cose Luoghi e Cibo
 Maglietta,T-shirt,Tシャツ,tiishatsu,L2 - Cose Luoghi e Cibo
 Orologio,watch; clock,とけい,tokee,L2 - Cose Luoghi e Cibo
-Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
+Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo
+Banca,bank,ぎんこう,ginkoo,L2 - Luoghi e Soldi
+Convenience store,convenience store,コンビニ,konbini,L2 - Luoghi e Soldi
+Bagno,toilet; restroom,トイレ,toire,L2 - Luoghi e Soldi
+Biblioteca,library,としょかん,toshokan,L2 - Luoghi e Soldi
+Ufficio postale,post office,ゆうびんきょく,yuubinkyoku,L2 - Luoghi e Soldi
+Lingua inglese,English (language),えいご,eego,L1 - Altro e Paesi
+Madre,mother,おかあさん,okaasan,L2 - Luoghi e Soldi
+Padre,father,おとうさん,otoosan,L2 - Luoghi e Soldi
+Quanto costa,how much,いくら,ikura,L2 - Luoghi e Soldi
+...yen,...yen,～えん,...en,L2 - Luoghi e Soldi
+Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
 
-        // --- DATASETS KANA ---
+        // --- DATASETS KANA ESTESI (Base + Dakuten + Handakuten + Yoon) ---
         const HIRAGANA_DATA = [
+            // --- BASE (46) ---
             {k:'あ',r:'a'}, {k:'い',r:'i'}, {k:'う',r:'u'}, {k:'え',r:'e'}, {k:'お',r:'o'},
             {k:'か',r:'ka'}, {k:'き',r:'ki'}, {k:'く',r:'ku'}, {k:'け',r:'ke'}, {k:'こ',r:'ko'},
             {k:'さ',r:'sa'}, {k:'し',r:'shi'}, {k:'す',r:'su'}, {k:'せ',r:'se'}, {k:'そ',r:'so'},
@@ -481,10 +512,35 @@ Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
             {k:'ま',r:'ma'}, {k:'み',r:'mi'}, {k:'む',r:'mu'}, {k:'め',r:'me'}, {k:'も',r:'mo'},
             {k:'や',r:'ya'}, {k:'ゆ',r:'yu'}, {k:'よ',r:'yo'},
             {k:'ら',r:'ra'}, {k:'り',r:'ri'}, {k:'る',r:'ru'}, {k:'れ',r:'re'}, {k:'ろ',r:'ro'},
-            {k:'わ',r:'wa'}, {k:'を',r:'wo'}, {k:'ん',r:'n'}
+            {k:'わ',r:'wa'}, {k:'を',r:'wo'}, {k:'ん',r:'n'},
+            
+            // --- DAKUTEN (20) (Ga, Za, Da, Ba) ---
+            {k:'が',r:'ga'}, {k:'ぎ',r:'gi'}, {k:'ぐ',r:'gu'}, {k:'げ',r:'ge'}, {k:'ご',r:'go'},
+            {k:'ざ',r:'za'}, {k:'じ',r:'ji'}, {k:'ず',r:'zu'}, {k:'ぜ',r:'ze'}, {k:'ぞ',r:'zo'},
+            {k:'だ',r:'da'}, {k:'ぢ',r:'ji'}, {k:'づ',r:'zu'}, {k:'で',r:'de'}, {k:'ど',r:'do'}, // Nota: ぢ=ji (di), づ=zu (du)
+            {k:'ば',r:'ba'}, {k:'び',r:'bi'}, {k:'ぶ',r:'bu'}, {k:'べ',r:'be'}, {k:'ぼ',r:'bo'},
+
+            // --- HANDAKUTEN (5) (Pa) ---
+            {k:'ぱ',r:'pa'}, {k:'ぴ',r:'pi'}, {k:'ぷ',r:'pu'}, {k:'ぺ',r:'pe'}, {k:'ぽ',r:'po'},
+
+            // --- YOON BASE (21) (Kya, Sha, Cha, Nya, Hya, Mya, Rya) ---
+            {k:'きゃ',r:'kya'}, {k:'きゅ',r:'kyu'}, {k:'きょ',r:'kyo'},
+            {k:'しゃ',r:'sha'}, {k:'しゅ',r:'shu'}, {k:'しょ',r:'sho'},
+            {k:'ちゃ',r:'cha'}, {k:'ちゅ',r:'chu'}, {k:'ちょ',r:'cho'},
+            {k:'にゃ',r:'nya'}, {k:'にゅ',r:'nyu'}, {k:'にょ',r:'nyo'},
+            {k:'ひゃ',r:'hya'}, {k:'ひゅ',r:'hyu'}, {k:'ひょ',r:'hyo'},
+            {k:'みゃ',r:'mya'}, {k:'みゅ',r:'myu'}, {k:'みょ',r:'myo'},
+            {k:'りゃ',r:'rya'}, {k:'りゅ',r:'ryu'}, {k:'りょ',r:'ryo'},
+
+            // --- YOON DAKUTEN/HANDAKUTEN (12) (Gya, Ja, Bya, Pya) ---
+            {k:'ぎゃ',r:'gya'}, {k:'ぎゅ',r:'gyu'}, {k:'ぎょ',r:'gyo'},
+            {k:'じゃ',r:'ja'},  {k:'じゅ',r:'ju'},  {k:'じょ',r:'jo'},
+            {k:'びゃ',r:'bya'}, {k:'びゅ',r:'byu'}, {k:'びょ',r:'byo'},
+            {k:'ぴゃ',r:'pya'}, {k:'ぴゅ',r:'pyu'}, {k:'ぴょ',r:'pyo'}
         ];
 
         const KATAKANA_DATA = [
+            // --- BASE (46) ---
             {k:'ア',r:'a'}, {k:'イ',r:'i'}, {k:'ウ',r:'u'}, {k:'エ',r:'e'}, {k:'オ',r:'o'},
             {k:'カ',r:'ka'}, {k:'キ',r:'ki'}, {k:'ク',r:'ku'}, {k:'ケ',r:'ke'}, {k:'コ',r:'ko'},
             {k:'サ',r:'sa'}, {k:'シ',r:'shi'}, {k:'ス',r:'su'}, {k:'セ',r:'se'}, {k:'ソ',r:'so'},
@@ -494,7 +550,31 @@ Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
             {k:'マ',r:'ma'}, {k:'ミ',r:'mi'}, {k:'ム',r:'mu'}, {k:'メ',r:'me'}, {k:'モ',r:'mo'},
             {k:'ヤ',r:'ya'}, {k:'ユ',r:'yu'}, {k:'ヨ',r:'yo'},
             {k:'ラ',r:'ra'}, {k:'リ',r:'ri'}, {k:'ル',r:'ru'}, {k:'レ',r:'re'}, {k:'ロ',r:'ro'},
-            {k:'ワ',r:'wa'}, {k:'ヲ',r:'wo'}, {k:'ン',r:'n'}
+            {k:'ワ',r:'wa'}, {k:'ヲ',r:'wo'}, {k:'ン',r:'n'},
+
+            // --- DAKUTEN (20) ---
+            {k:'ガ',r:'ga'}, {k:'ギ',r:'gi'}, {k:'グ',r:'gu'}, {k:'ゲ',r:'ge'}, {k:'ゴ',r:'go'},
+            {k:'ザ',r:'za'}, {k:'ジ',r:'ji'}, {k:'ズ',r:'zu'}, {k:'ゼ',r:'ze'}, {k:'ゾ',r:'zo'},
+            {k:'ダ',r:'da'}, {k:'ヂ',r:'ji'}, {k:'ヅ',r:'zu'}, {k:'デ',r:'de'}, {k:'ド',r:'do'},
+            {k:'バ',r:'ba'}, {k:'ビ',r:'bi'}, {k:'ブ',r:'bu'}, {k:'ベ',r:'be'}, {k:'ボ',r:'bo'},
+
+            // --- HANDAKUTEN (5) ---
+            {k:'パ',r:'pa'}, {k:'ピ',r:'pi'}, {k:'プ',r:'pu'}, {k:'ペ',r:'pe'}, {k:'ポ',r:'po'},
+
+            // --- YOON BASE (21) ---
+            {k:'キャ',r:'kya'}, {k:'キュ',r:'kyu'}, {k:'キョ',r:'kyo'},
+            {k:'シャ',r:'sha'}, {k:'シュ',r:'shu'}, {k:'ショ',r:'sho'},
+            {k:'チャ',r:'cha'}, {k:'チュ',r:'chu'}, {k:'チョ',r:'cho'},
+            {k:'ニャ',r:'nya'}, {k:'ニュ',r:'nyu'}, {k:'ニョ',r:'nyo'},
+            {k:'ヒャ',r:'hya'}, {k:'ヒュ',r:'hyu'}, {k:'ヒョ',r:'hyo'},
+            {k:'ミャ',r:'mya'}, {k:'ミュ',r:'myu'}, {k:'ミョ',r:'myo'},
+            {k:'リャ',r:'rya'}, {k:'リュ',r:'ryu'}, {k:'リョ',r:'ryo'},
+
+            // --- YOON DAKUTEN/HANDAKUTEN (12) ---
+            {k:'ギャ',r:'gya'}, {k:'ギュ',r:'gyu'}, {k:'ギョ',r:'gyo'},
+            {k:'ジャ',r:'ja'},  {k:'ジュ',r:'ju'},  {k:'ジョ',r:'jo'},
+            {k:'ビャ',r:'bya'}, {k:'ビュ',r:'byu'}, {k:'ビョ',r:'byo'},
+            {k:'ピャ',r:'pya'}, {k:'ピュ',r:'pyu'}, {k:'ピョ',r:'pyo'}
         ];
 
         const KANA_ROWS = {
@@ -507,7 +587,11 @@ Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo`;
             'Riga M': [30, 35],
             'Riga Y': [35, 38],
             'Riga R': [38, 43],
-            'Riga W/N': [43, 46]
+            'Riga W/N': [43, 46],
+            'Dakuten (Ga, Za, Da, Ba)': [46, 66],
+            'Handakuten (Pa)': [66, 71],
+            'Yoon Base (Kya, Sha...)': [71, 92],
+            'Yoon Daku/Handaku (Gya...)': [92, 104]
         };
 
         // --- DOM ELEMENTS ---
