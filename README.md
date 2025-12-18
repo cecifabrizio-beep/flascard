@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set di Studio Giapponese SRS (Completo con Tabelle Estese)</title>
+    <title>Set di Studio Giapponese SRS v2.0</title>
     <style>
         /* --- Stile Generale --- */
         body {
@@ -14,7 +14,7 @@
             box-sizing: border-box; min-height: 100vh;
         }
         h1, h2, h3 { color: #2c3e50; text-align: center; }
-        .container { width: 100%; max-width: 480px; margin-bottom: 30px; }
+        .container { width: 100%; max-width: 500px; margin-bottom: 30px; }
         
         .card-ui {
             background-color: #ffffff; padding: 25px;
@@ -28,7 +28,7 @@
         }
 
         /* --- Navigazione Moduli --- */
-        #main-nav { display: flex; gap: 10px; width: 100%; max-width: 480px; margin-bottom: 20px; flex-wrap: wrap; }
+        #main-nav { display: flex; gap: 10px; width: 100%; max-width: 500px; margin-bottom: 20px; flex-wrap: wrap; }
         .nav-btn {
             flex: 1; padding: 10px 5px; font-size: 0.85rem; font-weight: 600;
             border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;
@@ -120,7 +120,7 @@
         .kana-table .kana { font-size: 1.3rem; font-weight: bold; color: #333; display: block; }
         .kana-table .romaji { font-size: 0.8rem; color: #555; display: block; }
         .btn-start-kana { background-color: #34c759; margin-bottom: 20px; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(52, 199, 89, 0.3); }
-        h4 { margin-top: 0; margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        h4 { margin-top: 0; margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #007aff; }
 
         /* --- STILI LISTA VOCABOLI --- */
         #lista-vocaboli-container { margin-top: 20px; max-height: 450px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
@@ -138,7 +138,7 @@
 </head>
 <body>
 
-    <h1>Set di Studio Giapponese SRS</h1>
+    <h1>Set di Studio Giapponese SRS v2.0 (Estesa)</h1>
 
     <nav id="main-nav">
         <button class="nav-btn" data-modulo="quiz">Quiz Vocaboli</button>
