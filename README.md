@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set di Studio Giapponese SRS v2.0</title>
+    <title>Set di Studio Giapponese SRS v2.1 (Fix Grafico)</title>
     <style>
         /* --- Stile Generale --- */
         body {
@@ -14,7 +14,7 @@
             box-sizing: border-box; min-height: 100vh;
         }
         h1, h2, h3 { color: #2c3e50; text-align: center; }
-        .container { width: 100%; max-width: 500px; margin-bottom: 30px; }
+        .container { width: 100%; max-width: 600px; margin-bottom: 30px; } /* Allargato leggermente per le tabelle */
         
         .card-ui {
             background-color: #ffffff; padding: 25px;
@@ -28,11 +28,11 @@
         }
 
         /* --- Navigazione Moduli --- */
-        #main-nav { display: flex; gap: 10px; width: 100%; max-width: 500px; margin-bottom: 20px; flex-wrap: wrap; }
+        #main-nav { display: flex; gap: 8px; width: 100%; max-width: 600px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
         .nav-btn {
-            flex: 1; padding: 10px 5px; font-size: 0.85rem; font-weight: 600;
+            padding: 10px 15px; font-size: 0.9rem; font-weight: 600;
             border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;
-            background-color: #e5e5ea; color: #007aff; white-space: nowrap;
+            background-color: #e5e5ea; color: #007aff; white-space: nowrap; flex: 1; min-width: 80px;
         }
         .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 10px rgba(0,122,255,0.3); }
         .modulo-content { display: none; width: 100%; }
@@ -112,13 +112,16 @@
         .btn-audio { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0 5px; vertical-align: middle; }
         #prompt-principale .btn-audio { font-size: 1.8rem; position: relative; top: -2px; }
         
-        /* --- TABELLE KANA --- */
-        .table-container { overflow-x: auto; margin-bottom: 25px; }
-        .kana-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 1.1rem; text-align: center; }
-        .kana-table td, .kana-table th { border: 1px solid #ddd; padding: 8px 4px; }
-        .kana-table th { background-color: #f4f4f4; font-weight: 600; font-size: 0.9rem; }
-        .kana-table .kana { font-size: 1.3rem; font-weight: bold; color: #333; display: block; }
-        .kana-table .romaji { font-size: 0.8rem; color: #555; display: block; }
+        /* --- TABELLE KANA (FIXED) --- */
+        .table-container { overflow-x: auto; margin-bottom: 25px; border-radius: 8px; border: 1px solid #eee; }
+        .kana-table { width: 100%; border-collapse: collapse; min-width: 300px; }
+        .kana-table th, .kana-table td { border: 1px solid #ddd; padding: 10px; text-align: center; vertical-align: middle; }
+        .kana-table th { background-color: #f8f9fa; color: #555; font-weight: bold; }
+        
+        /* Stili per il contenuto delle celle */
+        .k-char { font-size: 1.4rem; font-weight: bold; color: #333; display: block; margin-bottom: 2px; }
+        .k-romaji { font-size: 0.8rem; color: #888; display: block; }
+        
         .btn-start-kana { background-color: #34c759; margin-bottom: 20px; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(52, 199, 89, 0.3); }
         h4 { margin-top: 0; margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #007aff; }
 
@@ -138,7 +141,7 @@
 </head>
 <body>
 
-    <h1>Set di Studio Giapponese SRS v2.0 (Estesa)</h1>
+    <h1>Set di Studio Giapponese SRS</h1>
 
     <nav id="main-nav">
         <button class="nav-btn" data-modulo="quiz">Quiz Vocaboli</button>
@@ -243,17 +246,17 @@
                 <div class="table-container">
                     <table class="kana-table">
                         <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                        <tr><td><b>-</b></td><td class="kana">あ<span class="romaji">a</span></td><td class="kana">い<span class="romaji">i</span></td><td class="kana">う<span class="romaji">u</span></td><td class="kana">え<span class="romaji">e</span></td><td class="kana">お<span class="romaji">o</span></td></tr>
-                        <tr><td><b>K</b></td><td class="kana">か<span class="romaji">ka</span></td><td class="kana">き<span class="romaji">ki</span></td><td class="kana">く<span class="romaji">ku</span></td><td class="kana">け<span class="romaji">ke</span></td><td class="kana">こ<span class="romaji">ko</span></td></tr>
-                        <tr><td><b>S</b></td><td class="kana">さ<span class="romaji">sa</span></td><td class="kana">し<span class="romaji">shi</span></td><td class="kana">す<span class="romaji">su</span></td><td class="kana">せ<span class="romaji">se</span></td><td class="kana">そ<span class="romaji">so</span></td></tr>
-                        <tr><td><b>T</b></td><td class="kana">た<span class="romaji">ta</span></td><td class="kana">ち<span class="romaji">chi</span></td><td class="kana">つ<span class="romaji">tsu</span></td><td class="kana">て<span class="romaji">te</span></td><td class="kana">と<span class="romaji">to</span></td></tr>
-                        <tr><td><b>N</b></td><td class="kana">な<span class="romaji">na</span></td><td class="kana">に<span class="romaji">ni</span></td><td class="kana">ぬ<span class="romaji">nu</span></td><td class="kana">ね<span class="romaji">ne</span></td><td class="kana">の<span class="romaji">no</span></td></tr>
-                        <tr><td><b>H</b></td><td class="kana">は<span class="romaji">ha</span></td><td class="kana">ひ<span class="romaji">hi</span></td><td class="kana">ふ<span class="romaji">fu</span></td><td class="kana">へ<span class="romaji">he</span></td><td class="kana">ほ<span class="romaji">ho</span></td></tr>
-                        <tr><td><b>M</b></td><td class="kana">ま<span class="romaji">ma</span></td><td class="kana">み<span class="romaji">mi</span></td><td class="kana">む<span class="romaji">mu</span></td><td class="kana">め<span class="romaji">me</span></td><td class="kana">も<span class="romaji">mo</span></td></tr>
-                        <tr><td><b>Y</b></td><td class="kana">や<span class="romaji">ya</span></td><td></td><td class="kana">ゆ<span class="romaji">yu</span></td><td></td><td class="kana">よ<span class="romaji">yo</span></td></tr>
-                        <tr><td><b>R</b></td><td class="kana">ら<span class="romaji">ra</span></td><td class="kana">り<span class="romaji">ri</span></td><td class="kana">る<span class="romaji">ru</span></td><td class="kana">れ<span class="romaji">re</span></td><td class="kana">ろ<span class="romaji">ro</span></td></tr>
-                        <tr><td><b>W</b></td><td class="kana">わ<span class="romaji">wa</span></td><td></td><td></td><td></td><td class="kana">を<span class="romaji">wo</span></td></tr>
-                        <tr><td><b>N</b></td><td class="kana">ん<span class="romaji">n</span></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td><b>-</b></td><td><span class="k-char">あ</span><span class="k-romaji">a</span></td><td><span class="k-char">い</span><span class="k-romaji">i</span></td><td><span class="k-char">う</span><span class="k-romaji">u</span></td><td><span class="k-char">え</span><span class="k-romaji">e</span></td><td><span class="k-char">お</span><span class="k-romaji">o</span></td></tr>
+                        <tr><td><b>K</b></td><td><span class="k-char">か</span><span class="k-romaji">ka</span></td><td><span class="k-char">き</span><span class="k-romaji">ki</span></td><td><span class="k-char">く</span><span class="k-romaji">ku</span></td><td><span class="k-char">け</span><span class="k-romaji">ke</span></td><td><span class="k-char">こ</span><span class="k-romaji">ko</span></td></tr>
+                        <tr><td><b>S</b></td><td><span class="k-char">さ</span><span class="k-romaji">sa</span></td><td><span class="k-char">し</span><span class="k-romaji">shi</span></td><td><span class="k-char">す</span><span class="k-romaji">su</span></td><td><span class="k-char">せ</span><span class="k-romaji">se</span></td><td><span class="k-char">そ</span><span class="k-romaji">so</span></td></tr>
+                        <tr><td><b>T</b></td><td><span class="k-char">た</span><span class="k-romaji">ta</span></td><td><span class="k-char">ち</span><span class="k-romaji">chi</span></td><td><span class="k-char">つ</span><span class="k-romaji">tsu</span></td><td><span class="k-char">て</span><span class="k-romaji">te</span></td><td><span class="k-char">と</span><span class="k-romaji">to</span></td></tr>
+                        <tr><td><b>N</b></td><td><span class="k-char">な</span><span class="k-romaji">na</span></td><td><span class="k-char">に</span><span class="k-romaji">ni</span></td><td><span class="k-char">ぬ</span><span class="k-romaji">nu</span></td><td><span class="k-char">ね</span><span class="k-romaji">ne</span></td><td><span class="k-char">の</span><span class="k-romaji">no</span></td></tr>
+                        <tr><td><b>H</b></td><td><span class="k-char">は</span><span class="k-romaji">ha</span></td><td><span class="k-char">ひ</span><span class="k-romaji">hi</span></td><td><span class="k-char">ふ</span><span class="k-romaji">fu</span></td><td><span class="k-char">へ</span><span class="k-romaji">he</span></td><td><span class="k-char">ほ</span><span class="k-romaji">ho</span></td></tr>
+                        <tr><td><b>M</b></td><td><span class="k-char">ま</span><span class="k-romaji">ma</span></td><td><span class="k-char">み</span><span class="k-romaji">mi</span></td><td><span class="k-char">む</span><span class="k-romaji">mu</span></td><td><span class="k-char">め</span><span class="k-romaji">me</span></td><td><span class="k-char">も</span><span class="k-romaji">mo</span></td></tr>
+                        <tr><td><b>Y</b></td><td><span class="k-char">や</span><span class="k-romaji">ya</span></td><td></td><td><span class="k-char">ゆ</span><span class="k-romaji">yu</span></td><td></td><td><span class="k-char">よ</span><span class="k-romaji">yo</span></td></tr>
+                        <tr><td><b>R</b></td><td><span class="k-char">ら</span><span class="k-romaji">ra</span></td><td><span class="k-char">り</span><span class="k-romaji">ri</span></td><td><span class="k-char">る</span><span class="k-romaji">ru</span></td><td><span class="k-char">れ</span><span class="k-romaji">re</span></td><td><span class="k-char">ろ</span><span class="k-romaji">ro</span></td></tr>
+                        <tr><td><b>W</b></td><td><span class="k-char">わ</span><span class="k-romaji">wa</span></td><td></td><td></td><td></td><td><span class="k-char">を</span><span class="k-romaji">wo</span></td></tr>
+                        <tr><td><b>N</b></td><td><span class="k-char">ん</span><span class="k-romaji">n</span></td><td></td><td></td><td></td><td></td></tr>
                     </table>
                 </div>
 
@@ -261,11 +264,11 @@
                 <div class="table-container">
                     <table class="kana-table">
                         <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                        <tr><td><b>G</b></td><td class="kana">が<span class="romaji">ga</span></td><td class="kana">ぎ<span class="romaji">gi</span></td><td class="kana">ぐ<span class="romaji">gu</span></td><td class="kana">げ<span class="romaji">ge</span></td><td class="kana">ご<span class="romaji">go</span></td></tr>
-                        <tr><td><b>Z</b></td><td class="kana">ざ<span class="romaji">za</span></td><td class="kana">じ<span class="romaji">ji</span></td><td class="kana">ず<span class="romaji">zu</span></td><td class="kana">ぜ<span class="romaji">ze</span></td><td class="kana">ぞ<span class="romaji">zo</span></td></tr>
-                        <tr><td><b>D</b></td><td class="kana">だ<span class="romaji">da</span></td><td class="kana">ぢ<span class="romaji">ji</span></td><td class="kana">づ<span class="romaji">zu</span></td><td class="kana">で<span class="romaji">de</span></td><td class="kana">ど<span class="romaji">do</span></td></tr>
-                        <tr><td><b>B</b></td><td class="kana">ば<span class="romaji">ba</span></td><td class="kana">び<span class="romaji">bi</span></td><td class="kana">ぶ<span class="romaji">bu</span></td><td class="kana">べ<span class="romaji">be</span></td><td class="kana">ぼ<span class="romaji">bo</span></td></tr>
-                        <tr><td><b>P</b></td><td class="kana">ぱ<span class="romaji">pa</span></td><td class="kana">ぴ<span class="romaji">pi</span></td><td class="kana">ぷ<span class="romaji">pu</span></td><td class="kana">ぺ<span class="romaji">pe</span></td><td class="kana">ぽ<span class="romaji">po</span></td></tr>
+                        <tr><td><b>G</b></td><td><span class="k-char">が</span><span class="k-romaji">ga</span></td><td><span class="k-char">ぎ</span><span class="k-romaji">gi</span></td><td><span class="k-char">ぐ</span><span class="k-romaji">gu</span></td><td><span class="k-char">げ</span><span class="k-romaji">ge</span></td><td><span class="k-char">ご</span><span class="k-romaji">go</span></td></tr>
+                        <tr><td><b>Z</b></td><td><span class="k-char">ざ</span><span class="k-romaji">za</span></td><td><span class="k-char">じ</span><span class="k-romaji">ji</span></td><td><span class="k-char">ず</span><span class="k-romaji">zu</span></td><td><span class="k-char">ぜ</span><span class="k-romaji">ze</span></td><td><span class="k-char">ぞ</span><span class="k-romaji">zo</span></td></tr>
+                        <tr><td><b>D</b></td><td><span class="k-char">だ</span><span class="k-romaji">da</span></td><td><span class="k-char">ぢ</span><span class="k-romaji">ji</span></td><td><span class="k-char">づ</span><span class="k-romaji">zu</span></td><td><span class="k-char">で</span><span class="k-romaji">de</span></td><td><span class="k-char">ど</span><span class="k-romaji">do</span></td></tr>
+                        <tr><td><b>B</b></td><td><span class="k-char">ば</span><span class="k-romaji">ba</span></td><td><span class="k-char">び</span><span class="k-romaji">bi</span></td><td><span class="k-char">ぶ</span><span class="k-romaji">bu</span></td><td><span class="k-char">べ</span><span class="k-romaji">be</span></td><td><span class="k-char">ぼ</span><span class="k-romaji">bo</span></td></tr>
+                        <tr><td><b>P</b></td><td><span class="k-char">ぱ</span><span class="k-romaji">pa</span></td><td><span class="k-char">ぴ</span><span class="k-romaji">pi</span></td><td><span class="k-char">ぷ</span><span class="k-romaji">pu</span></td><td><span class="k-char">ぺ</span><span class="k-romaji">pe</span></td><td><span class="k-char">ぽ</span><span class="k-romaji">po</span></td></tr>
                     </table>
                 </div>
 
@@ -273,17 +276,17 @@
                 <div class="table-container">
                     <table class="kana-table">
                         <tr><th></th><th>YA</th><th>YU</th><th>YO</th></tr>
-                        <tr><td><b>K</b></td><td class="kana">きゃ<span class="romaji">kya</span></td><td class="kana">きゅ<span class="romaji">kyu</span></td><td class="kana">きょ<span class="romaji">kyo</span></td></tr>
-                        <tr><td><b>S</b></td><td class="kana">しゃ<span class="romaji">sha</span></td><td class="kana">しゅ<span class="romaji">shu</span></td><td class="kana">しょ<span class="romaji">sho</span></td></tr>
-                        <tr><td><b>C</b></td><td class="kana">ちゃ<span class="romaji">cha</span></td><td class="kana">ちゅ<span class="romaji">chu</span></td><td class="kana">ちょ<span class="romaji">cho</span></td></tr>
-                        <tr><td><b>N</b></td><td class="kana">にゃ<span class="romaji">nya</span></td><td class="kana">にゅ<span class="romaji">nyu</span></td><td class="kana">にょ<span class="romaji">nyo</span></td></tr>
-                        <tr><td><b>H</b></td><td class="kana">ひゃ<span class="romaji">hya</span></td><td class="kana">ひゅ<span class="romaji">hyu</span></td><td class="kana">ひょ<span class="romaji">hyo</span></td></tr>
-                        <tr><td><b>M</b></td><td class="kana">みゃ<span class="romaji">mya</span></td><td class="kana">みゅ<span class="romaji">myu</span></td><td class="kana">みょ<span class="romaji">myo</span></td></tr>
-                        <tr><td><b>R</b></td><td class="kana">りゃ<span class="romaji">rya</span></td><td class="kana">りゅ<span class="romaji">ryu</span></td><td class="kana">りょ<span class="romaji">ryo</span></td></tr>
-                        <tr><td><b>G</b></td><td class="kana">ぎゃ<span class="romaji">gya</span></td><td class="kana">ぎゅ<span class="romaji">gyu</span></td><td class="kana">ぎょ<span class="romaji">gyo</span></td></tr>
-                        <tr><td><b>J</b></td><td class="kana">じゃ<span class="romaji">ja</span></td><td class="kana">じゅ<span class="romaji">ju</span></td><td class="kana">じょ<span class="romaji">jo</span></td></tr>
-                        <tr><td><b>B</b></td><td class="kana">びゃ<span class="romaji">bya</span></td><td class="kana">びゅ<span class="romaji">byu</span></td><td class="kana">びょ<span class="romaji">byo</span></td></tr>
-                        <tr><td><b>P</b></td><td class="kana">ぴゃ<span class="romaji">pya</span></td><td class="kana">ぴゅ<span class="romaji">pyu</span></td><td class="kana">ぴょ<span class="romaji">pyo</span></td></tr>
+                        <tr><td><b>K</b></td><td><span class="k-char">きゃ</span><span class="k-romaji">kya</span></td><td><span class="k-char">きゅ</span><span class="k-romaji">kyu</span></td><td><span class="k-char">きょ</span><span class="k-romaji">kyo</span></td></tr>
+                        <tr><td><b>S</b></td><td><span class="k-char">しゃ</span><span class="k-romaji">sha</span></td><td><span class="k-char">しゅ</span><span class="k-romaji">shu</span></td><td><span class="k-char">しょ</span><span class="k-romaji">sho</span></td></tr>
+                        <tr><td><b>C</b></td><td><span class="k-char">ちゃ</span><span class="k-romaji">cha</span></td><td><span class="k-char">ちゅ</span><span class="k-romaji">chu</span></td><td><span class="k-char">ちょ</span><span class="k-romaji">cho</span></td></tr>
+                        <tr><td><b>N</b></td><td><span class="k-char">にゃ</span><span class="k-romaji">nya</span></td><td><span class="k-char">にゅ</span><span class="k-romaji">nyu</span></td><td><span class="k-char">にょ</span><span class="k-romaji">nyo</span></td></tr>
+                        <tr><td><b>H</b></td><td><span class="k-char">ひゃ</span><span class="k-romaji">hya</span></td><td><span class="k-char">ひゅ</span><span class="k-romaji">hyu</span></td><td><span class="k-char">ひょ</span><span class="k-romaji">hyo</span></td></tr>
+                        <tr><td><b>M</b></td><td><span class="k-char">みゃ</span><span class="k-romaji">mya</span></td><td><span class="k-char">みゅ</span><span class="k-romaji">myu</span></td><td><span class="k-char">みょ</span><span class="k-romaji">myo</span></td></tr>
+                        <tr><td><b>R</b></td><td><span class="k-char">りゃ</span><span class="k-romaji">rya</span></td><td><span class="k-char">りゅ</span><span class="k-romaji">ryu</span></td><td><span class="k-char">りょ</span><span class="k-romaji">ryo</span></td></tr>
+                        <tr><td><b>G</b></td><td><span class="k-char">ぎゃ</span><span class="k-romaji">gya</span></td><td><span class="k-char">ぎゅ</span><span class="k-romaji">gyu</span></td><td><span class="k-char">ぎょ</span><span class="k-romaji">gyo</span></td></tr>
+                        <tr><td><b>J</b></td><td><span class="k-char">じゃ</span><span class="k-romaji">ja</span></td><td><span class="k-char">じゅ</span><span class="k-romaji">ju</span></td><td><span class="k-char">じょ</span><span class="k-romaji">jo</span></td></tr>
+                        <tr><td><b>B</b></td><td><span class="k-char">びゃ</span><span class="k-romaji">bya</span></td><td><span class="k-char">びゅ</span><span class="k-romaji">byu</span></td><td><span class="k-char">びょ</span><span class="k-romaji">byo</span></td></tr>
+                        <tr><td><b>P</b></td><td><span class="k-char">ぴゃ</span><span class="k-romaji">pya</span></td><td><span class="k-char">ぴゅ</span><span class="k-romaji">pyu</span></td><td><span class="k-char">ぴょ</span><span class="k-romaji">pyo</span></td></tr>
                     </table>
                 </div>
             </div>
@@ -308,17 +311,17 @@
                 <div class="table-container">
                     <table class="kana-table">
                          <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                        <tr><td><b>-</b></td><td class="kana">ア<span class="romaji">a</span></td><td class="kana">イ<span class="romaji">i</span></td><td class="kana">ウ<span class="romaji">u</span></td><td class="kana">エ<span class="romaji">e</span></td><td class="kana">オ<span class="romaji">o</span></td></tr>
-                        <tr><td><b>K</b></td><td class="kana">カ<span class="romaji">ka</span></td><td class="kana">キ<span class="romaji">ki</span></td><td class="kana">ク<span class="romaji">ku</span></td><td class="kana">ケ<span class="romaji">ke</span></td><td class="kana">コ<span class="romaji">ko</span></td></tr>
-                        <tr><td><b>S</b></td><td class="kana">サ<span class="romaji">sa</span></td><td class="kana">シ<span class="romaji">shi</span></td><td class="kana">ス<span class="romaji">su</span></td><td class="kana">セ<span class="romaji">se</span></td><td class="kana">ソ<span class="romaji">so</span></td></tr>
-                        <tr><td><b>T</b></td><td class="kana">タ<span class="romaji">ta</span></td><td class="kana">チ<span class="romaji">chi</span></td><td class="kana">ツ<span class="romaji">tsu</span></td><td class="kana">テ<span class="romaji">te</span></td><td class="kana">ト<span class="romaji">to</span></td></tr>
-                        <tr><td><b>N</b></td><td class="kana">ナ<span class="romaji">na</span></td><td class="kana">ニ<span class="romaji">ni</span></td><td class="kana">ヌ<span class="romaji">nu</span></td><td class="kana">ネ<span class="romaji">ne</span></td><td class="kana">ノ<span class="romaji">no</span></td></tr>
-                        <tr><td><b>H</b></td><td class="kana">ハ<span class="romaji">ha</span></td><td class="kana">ヒ<span class="romaji">hi</span></td><td class="kana">フ<span class="romaji">fu</span></td><td class="kana">ヘ<span class="romaji">he</span></td><td class="kana">ホ<span class="romaji">ho</span></td></tr>
-                        <tr><td><b>M</b></td><td class="kana">マ<span class="romaji">ma</span></td><td class="kana">ミ<span class="romaji">mi</span></td><td class="kana">ム<span class="romaji">mu</span></td><td class="kana">メ<span class="romaji">me</span></td><td class="kana">モ<span class="romaji">mo</span></td></tr>
-                        <tr><td><b>Y</b></td><td class="kana">ヤ<span class="romaji">ya</span></td><td></td><td class="kana">ユ<span class="romaji">yu</span></td><td></td><td class="kana">ヨ<span class="romaji">yo</span></td></tr>
-                        <tr><td><b>R</b></td><td class="kana">ラ<span class="romaji">ra</span></td><td class="kana">リ<span class="romaji">ri</span></td><td class="kana">ル<span class="romaji">ru</span></td><td class="kana">レ<span class="romaji">re</span></td><td class="kana">ロ<span class="romaji">ro</span></td></tr>
-                        <tr><td><b>W</b></td><td class="kana">ワ<span class="romaji">wa</span></td><td></td><td></td><td></td><td class="kana">ヲ<span class="romaji">wo</span></td></tr>
-                        <tr><td><b>N</b></td><td class="kana">ン<span class="romaji">n</span></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td><b>-</b></td><td><span class="k-char">ア</span><span class="k-romaji">a</span></td><td><span class="k-char">イ</span><span class="k-romaji">i</span></td><td><span class="k-char">ウ</span><span class="k-romaji">u</span></td><td><span class="k-char">エ</span><span class="k-romaji">e</span></td><td><span class="k-char">オ</span><span class="k-romaji">o</span></td></tr>
+                        <tr><td><b>K</b></td><td><span class="k-char">カ</span><span class="k-romaji">ka</span></td><td><span class="k-char">キ</span><span class="k-romaji">ki</span></td><td><span class="k-char">ク</span><span class="k-romaji">ku</span></td><td><span class="k-char">ケ</span><span class="k-romaji">ke</span></td><td><span class="k-char">コ</span><span class="k-romaji">ko</span></td></tr>
+                        <tr><td><b>S</b></td><td><span class="k-char">サ</span><span class="k-romaji">sa</span></td><td><span class="k-char">シ</span><span class="k-romaji">shi</span></td><td><span class="k-char">ス</span><span class="k-romaji">su</span></td><td><span class="k-char">セ</span><span class="k-romaji">se</span></td><td><span class="k-char">ソ</span><span class="k-romaji">so</span></td></tr>
+                        <tr><td><b>T</b></td><td><span class="k-char">タ</span><span class="k-romaji">ta</span></td><td><span class="k-char">チ</span><span class="k-romaji">chi</span></td><td><span class="k-char">ツ</span><span class="k-romaji">tsu</span></td><td><span class="k-char">テ</span><span class="k-romaji">te</span></td><td><span class="k-char">ト</span><span class="k-romaji">to</span></td></tr>
+                        <tr><td><b>N</b></td><td><span class="k-char">ナ</span><span class="k-romaji">na</span></td><td><span class="k-char">ニ</span><span class="k-romaji">ni</span></td><td><span class="k-char">ヌ</span><span class="k-romaji">nu</span></td><td><span class="k-char">ネ</span><span class="k-romaji">ne</span></td><td><span class="k-char">ノ</span><span class="k-romaji">no</span></td></tr>
+                        <tr><td><b>H</b></td><td><span class="k-char">ハ</span><span class="k-romaji">ha</span></td><td><span class="k-char">ヒ</span><span class="k-romaji">hi</span></td><td><span class="k-char">フ</span><span class="k-romaji">fu</span></td><td><span class="k-char">ヘ</span><span class="k-romaji">he</span></td><td><span class="k-char">ホ</span><span class="k-romaji">ho</span></td></tr>
+                        <tr><td><b>M</b></td><td><span class="k-char">マ</span><span class="k-romaji">ma</span></td><td><span class="k-char">ミ</span><span class="k-romaji">mi</span></td><td><span class="k-char">ム</span><span class="k-romaji">mu</span></td><td><span class="k-char">メ</span><span class="k-romaji">me</span></td><td><span class="k-char">モ</span><span class="k-romaji">mo</span></td></tr>
+                        <tr><td><b>Y</b></td><td><span class="k-char">ヤ</span><span class="k-romaji">ya</span></td><td></td><td><span class="k-char">ユ</span><span class="k-romaji">yu</span></td><td></td><td><span class="k-char">ヨ</span><span class="k-romaji">yo</span></td></tr>
+                        <tr><td><b>R</b></td><td><span class="k-char">ラ</span><span class="k-romaji">ra</span></td><td><span class="k-char">リ</span><span class="k-romaji">ri</span></td><td><span class="k-char">ル</span><span class="k-romaji">ru</span></td><td><span class="k-char">レ</span><span class="k-romaji">re</span></td><td><span class="k-char">ロ</span><span class="k-romaji">ro</span></td></tr>
+                        <tr><td><b>W</b></td><td><span class="k-char">ワ</span><span class="k-romaji">wa</span></td><td></td><td></td><td></td><td><span class="k-char">ヲ</span><span class="k-romaji">wo</span></td></tr>
+                        <tr><td><b>N</b></td><td><span class="k-char">ン</span><span class="k-romaji">n</span></td><td></td><td></td><td></td><td></td></tr>
                     </table>
                 </div>
 
@@ -326,11 +329,11 @@
                 <div class="table-container">
                     <table class="kana-table">
                         <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                        <tr><td><b>G</b></td><td class="kana">ガ<span class="romaji">ga</span></td><td class="kana">ギ<span class="romaji">gi</span></td><td class="kana">グ<span class="romaji">gu</span></td><td class="kana">ゲ<span class="romaji">ge</span></td><td class="kana">ゴ<span class="romaji">go</span></td></tr>
-                        <tr><td><b>Z</b></td><td class="kana">ザ<span class="romaji">za</span></td><td class="kana">ジ<span class="romaji">ji</span></td><td class="kana">ズ<span class="romaji">zu</span></td><td class="kana">ゼ<span class="romaji">ze</span></td><td class="kana">ゾ<span class="romaji">zo</span></td></tr>
-                        <tr><td><b>D</b></td><td class="kana">ダ<span class="romaji">da</span></td><td class="kana">ヂ<span class="romaji">ji</span></td><td class="kana">ヅ<span class="romaji">zu</span></td><td class="kana">デ<span class="romaji">de</span></td><td class="kana">ド<span class="romaji">do</span></td></tr>
-                        <tr><td><b>B</b></td><td class="kana">バ<span class="romaji">ba</span></td><td class="kana">ビ<span class="romaji">bi</span></td><td class="kana">ブ<span class="romaji">bu</span></td><td class="kana">ベ<span class="romaji">be</span></td><td class="kana">ボ<span class="romaji">bo</span></td></tr>
-                        <tr><td><b>P</b></td><td class="kana">パ<span class="romaji">pa</span></td><td class="kana">ピ<span class="romaji">pi</span></td><td class="kana">プ<span class="romaji">pu</span></td><td class="kana">ペ<span class="romaji">pe</span></td><td class="kana">ポ<span class="romaji">po</span></td></tr>
+                        <tr><td><b>G</b></td><td><span class="k-char">ガ</span><span class="k-romaji">ga</span></td><td><span class="k-char">ギ</span><span class="k-romaji">gi</span></td><td><span class="k-char">グ</span><span class="k-romaji">gu</span></td><td><span class="k-char">ゲ</span><span class="k-romaji">ge</span></td><td><span class="k-char">ゴ</span><span class="k-romaji">go</span></td></tr>
+                        <tr><td><b>Z</b></td><td><span class="k-char">ザ</span><span class="k-romaji">za</span></td><td><span class="k-char">ジ</span><span class="k-romaji">ji</span></td><td><span class="k-char">ズ</span><span class="k-romaji">zu</span></td><td><span class="k-char">ゼ</span><span class="k-romaji">ze</span></td><td><span class="k-char">ゾ</span><span class="k-romaji">zo</span></td></tr>
+                        <tr><td><b>D</b></td><td><span class="k-char">ダ</span><span class="k-romaji">da</span></td><td><span class="k-char">ヂ</span><span class="k-romaji">ji</span></td><td><span class="k-char">ヅ</span><span class="k-romaji">zu</span></td><td><span class="k-char">デ</span><span class="k-romaji">de</span></td><td><span class="k-char">ド</span><span class="k-romaji">do</span></td></tr>
+                        <tr><td><b>B</b></td><td><span class="k-char">バ</span><span class="k-romaji">ba</span></td><td><span class="k-char">ビ</span><span class="k-romaji">bi</span></td><td><span class="k-char">ブ</span><span class="k-romaji">bu</span></td><td><span class="k-char">ベ</span><span class="k-romaji">be</span></td><td><span class="k-char">ボ</span><span class="k-romaji">bo</span></td></tr>
+                        <tr><td><b>P</b></td><td><span class="k-char">パ</span><span class="k-romaji">pa</span></td><td><span class="k-char">ピ</span><span class="k-romaji">pi</span></td><td><span class="k-char">プ</span><span class="k-romaji">pu</span></td><td><span class="k-char">ペ</span><span class="k-romaji">pe</span></td><td><span class="k-char">ポ</span><span class="k-romaji">po</span></td></tr>
                     </table>
                 </div>
 
@@ -338,17 +341,17 @@
                 <div class="table-container">
                     <table class="kana-table">
                         <tr><th></th><th>YA</th><th>YU</th><th>YO</th></tr>
-                        <tr><td><b>K</b></td><td class="kana">キャ<span class="romaji">kya</span></td><td class="kana">キュ<span class="romaji">kyu</span></td><td class="kana">キョ<span class="romaji">kyo</span></td></tr>
-                        <tr><td><b>S</b></td><td class="kana">シャ<span class="romaji">sha</span></td><td class="kana">シュ<span class="romaji">shu</span></td><td class="kana">ショ<span class="romaji">sho</span></td></tr>
-                        <tr><td><b>C</b></td><td class="kana">チャ<span class="romaji">cha</span></td><td class="kana">チュ<span class="romaji">chu</span></td><td class="kana">チョ<span class="romaji">cho</span></td></tr>
-                        <tr><td><b>N</b></td><td class="kana">ニャ<span class="romaji">nya</span></td><td class="kana">ニュ<span class="romaji">nyu</span></td><td class="kana">ニョ<span class="romaji">nyo</span></td></tr>
-                        <tr><td><b>H</b></td><td class="kana">ヒャ<span class="romaji">hya</span></td><td class="kana">ヒュ<span class="romaji">hyu</span></td><td class="kana">ヒョ<span class="romaji">hyo</span></td></tr>
-                        <tr><td><b>M</b></td><td class="kana">ミャ<span class="romaji">mya</span></td><td class="kana">ミュ<span class="romaji">myu</span></td><td class="kana">ミョ<span class="romaji">myo</span></td></tr>
-                        <tr><td><b>R</b></td><td class="kana">リャ<span class="romaji">rya</span></td><td class="kana">リュ<span class="romaji">ryu</span></td><td class="kana">リョ<span class="romaji">ryo</span></td></tr>
-                        <tr><td><b>G</b></td><td class="kana">ギャ<span class="romaji">gya</span></td><td class="kana">ギュ<span class="romaji">gyu</span></td><td class="kana">ギョ<span class="romaji">gyo</span></td></tr>
-                        <tr><td><b>J</b></td><td class="kana">ジャ<span class="romaji">ja</span></td><td class="kana">ジュ<span class="romaji">ju</span></td><td class="kana">ジョ<span class="romaji">jo</span></td></tr>
-                        <tr><td><b>B</b></td><td class="kana">ビャ<span class="romaji">bya</span></td><td class="kana">ビュ<span class="romaji">byu</span></td><td class="kana">ビョ<span class="romaji">byo</span></td></tr>
-                        <tr><td><b>P</b></td><td class="kana">ピャ<span class="romaji">pya</span></td><td class="kana">ピュ<span class="romaji">pyu</span></td><td class="kana">ピョ<span class="romaji">pyo</span></td></tr>
+                        <tr><td><b>K</b></td><td><span class="k-char">キャ</span><span class="k-romaji">kya</span></td><td><span class="k-char">キュ</span><span class="k-romaji">kyu</span></td><td><span class="k-char">キョ</span><span class="k-romaji">kyo</span></td></tr>
+                        <tr><td><b>S</b></td><td><span class="k-char">シャ</span><span class="k-romaji">sha</span></td><td><span class="k-char">シュ</span><span class="k-romaji">shu</span></td><td><span class="k-char">ショ</span><span class="k-romaji">sho</span></td></tr>
+                        <tr><td><b>C</b></td><td><span class="k-char">チャ</span><span class="k-romaji">cha</span></td><td><span class="k-char">チュ</span><span class="k-romaji">chu</span></td><td><span class="k-char">チョ</span><span class="k-romaji">cho</span></td></tr>
+                        <tr><td><b>N</b></td><td><span class="k-char">ニャ</span><span class="k-romaji">nya</span></td><td><span class="k-char">ニュ</span><span class="k-romaji">nyu</span></td><td><span class="k-char">ニョ</span><span class="k-romaji">nyo</span></td></tr>
+                        <tr><td><b>H</b></td><td><span class="k-char">ヒャ</span><span class="k-romaji">hya</span></td><td><span class="k-char">ヒュ</span><span class="k-romaji">hyu</span></td><td><span class="k-char">ヒョ</span><span class="k-romaji">hyo</span></td></tr>
+                        <tr><td><b>M</b></td><td><span class="k-char">ミャ</span><span class="k-romaji">mya</span></td><td><span class="k-char">ミュ</span><span class="k-romaji">myu</span></td><td><span class="k-char">ミョ</span><span class="k-romaji">myo</span></td></tr>
+                        <tr><td><b>R</b></td><td><span class="k-char">リャ</span><span class="k-romaji">rya</span></td><td><span class="k-char">リュ</span><span class="k-romaji">ryu</span></td><td><span class="k-char">リョ</span><span class="k-romaji">ryo</span></td></tr>
+                        <tr><td><b>G</b></td><td><span class="k-char">ギャ</span><span class="k-romaji">gya</span></td><td><span class="k-char">ギュ</span><span class="k-romaji">gyu</span></td><td><span class="k-char">ギョ</span><span class="k-romaji">gyo</span></td></tr>
+                        <tr><td><b>J</b></td><td><span class="k-char">ジャ</span><span class="k-romaji">ja</span></td><td><span class="k-char">ジュ</span><span class="k-romaji">ju</span></td><td><span class="k-char">ジョ</span><span class="k-romaji">jo</span></td></tr>
+                        <tr><td><b>B</b></td><td><span class="k-char">ビャ</span><span class="k-romaji">bya</span></td><td><span class="k-char">ビュ</span><span class="k-romaji">byu</span></td><td><span class="k-char">ビョ</span><span class="k-romaji">byo</span></td></tr>
+                        <tr><td><b>P</b></td><td><span class="k-char">ピャ</span><span class="k-romaji">pya</span></td><td><span class="k-char">ピュ</span><span class="k-romaji">pyu</span></td><td><span class="k-char">ピョ</span><span class="k-romaji">pyo</span></td></tr>
                     </table>
                 </div>
             </div>
@@ -581,7 +584,7 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
             // --- DAKUTEN (20) (Ga, Za, Da, Ba) ---
             {k:'が',r:'ga'}, {k:'ぎ',r:'gi'}, {k:'ぐ',r:'gu'}, {k:'げ',r:'ge'}, {k:'ご',r:'go'},
             {k:'ざ',r:'za'}, {k:'じ',r:'ji'}, {k:'ず',r:'zu'}, {k:'ぜ',r:'ze'}, {k:'ぞ',r:'zo'},
-            {k:'だ',r:'da'}, {k:'ぢ',r:'ji'}, {k:'づ',r:'zu'}, {k:'で',r:'de'}, {k:'ど',r:'do'}, // Nota: ぢ=ji (di), づ=zu (du)
+            {k:'だ',r:'da'}, {k:'ぢ',r:'ji'}, {k:'づ',r:'zu'}, {k:'で',r:'de'}, {k:'ど',r:'do'}, 
             {k:'ば',r:'ba'}, {k:'び',r:'bi'}, {k:'ぶ',r:'bu'}, {k:'べ',r:'be'}, {k:'ぼ',r:'bo'},
 
             // --- HANDAKUTEN (5) (Pa) ---
