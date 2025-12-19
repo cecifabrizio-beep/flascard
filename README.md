@@ -1,23 +1,4 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set di Studio Giapponese SRS v3.0 (Tabelle Fix)</title>
-    <style>
-        /* --- Stile Generale --- */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex; justify-content: center; align-items: center;
-            flex-direction: column; background-color: #f0f2f5;
-            color: #333; margin: 0; padding: 10px;
-            box-sizing: border-box; min-height: 100vh;
-        }
-        h1, h2, h3 { color: #2c3e50; text-align: center; }
-        h4 { color: #007aff; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; margin-top: 30px; }
-        
-        .container { width: 100%; max-width: 600px; margin-bottom: 30px; }
-        
+<!DOCTYPE html> <html lang="it"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Set di Studio Giapponese SRS v3.2 (Clean)</title> <style> /* --- Stile Generale --- */ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; flex-direction: column; background-color: #f0f2f5; color: #333; margin: 0; padding: 10px; box-sizing: border-box; min-height: 100vh; } h1, h2, h3 { color: #2c3e50; text-align: center; } h4 { color: #007aff; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; margin-top: 30px; } .container { width: 100%; max-width: 600px; margin-bottom: 30px; } .card-ui { background-color: #ffffff; padding: 20px; border-radius: 16px; ...        
         .card-ui {
             background-color: #ffffff; padding: 20px;
             border-radius: 16px;
