@@ -1,8 +1,28 @@
-<!DOCTYPE html> <html lang="it"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Set di Studio Giapponese SRS v3.2 (Clean)</title> <style> /* --- Stile Generale --- */ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; flex-direction: column; background-color: #f0f2f5; color: #333; margin: 0; padding: 10px; box-sizing: border-box; min-height: 100vh; } h1, h2, h3 { color: #2c3e50; text-align: center; } h4 { color: #007aff; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; margin-top: 30px; } .container { width: 100%; max-width: 600px; margin-bottom: 30px; } .card-ui { background-color: #ffffff; padding: 20px; border-radius: 16px; ...        
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set di Studio Giapponese SRS v3.2 (Clean)</title>
+    <style>
+        /* --- Stile Generale --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column; background-color: #f0f2f5;
+            color: #333; margin: 0; padding: 10px;
+            box-sizing: border-box; min-height: 100vh;
+        }
+        h1, h2, h3 { color: #2c3e50; text-align: center; }
+        h4 { color: #007aff; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; margin-top: 30px; }
+        
+        .container { width: 100%; max-width: 600px; margin-bottom: 30px; }
+        
         .card-ui {
             background-color: #ffffff; padding: 20px;
             border-radius: 16px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
         }
 
         /* --- Navigazione --- */
@@ -31,45 +51,13 @@
         #risultato-controllo { min-height: 40px; font-size: 1.1rem; font-weight: bold; text-align: center; margin: 10px 0; }
         .corretto { color: #2ca049; } .sbagliato { color: #d92c23; }
 
-        /* --- TABELLE KANA (CSS FIX DEFINITIVO) --- */
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            margin-bottom: 20px;
-        }
-        .kana-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed; /* Forza colonne uguali */
-            min-width: 300px; /* Evita schiacciamento su schermi piccolissimi */
-        }
-        /* Forziamo il comportamento cella per evitare stacking */
-        .kana-table td, .kana-table th {
-            border: 1px solid #eee;
-            padding: 8px 2px;
-            text-align: center;
-            vertical-align: middle;
-            display: table-cell !important; /* CRUCIALE */
-        }
-        .kana-table th {
-            background-color: #f2f2f7;
-            color: #555;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-        .k-char { 
-            font-size: 1.4rem; 
-            font-weight: bold; 
-            color: #333; 
-            display: block; 
-            line-height: 1.2;
-        }
-        .k-romaji { 
-            font-size: 0.75rem; 
-            color: #999; 
-            display: block; 
-        }
+        /* --- TABELLE KANA --- */
+        .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .kana-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 300px; }
+        .kana-table td, .kana-table th { border: 1px solid #eee; padding: 8px 2px; text-align: center; vertical-align: middle; display: table-cell !important; }
+        .kana-table th { background-color: #f2f2f7; color: #555; font-size: 0.85rem; font-weight: bold; }
+        .k-char { font-size: 1.4rem; font-weight: bold; color: #333; display: block; line-height: 1.2; }
+        .k-romaji { font-size: 0.75rem; color: #999; display: block; }
 
         /* --- TASTIERA VIRTUALE --- */
         #virtual-keyboard { display: none; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 15px 0; background: #f2f2f7; padding: 10px; border-radius: 10px; }
@@ -82,7 +70,8 @@
         .btn:hover { opacity: 0.9; }
         #pulsante-controlla { background: #007aff; } #pulsante-prossima { background: #34c759; } #pulsante-elimina { background: #ff3b30; margin-top: 10px; }
         
-        .sezione-gestione { border-top: 1px solid #eee; margin-top: 20px; padding-top: 20px; }
+        .sezione-gestione { border-top: 2px solid #f0f0f0; margin-top: 20px; padding-top: 20px; }
+        .sezione-gestione h3 { margin-top: 0; color: #555; font-size: 1.1rem; }
         label { font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
         input[type="text"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         
@@ -150,13 +139,23 @@
                 </div>
             </div>
 
-            <div class="card-ui" id="form-container" style="margin-top:30px;">
+            <div class="card-ui" id="form-container">
                 <h2>Gestione Dati</h2>
-                <button id="reset-dati-btn" class="btn" style="background-color: #34c759;">🔄 Ripristina Dati Vocaboli</button>
-                <p class="messaggio-feedback" style="font-weight:normal; font-size:0.9rem;">(Clicca qui se non vedi le categorie)</p>
                 
                 <div class="sezione-gestione">
-                    <h3>Aggiungi Manualmente</h3>
+                    <h3>Aggiornamento Online</h3>
+                    <label>Link al file .csv su GitHub:</label>
+                    <input type="text" id="csv-url-input" placeholder="https://raw.githubusercontent.com/..." value="">
+                    <button id="update-url-btn" class="btn" style="background:#007aff;">Aggiorna da Link</button>
+                    <p id="messaggio-update" class="messaggio-feedback"></p>
+                </div>
+
+                <div class="sezione-gestione">
+                    <h3>Importa/Aggiungi</h3>
+                    <label id="import-label" for="import-csv-file" style="cursor:pointer; background:#eee; padding:10px; text-align:center; border-radius:6px; margin-bottom:15px;">📂 Importa CSV Locale</label>
+                    <input type="file" id="import-csv-file" accept=".csv" style="display:none;">
+                    
+                    <h3 style="margin-top:20px;">Aggiungi Parola Singola</h3>
                     <form id="form-aggiungi">
                         <label>Italiano: <input type="text" id="input-ita" required></label>
                         <label>Inglese: <input type="text" id="input-eng" required></label>
@@ -166,6 +165,7 @@
                         <button type="submit" class="btn">Salva Parola</button>
                     </form>
                 </div>
+
                 <div class="sezione-gestione">
                     <button id="svuota-tutto-btn" class="btn" style="background-color: #d92c23;">CANCELLA TUTTO</button>
                 </div>
@@ -175,7 +175,6 @@
         <div id="modulo-hiragana" class="modulo-content">
             <div class="card-ui">
                 <h2>Alfabeto Hiragana</h2>
-                
                 <div class="kana-config-panel">
                     <h3>Seleziona gruppi:</h3>
                     <div class="config-grid" id="h-config-grid"></div>
@@ -184,7 +183,6 @@
                         <button class="btn-small" onclick="toggleAllKana('hiragana', false)">Deseleziona</button>
                     </div>
                 </div>
-
                 <button class="btn btn-start-kana" onclick="avviaQuizKana('hiragana')">🏋️ Avvia Quiz Hiragana</button>
 
                 <h4>Suoni Base (Gojūon)</h4>
@@ -240,7 +238,6 @@
         <div id="modulo-katakana" class="modulo-content">
             <div class="card-ui">
                 <h2>Alfabeto Katakana</h2>
-
                 <div class="kana-config-panel">
                     <h3>Seleziona gruppi:</h3>
                     <div class="config-grid" id="k-config-grid"></div>
@@ -249,7 +246,6 @@
                         <button class="btn-small" onclick="toggleAllKana('katakana', false)">Deseleziona</button>
                     </div>
                 </div>
-
                 <button class="btn btn-start-kana" onclick="avviaQuizKana('katakana')">🏋️ Avvia Quiz Katakana</button>
 
                 <h4>Suoni Base (Gojūon)</h4>
@@ -307,7 +303,10 @@
                 <h2>Lista Vocaboli</h2>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <p id="vocaboli-count" style="font-weight:bold;"></p>
-                    <button id="copia-vocaboli-btn" style="background:transparent; border:1px solid #ddd; padding:5px; cursor:pointer; border-radius:4px;">📋 Copia CSV</button>
+                    <button id="copia-vocaboli-btn" style="background:transparent; border:1px solid #ddd; padding:5px; cursor:pointer; border-radius:4px; font-size:0.8rem;">📋 Copia CSV</button>
+                </div>
+                <div style="text-align:right; margin-bottom:10px;">
+                    <button id="svuota-lista-btn" style="background-color: #ff3b30; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:bold;">🗑 CANCELLA TUTTO</button>
                 </div>
                 <div id="lista-vocaboli-container"></div>
             </div>
@@ -315,205 +314,6 @@
     </main>
 
     <script>
-        // --- DATI INIZIALI (CSV EMBEDDED) ---
-        const DATI_INIZIALI_CSV = `
-Buongiorno,Good morning,おはよう,Ohayoo,Intro - Saluti
-Buongiorno (cortese),Good morning (polite),おはようございます,Ohayoo gozaimasu,Intro - Saluti
-Buon pomeriggio,Good afternoon,こんにちは,Konnichiwa,Intro - Saluti
-Buonasera,Good evening,こんばんは,Konbanwa,Intro - Saluti
-Arrivederci,Good-bye,さようなら,Sayoonara,Intro - Saluti
-Buonanotte,Good night,おやすみ（なさい）,Oyasumi (nasai),Intro - Saluti
-Grazie,Thank you,ありがとう,Arigatoo,Intro - Saluti
-Grazie (cortese),Thank you (polite),ありがとうございます,Arigatoo gozaimasu,Intro - Saluti
-Mi scusi / Mi dispiace,Excuse me / I'm sorry,すみません,Sumimasen,Intro - Saluti
-No / Di nulla,No / Not at all,いいえ,Iie,Intro - Saluti
-Vado e torno,I'll go and come back,いってきます,Itte kimasu,Intro - Saluti
-Vai e torna,Please go and come back,いってらっしゃい,Itterasshai,Intro - Saluti
-Sono a casa,I'm home,ただいま,Tadaima,Intro - Saluti
-Bentornato,Welcome home,おかえり（なさい）,Okaeri (nasai),Intro - Saluti
-Grazie per il cibo (prima),Thank you for the meal (before),いただきます,Itadakimasu,Intro - Saluti
-Grazie per il cibo (dopo),Thank you for the meal (after),ごちそうさま（でした）,Gochisoosama (deshita),Intro - Saluti
-Piacere di conoscerti,How do you do?,はじめまして,Hajimemashite,Intro - Saluti
-Sono...,I am...,～です,... desu,Intro - Saluti
-Piacere,Nice to meet you,よろしく おねがいします,Yoroshiku onegai shimasu,Intro - Saluti
-Zero,Zero,ゼロ / れい,zero / ree,Intro - Numeri
-Uno,One,いち,ichi,Intro - Numeri
-Due,Two,に,ni,Intro - Numeri
-Tre,Three,さん,san,Intro - Numeri
-Quattro,Four,よん / し / (よ),yon / shi / (yo),Intro - Numeri
-Cinque,Five,ご,go,Intro - Numeri
-Sei,Six,ろく,roku,Intro - Numeri
-Sette,Seven,なな / しち,nana / shichi,Intro - Numeri
-Otto,Eight,はち,hachi,Intro - Numeri
-Nove,Nine,きゅう / く,kyuu / ku,Intro - Numeri
-Dieci,Ten,じゅう,juu,Intro - Numeri
-Undici,Eleven,じゅういち,juuichi,Intro - Numeri
-Dodici,Twelve,じゅうに,juuni,Intro - Numeri
-Tredici,Thirteen,じゅうさん,juusan,Intro - Numeri
-Quattordici,Fourteen,じゅうよん / じゅうし,juuyon / juushi,Intro - Numeri
-Quindici,Fifteen,じゅうご,juugo,Intro - Numeri
-Sedici,Sixteen,じゅうろく,juuroku,Intro - Numeri
-Diciassette,Seventeen,じゅうなな / じゅうしち,juunana / juushichi,Intro - Numeri
-Diciotto,Eighteen,じゅうはち,juuhachi,Intro - Numeri
-Diciannove,Nineteen,じゅうきゅう / じゅうく,juukyuu / juuku,Intro - Numeri
-Venti,Twenty,にじゅう,nijuu,Intro - Numeri
-Trenta,Thirty,さんじゅう,sanjuu,Intro - Numeri
-Quaranta,Forty,よんじゅう,yonjuu,Intro - Numeri
-Cinquanta,Fifty,ごじゅう,gojuu,Intro - Numeri
-Sessanta,Sixty,ろくじゅう,rokujuu,Intro - Numeri
-Settanta,Seventy,ななじゅう,nanajuu,Intro - Numeri
-Ottanta,Eighty,はちじゅう,hachijuu,Intro - Numeri
-Novanta,Ninety,きゅうじゅう,kyuujuu,Intro - Numeri
-Cento,One hundred,ひゃく,hyaku,Intro - Numeri
-Duecento,Two hundred,にひゃく,nihyaku,Intro - Numeri
-Trecento,Three hundred,さんびゃく,sanbyaku,Intro - Numeri
-Quattrocento,Four hundred,よんひゃく,yonhyaku,Intro - Numeri
-Cinquecento,Five hundred,ごひゃく,gohyaku,Intro - Numeri
-Seicento,Six hundred,ろっぴゃく,roppyaku,Intro - Numeri
-Settecento,Seven hundred,ななひゃく,nanahyaku,Intro - Numeri
-Ottocento,Eight hundred,はっぴゃく,happyaku,Intro - Numeri
-Novecento,Nine hundred,きゅうひゃく,kyuuhyaku,Intro - Numeri
-Mille,One thousand,せん,sen,Intro - Numeri
-Duemila,Two thousand,にせん,nisen,Intro - Numeri
-Tremila,Three thousand,さんぜん,sanzen,Intro - Numeri
-Quattromila,Four thousand,よんせん,yonsen,Intro - Numeri
-Cinquemila,Five thousand,ごせん,gosen,Intro - Numeri
-Seimila,Six thousand,ろくせん,rokusen,Intro - Numeri
-Settemila,Seven thousand,ななせん,nanasen,Intro - Numeri
-Ottomila,Eight thousand,はっせん,hassen,Intro - Numeri
-Novemila,Nine thousand,きゅうせん,kyuusen,Intro - Numeri
-Diecimila,Ten thousand,いちまん,ichiman,Intro - Numeri
-Ventimila,Twenty thousand,にまん,niman,Intro - Numeri
-L'una,One o'clock,いちじ,ichiji,Intro - Orario
-Le due,Two o'clock,にじ,niji,Intro - Orario
-Le tre,Three o'clock,さんじ,sanji,Intro - Orario
-Le quattro,Four o'clock,よじ,yoji,Intro - Orario
-Le cinque,Five o'clock,ごじ,goji,Intro - Orario
-Le sei,Six o'clock,ろくじ,rokuji,Intro - Orario
-Le sette,Seven o'clock,しちじ,shichiji,Intro - Orario
-Le otto,Eight o'clock,はちじ,hachiji,Intro - Orario
-Le nove,Nine o'clock,くじ,kuji,Intro - Orario
-Le dieci,Ten o'clock,じゅうじ,juuji,Intro - Orario
-Le undici,Eleven o'clock,じゅういちじ,juuichiji,Intro - Orario
-Le dodici,Twelve o'clock,じゅうにじ,juuniji,Intro - Orario
-Un minuto,One minute,いっぷん,ippun,Intro - Orario
-Due minuti,Two minutes,にふん,nifun,Intro - Orario
-Tre minuti,Three minutes,さんぷん,sanpun,Intro - Orario
-Quattro minuti,Four minutes,よんぷん,yonpun,Intro - Orario
-Cinque minuti,Five minutes,ごふん,gofun,Intro - Orario
-Sei minuti,Six minutes,ろっぷん,roppun,Intro - Orario
-Sette minuti,Seven minutes,ななふん,nanafun,Intro - Orario
-Otto minuti,Eight minutes,はっぷん / はちふん,happun / hachifun,Intro - Orario
-Nove minuti,Nine minutes,きゅうふん,kyuufun,Intro - Orario
-Dieci minuti,Ten minutes,じゅっぷん,juppun,Intro - Orario
-Undici minuti,Eleven minutes,じゅういっぷん,juuippun,Intro - Orario
-Dodici minuti,Twelve minutes,じゅうにふん,juunifun,Intro - Orario
-Tredici minuti,Thirteen minutes,じゅうさんぷん,juusanpun,Intro - Orario
-Quattordici minuti,Fourteen minutes,じゅうよんぷん,juuyonpun,Intro - Orario
-Quindici minuti,Fifteen minutes,じゅうごふん,juugofun,Intro - Orario
-Sedici minuti,Sixteen minutes,じゅうろっぷん,juuroppun,Intro - Orario
-Diciassette minuti,Seventeen minutes,じゅうななふん,juunanafun,Intro - Orario
-Diciotto minuti,Eighteen minutes,じゅうはっぷん / じゅうはちふん,juuhappun / juuhachifun,Intro - Orario
-Diciannove minuti,Nineteen minutes,じゅうきゅうふん,juukyuufun,Intro - Orario
-Venti minuti,Twenty minutes,にじゅっぷん,nijuppun,Intro - Orario
-Trenta minuti,Thirty minutes,さんじゅっぷん,sanjuppun,Intro - Orario
-Università,college; university,だいがく,daigaku,L1 - Scuola e Persone
-Scuola superiore,high school,こうこう,kookoo,L1 - Scuola e Persone
-Studente,student,がくせい,gakusee,L1 - Scuola e Persone
-Studente universitario,college student,だいがくせい,daigakusee,L1 - Scuola e Persone
-Studente internazionale,international student,りゅうがくせい,ryuugakusee,L1 - Scuola e Persone
-Insegnante / Professore,teacher; Professor...,せんせい,sensee,L1 - Scuola e Persone
-Studente del ... anno,...year student,～ねんせい,... nensee,L1 - Scuola e Persone
-Studente del primo anno,first-year student,いちねんせい,ichinensee,L1 - Scuola e Persone
-Specializzazione,major,せんこう,senkoo,L1 - Scuola e Persone
-Io,I,わたし,watashi,L1 - Scuola e Persone
-Amico,friend,ともだち,tomodachi,L1 - Scuola e Persone
-Sig./Sig.ra,Mr./Ms.,～さん,... san,L1 - Scuola e Persone
-Persona ... (nazionalità),... people,～じん,... jin,L1 - Scuola e Persone
-Giapponese (persona),Japanese people,にほんじん,nihonjin,L1 - Scuola e Persone
-Adesso,now,いま,ima,L1 - Scuola e Persone
-Mattina (A.M.),A.M.,ごぜん,gozen,L1 - Scuola e Persone
-Pomeriggio (P.M.),P.M.,ごご,gogo,L1 - Scuola e Persone
-Ore ...,...o'clock,～じ,... ji,L1 - Scuola e Persone
-L'una (orario),one o'clock,いちじ,ichiji,L1 - Scuola e Persone
-Mezza,half,はん,han,L1 - Scuola e Persone
-Due e mezza,half past two,にじはん,niji han,L1 - Scuola e Persone
-Giappone,Japan,にほん,Nihon,L1 - Scuola e Persone
-USA,U.S.A.,アメリカ,Amerika,L1 - Scuola e Persone
-Lingua ...,... language,～ご,... go,L1 - Scuola e Persone
-Lingua giapponese,Japanese language,にほんご,nihongo,L1 - Scuola e Persone
-... anni,... years old,～さい,... sai,L1 - Scuola e Persone
-Telefono,telephone,でんわ,denwa,L1 - Scuola e Persone
-Numero ...,number...,～ばん,... ban,L1 - Scuola e Persone
-Numero,number,ばんごう,bangoo,L1 - Altro e Paesi
-Nome,name,なまえ,namae,L1 - Altro e Paesi
-Cosa / Che,what,なん／なに,nan/nani,L1 - Altro e Paesi
-Ehm...,um...,あのう,anoo,L1 - Altro e Paesi
-Sì,yes,はい,hai,L1 - Altro e Paesi
-È così / Giusto,That's right,そうです,soo desu,L1 - Altro e Paesi
-Capisco / È così?,I see.; Is that so?,そうですか,soo desu ka,L1 - Altro e Paesi
-Gran Bretagna,Britain,イギリス,Igirisu,L1 - Altro e Paesi
-Australia,Australia,オーストラリア,Oosutoraria,L1 - Altro e Paesi
-Corea,Korea,かんこく,Kankoku,L1 - Altro e Paesi
-Canada,Canada,カナダ,Kanada,L1 - Altro e Paesi
-Cina,China,ちゅうごく,Chuugoku,L1 - Altro e Paesi
-India,India,インド,Indo,L1 - Altro e Paesi
-Egitto,Egypt,エジプト,Ejiputo,L1 - Altro e Paesi
-Filippine,Philippines,フィリピン,Firipin,L1 - Altro e Paesi
-Studi asiatici,Asian studies,アジアけんきゅう,ajia kenkyuu,L1 - Altro e Paesi
-Economia,economics,けいざい,keezai,L1 - Altro e Paesi
-Ingegneria,engineering,こうがく,koogaku,L1 - Altro e Paesi
-Relazioni internazionali,international relations,こくさいかんけい,kokusaikankee,L1 - Altro e Paesi
-Computer,computer,コンピューター,konpyuutaa,L1 - Altro e Paesi
-Politica,politics,せいじ,seeji,L1 - Altro e Paesi
-Biologia,biology,せいぶつがく,seebutsugaku,L1 - Altro e Paesi
-Affari / Business,business,ビジネス,bijinesu,L1 - Altro e Paesi
-Letteratura,literature,ぶんがく,bungaku,L1 - Altro e Paesi
-Storia,history,れきし,rekishi,L1 - Altro e Paesi
-Dottore,doctor,いしゃ,isha,L1 - Altro e Paesi
-Impiegato,office worker,かいしゃいん,kaishain,L1 - Altro e Paesi
-Questo (vicino a me),this one,これ,kore,L2 - Cose Luoghi e Cibo
-Quello (vicino a te),that one,それ,sore,L2 - Cose Luoghi e Cibo
-Quello (laggiù),that one (over there),あれ,are,L2 - Cose Luoghi e Cibo
-Quale,which one,どれ,dore,L2 - Cose Luoghi e Cibo
-Questo...,this...,この,kono,L2 - Cose Luoghi e Cibo
-Quello...,that...,その,sono,L2 - Cose Luoghi e Cibo
-Quello... (laggiù),that... (over there),あの,ano,L2 - Cose Luoghi e Cibo
-Quale...,which...,どの,dono,L2 - Cose Luoghi e Cibo
-Qui,here,ここ,koko,L2 - Cose Luoghi e Cibo
-Lì,there,そこ,soko,L2 - Cose Luoghi e Cibo
-Laggiù,over there,あそこ,asoko,L2 - Cose Luoghi e Cibo
-Dove,where,どこ,doko,L2 - Cose Luoghi e Cibo
-Chi,who,だれ,dare,L2 - Cose Luoghi e Cibo
-Delizioso,delicious,おいしい,oishii,L2 - Cose Luoghi e Cibo
-Pesce,fish,さかな,sakana,L2 - Cose Luoghi e Cibo
-Cotoletta di maiale,pork cutlet,とんかつ,tonkatsu,L2 - Cose Luoghi e Cibo
-Carne,meat,にく,niku,L2 - Cose Luoghi e Cibo
-Menu,menu,メニュー,menyuu,L2 - Cose Luoghi e Cibo
-Verdura,vegetable,やさい,yasai,L2 - Cose Luoghi e Cibo
-Ombrello,umbrella,かさ,kasa,L2 - Cose Luoghi e Cibo
-Borsa,bag,かばん,kaban,L2 - Cose Luoghi e Cibo
-Scarpe,shoes,くつ,kutsu,L2 - Cose Luoghi e Cibo
-Portafoglio,wallet,さいふ,saifu,L2 - Cose Luoghi e Cibo
-Jeans,jeans,ジーンズ,jiinzu,L2 - Cose Luoghi e Cibo
-Bicicletta,bicycle,じてんしゃ,jitensha,L2 - Cose Luoghi e Cibo
-Giornale,newspaper,しんぶん,shinbun,L2 - Cose Luoghi e Cibo
-Smartphone / Cellulare,smartphone; mobile,スマホ,sumaho,L2 - Cose Luoghi e Cibo
-Maglietta,T-shirt,Tシャツ,tiishatsu,L2 - Cose Luoghi e Cibo
-Orologio,watch; clock,とけい,tokee,L2 - Cose Luoghi e Cibo
-Quaderno,notebook,ノート,nooto,L2 - Cose Luoghi e Cibo
-Banca,bank,ぎんこう,ginkoo,L2 - Luoghi e Soldi
-Convenience store,convenience store,コンビニ,konbini,L2 - Luoghi e Soldi
-Bagno,toilet; restroom,トイレ,toire,L2 - Luoghi e Soldi
-Biblioteca,library,としょかん,toshokan,L2 - Luoghi e Soldi
-Ufficio postale,post office,ゆうびんきょく,yuubinkyoku,L2 - Luoghi e Soldi
-Lingua inglese,English (language),えいご,eego,L1 - Altro e Paesi
-Madre,mother,おかあさん,okaasan,L2 - Luoghi e Soldi
-Padre,father,おとうさん,otoosan,L2 - Luoghi e Soldi
-Quanto costa,how much,いくら,ikura,L2 - Luoghi e Soldi
-...yen,...yen,～えん,...en,L2 - Luoghi e Soldi
-Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
-
         // --- DATASETS KANA ESTESI ---
         const HIRAGANA_DATA = [
             {k:'あ',r:'a'}, {k:'い',r:'i'}, {k:'う',r:'u'}, {k:'え',r:'e'}, {k:'お',r:'o'},
@@ -528,7 +328,7 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
             {k:'わ',r:'wa'}, {k:'を',r:'wo'}, {k:'ん',r:'n'},
             {k:'が',r:'ga'}, {k:'ぎ',r:'gi'}, {k:'ぐ',r:'gu'}, {k:'げ',r:'ge'}, {k:'ご',r:'go'},
             {k:'ざ',r:'za'}, {k:'じ',r:'ji'}, {k:'ず',r:'zu'}, {k:'ぜ',r:'ze'}, {k:'ぞ',r:'zo'},
-            {k:'だ',r:'da'}, {k:'ぢ',r:'ji'}, {k:'づ',r:'zu'}, {k:'で',r:'de'}, {k:'ど',r:'do'},
+            {k:'だ',r:'da'}, {k:'ぢ',r:'ji'}, {k:'づ',r:'zu'}, {k:'で',r:'de'}, {k:'ど',r:'do'}, 
             {k:'ば',r:'ba'}, {k:'び',r:'bi'}, {k:'ぶ',r:'bu'}, {k:'べ',r:'be'}, {k:'ぼ',r:'bo'},
             {k:'ぱ',r:'pa'}, {k:'ぴ',r:'pi'}, {k:'ぷ',r:'pu'}, {k:'ぺ',r:'pe'}, {k:'ぽ',r:'po'},
             {k:'きゃ',r:'kya'}, {k:'きゅ',r:'kyu'}, {k:'きょ',r:'kyo'}, {k:'しゃ',r:'sha'}, {k:'しゅ',r:'shu'}, {k:'しょ',r:'sho'},
@@ -576,27 +376,11 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
             'Riga W/N': [43, 46],
             'Dakuten (Ga, Za, Da, Ba)': [46, 66],
             'Handakuten (Pa)': [66, 71],
-            'Yoon (Kya, Sha, Cha...)': [71, 104]
+            'Yoon Base (Kya, Sha...)': [71, 92],
+            'Yoon Daku/Handaku (Gya...)': [92, 104]
         };
 
-        // --- DOM ELEMENTS ---
-        const promptContainer = document.getElementById('prompt-container'); 
-        const promptLabel = document.getElementById('prompt-label');
-        const promptPrincipale = document.getElementById('prompt-principale');
-        const promptSecondario = document.getElementById('prompt-secondario');
-        const inputRisposta = document.getElementById('input-risposta');
-        const risultatoControllo = document.getElementById('risultato-controllo');
-        const punteggioDisplay = document.getElementById('punteggio-container');
-        const btnControlla = document.getElementById('pulsante-controlla');
-        const btnProssima = document.getElementById('pulsante-prossima');
-        const btnElimina = document.getElementById('pulsante-elimina');
-        const quizContainer = document.getElementById('quiz-container');
-        const formContainer = document.getElementById('form-container'); 
-        const esempioDisplay = document.getElementById('esempio-display'); 
-        const virtualKeyboard = document.getElementById('virtual-keyboard');
-        const filtroCategoria = document.getElementById('filtro-categoria');
-        
-        // --- STATE ---
+        // --- VARIABILI DI STATO ---
         let mazzoPrincipale = [];
         let mazzoErroriPrioritari = [];
         let mazzoBacklog = []; 
@@ -641,9 +425,13 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
         }
 
         function setupEventListeners() {
+            const btnControlla = document.getElementById('pulsante-controlla');
+            const btnProssima = document.getElementById('pulsante-prossima');
+            const btnElimina = document.getElementById('pulsante-elimina');
+
             btnControlla.addEventListener('click', controllaRisposta);
-            document.getElementById('pulsante-prossima').addEventListener('click', prossimaParola);
-            inputRisposta.addEventListener('keydown', (e) => {
+            btnProssima.addEventListener('click', prossimaParola);
+            document.getElementById('input-risposta').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     if (btnControlla.style.display !== 'none') controllaRisposta();
                     else if (btnProssima.style.display !== 'none') prossimaParola();
@@ -657,10 +445,10 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
                     
                     if (targetModulo === 'quiz' && (modalitaQuiz === 'hiragana_mode' || modalitaQuiz === 'katakana_mode')) {
                         modalitaQuiz = 'normale';
-                        formContainer.style.display = 'block'; 
+                        document.getElementById('form-container').style.display = 'block'; 
                         btnElimina.style.display = 'block';
-                        virtualKeyboard.style.display = 'none';
-                        filtroCategoria.parentElement.style.display = 'block'; 
+                        document.getElementById('virtual-keyboard').style.display = 'none';
+                        document.getElementById('filtro-categoria').parentElement.style.display = 'block'; 
                         caricaMazzi(); 
                     }
                     mostraModulo(targetModulo);
@@ -690,11 +478,18 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
             document.getElementById('import-csv-file').addEventListener('change', gestisciImportaCSV);
             document.getElementById('update-url-btn').addEventListener('click', gestisciAggiornaDaUrl);
             document.getElementById('svuota-tutto-btn').addEventListener('click', svuotaMazziTotali);
+            document.getElementById('svuota-lista-btn').addEventListener('click', svuotaMazziTotali);
             document.getElementById('copia-vocaboli-btn').addEventListener('click', copiaVocaboli);
         }
 
         function ripristinaDatiVocaboli() {
-            if(confirm("Questo caricherà i dati predefiniti (sovrascrivendo eventuali duplicati). Vuoi procedere?")) {
+            // Nota: DATI_INIZIALI_CSV è vuoto in questa versione clean.
+            // Questa funzione serve se l'utente incolla i dati nel codice.
+            if (!DATI_INIZIALI_CSV || DATI_INIZIALI_CSV.trim() === "") {
+                alert("Nessun dato di default trovato nel codice. Usa 'Importa da file locale' per caricare i tuoi vocaboli.");
+                return;
+            }
+            if(confirm("Questo caricherà i dati predefiniti. Vuoi procedere?")) {
                 importaDatiDaStringa(DATI_INIZIALI_CSV);
             }
         }
@@ -760,7 +555,9 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
         }
 
         function generaTastieraVirtuale() {
-            virtualKeyboard.innerHTML = '';
+            const vk = document.getElementById('virtual-keyboard');
+            vk.innerHTML = '';
+            
             let caratteriDaMostrare = subsetKanaAttivo.length > 0 ? subsetKanaAttivo : (modalitaQuiz.startsWith('hiragana') ? HIRAGANA_DATA : KATAKANA_DATA);
             let listaTasti = caratteriDaMostrare.map(x => x.k);
             listaTasti = shuffleArray(listaTasti);
@@ -769,10 +566,14 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
                const btn = document.createElement('button');
                btn.className = 'key-btn';
                btn.textContent = char;
-               btn.onclick = () => { inputRisposta.value += char; inputRisposta.focus(); };
-               virtualKeyboard.appendChild(btn);
+               btn.onclick = () => { 
+                   const inp = document.getElementById('input-risposta');
+                   inp.value += char; 
+                   inp.focus(); 
+                };
+               vk.appendChild(btn);
             });
-            virtualKeyboard.style.gridTemplateColumns = 'repeat(5, 1fr)';
+            vk.style.gridTemplateColumns = 'repeat(5, 1fr)';
         }
 
         function avviaQuizKana(type) {
@@ -785,24 +586,32 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
             mazzoSessioneCorrente = shuffleArray(mazzoKana);
             indiceSessione = 0; sessioneCorretti = 0; sessioneSbagliati = 0;
             erroriSessioneCorrente = new Set(); modalitaQuiz = type + '_mode'; 
-            mostraModulo('quiz'); formContainer.style.display = 'none'; btnElimina.style.display = 'none';
-            filtroCategoria.parentElement.style.display = 'none'; 
+            mostraModulo('quiz'); 
+            document.getElementById('form-container').style.display = 'none'; 
+            document.getElementById('pulsante-elimina').style.display = 'none';
+            document.getElementById('filtro-categoria').parentElement.style.display = 'none'; 
             generaTastieraVirtuale();
             prossimaParola();
         }
 
         function prossimaParola() {
+            const btnControlla = document.getElementById('pulsante-controlla');
+            const btnProssima = document.getElementById('pulsante-prossima');
+            const inputRisposta = document.getElementById('input-risposta');
+
             if (modalitaQuiz === 'set_finito') {
                 if (mazzoBacklog.length > 0) { caricaProssimoBatch(); return; } 
                 else { modalitaQuiz = 'normale'; caricaMazzi(); return; }
             }
 
-            promptContainer.style.display = 'block';
+            document.getElementById('prompt-container').style.display = 'block';
             inputRisposta.style.display = 'block';
-            risultatoControllo.style.display = 'block';
-            esempioDisplay.innerHTML = ''; inputRisposta.value = ""; risultatoControllo.innerHTML = "";
+            document.getElementById('risultato-controllo').style.display = 'block';
+            document.getElementById('esempio-display').innerHTML = ''; 
+            inputRisposta.value = ""; 
+            document.getElementById('risultato-controllo').innerHTML = "";
             inputRisposta.disabled = false; btnControlla.style.display = "block"; btnProssima.style.display = "none";
-            virtualKeyboard.style.display = 'none'; 
+            document.getElementById('virtual-keyboard').style.display = 'none'; 
 
             let etichetta = "";
             const isKanaMode = modalitaQuiz.includes('_mode');
@@ -810,8 +619,8 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
             if (isKanaMode || (modalitaQuiz === 'ripasso_errori' && parolaCorrente && (parolaCorrente.type === 'hiragana' || parolaCorrente.type === 'katakana'))) {
                 if (isKanaMode) {
                     if (indiceSessione >= mazzoSessioneCorrente.length) {
-                        promptPrincipale.innerHTML = "🎉 Fine Pratica!";
-                        promptSecondario.textContent = `Punteggio: ${sessioneCorretti}/${mazzoSessioneCorrente.length}`;
+                        document.getElementById('prompt-principale').innerHTML = "🎉 Fine Pratica!";
+                        document.getElementById('prompt-secondario').textContent = `Punteggio: ${sessioneCorretti}/${mazzoSessioneCorrente.length}`;
                         inputRisposta.style.display = 'none'; btnControlla.style.display = 'none';
                         return;
                     }
@@ -829,16 +638,17 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
                 
                 if (Math.random() < 0.5) {
                     quizDirection = 'JPN_TO_ITA';
-                    promptLabel.innerHTML = `${etichetta} - Scrivi il Romaji`;
+                    document.getElementById('prompt-label').innerHTML = `${etichetta} - Scrivi il Romaji`;
                     const cssClass = parolaCorrente.type === 'hiragana' ? 'hiragana' : 'katakana';
-                    promptPrincipale.innerHTML = `<span class="${cssClass}">${parolaCorrente.jpn}</span>`;
-                    promptSecondario.textContent = "";
+                    document.getElementById('prompt-principale').innerHTML = `<span class="${cssClass}">${parolaCorrente.jpn}</span>`;
+                    document.getElementById('prompt-secondario').textContent = "";
                 } else {
                     quizDirection = 'ITA_TO_JPN'; 
-                    promptLabel.innerHTML = `${etichetta} - Che carattere è?`;
-                    promptPrincipale.textContent = parolaCorrente.romaji;
-                    promptSecondario.textContent = "(Usa la tastiera qui sotto)";
-                    generaTastieraVirtuale(); virtualKeyboard.style.display = 'grid'; 
+                    document.getElementById('prompt-label').innerHTML = `${etichetta} - Che carattere è?`;
+                    document.getElementById('prompt-principale').textContent = parolaCorrente.romaji;
+                    document.getElementById('prompt-secondario').textContent = "(Usa la tastiera qui sotto)";
+                    generaTastieraVirtuale(); 
+                    document.getElementById('virtual-keyboard').style.display = 'grid'; 
                 }
 
             } else {
@@ -852,15 +662,15 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
                     if (indiceSessione >= mazzoSessioneCorrente.length) {
                         if (mazzoSessioneCorrente.length === 0) {
                             document.getElementById('nessuna-carta').style.display = 'block';
-                            document.getElementById('quiz-container').querySelector('.controlli').style.display = 'none'; return;
+                            document.querySelector('.controlli').style.display = 'none'; return;
                         }
                         modalitaQuiz = 'set_finito';
-                        promptPrincipale.innerHTML = "Set Completato!";
+                        document.getElementById('prompt-principale').innerHTML = "Set Completato!";
                         if(mazzoBacklog.length > 0) {
-                            promptSecondario.innerHTML = `Ne rimangono altre ${mazzoBacklog.length}.`;
+                            document.getElementById('prompt-secondario').innerHTML = `Ne rimangono altre ${mazzoBacklog.length}.`;
                             btnProssima.textContent = "Carica prossime 10";
                         } else {
-                            promptSecondario.innerHTML = "Hai finito tutte le parole!";
+                            document.getElementById('prompt-secondario').innerHTML = "Hai finito tutte le parole!";
                             btnProssima.textContent = "Ricomincia";
                         }
                         inputRisposta.style.display = 'none'; btnControlla.style.display = 'none'; btnProssima.style.display = 'block';
@@ -877,15 +687,15 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
                 
                 if (Math.random() < 0.5) {
                     quizDirection = 'ITA_TO_JPN';
-                    promptLabel.innerHTML = `TRADUCI ${etichetta} <small>${stelle}</small>`;
-                    promptPrincipale.textContent = parolaCorrente.ita.split('/')[0];
-                    promptSecondario.innerHTML = parolaCorrente.eng.split('/')[0] + tagInfo;
+                    document.getElementById('prompt-label').innerHTML = `TRADUCI ${etichetta} <small>${stelle}</small>`;
+                    document.getElementById('prompt-principale').textContent = parolaCorrente.ita.split('/')[0];
+                    document.getElementById('prompt-secondario').innerHTML = parolaCorrente.eng.split('/')[0] + tagInfo;
                 } else {
                     quizDirection = 'JPN_TO_ITA';
-                    promptLabel.innerHTML = `TRADUCI ${etichetta} <small>${stelle}</small>`;
+                    document.getElementById('prompt-label').innerHTML = `TRADUCI ${etichetta} <small>${stelle}</small>`;
                     const btnAudio = `<button class="btn-audio" onclick="parla('${jpnClean}')">🔊</button>`;
-                    promptPrincipale.innerHTML = `${colorizeJapanese(jpnClean)} ${btnAudio}`;
-                    promptSecondario.innerHTML = parolaCorrente.romaji.split('/')[0] + tagInfo;
+                    document.getElementById('prompt-principale').innerHTML = `${colorizeJapanese(jpnClean)} ${btnAudio}`;
+                    document.getElementById('prompt-secondario').innerHTML = parolaCorrente.romaji.split('/')[0] + tagInfo;
                 }
             }
             aggiornaPunteggio();
@@ -893,9 +703,15 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
 
         function controllaRisposta() {
             if (!parolaCorrente) return;
+            const inputRisposta = document.getElementById('input-risposta');
             const risp = inputRisposta.value.trim().toLowerCase();
             let ok = false; let err = "";
-            inputRisposta.disabled = true; btnControlla.style.display = 'none'; btnProssima.style.display = 'block'; virtualKeyboard.style.display = 'none'; 
+            
+            inputRisposta.disabled = true; 
+            document.getElementById('pulsante-controlla').style.display = 'none'; 
+            document.getElementById('pulsante-prossima').style.display = 'block'; 
+            document.getElementById('virtual-keyboard').style.display = 'none'; 
+            
             const jpnClean = parolaCorrente.jpn.split('/')[0];
             const audioBtn = `<button class="btn-audio" onclick="parla('${jpnClean}')">🔊</button>`;
 
@@ -915,7 +731,7 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
             }
 
             if (ok) {
-                risultatoControllo.innerHTML = `<span class="corretto">Corretto!</span>`; sessioneCorretti++;
+                document.getElementById('risultato-controllo').innerHTML = `<span class="corretto">Corretto!</span>`; sessioneCorretti++;
                 if (erroriSessioneCorrente.has(parolaCorrente)) { erroriSessioneCorrente.delete(parolaCorrente); }
                 if(parolaCorrente.type === 'vocab') {
                     parolaCorrente.level = (parolaCorrente.level || 0) + 1;
@@ -923,12 +739,12 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
                     if(quizDirection === 'ITA_TO_JPN') parla(jpnClean);
                 }
             } else {
-                risultatoControllo.innerHTML = `<span class="sbagliato">Sbagliato.</span><br>${err}`; sessioneSbagliati++;
+                document.getElementById('risultato-controllo').innerHTML = `<span class="sbagliato">Sbagliato.</span><br>${err}`; sessioneSbagliati++;
                 erroriSessioneCorrente.add(parolaCorrente); 
                 if(parolaCorrente.type === 'vocab') { parolaCorrente.level = 0; }
             }
             
-            if(parolaCorrente.esempi) { esempioDisplay.innerHTML = `📝 <i>${parolaCorrente.esempi}</i>`; }
+            if(parolaCorrente.esempi) { document.getElementById('esempio-display').innerHTML = `📝 <i>${parolaCorrente.esempi}</i>`; }
             aggiornaPunteggio();
         }
 
@@ -944,7 +760,7 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
         function aggiornaPunteggio() {
             let html = `<span class="punteggio-info">Corretti: ${sessioneCorretti} | Errori: ${sessioneSbagliati}</span>`;
             if (!modalitaQuiz.includes('_mode')) { html += `<br><span style="font-size:0.8em">In attesa: ${mazzoBacklog.length} | Da Rivedere: ${mazzoErroriPrioritari.length}</span>`; }
-            punteggioDisplay.innerHTML = html;
+            document.getElementById('punteggio-container').innerHTML = html;
             const btnRipassa = document.getElementById('ripassa-errori-btn');
             const numErrori = erroriSessioneCorrente.size;
             btnRipassa.textContent = `Ripassa Errori (${numErrori})`;
@@ -985,17 +801,17 @@ Costoso / Alto,expensive; high,たかい,takai,L2 - Luoghi e Soldi`;
             mazzoErroriPrioritari = dE ? JSON.parse(dE) : [];
             mazzoPrincipale.forEach(c => { if(typeof c.level==='undefined') c.level=0; c.type = 'vocab'; });
 
-            if (mazzoPrincipale.length === 0) { importaDatiDaStringa(DATI_INIZIALI_CSV); return; }
+            // DATI_INIZIALI_CSV è vuoto qui (clean version), quindi non fa nulla se il mazzo è vuoto.
             aggiornaFiltroCategorie(); creaNuovoSet();
             if(modalitaQuiz === 'normale') {
                 if(mazzoSessioneCorrente.length === 0 && (mazzoPrincipale.length > 0 || mazzoErroriPrioritari.length > 0)) {
                     document.getElementById('nessuna-carta').style.display = 'block';
-                    document.getElementById('quiz-container').querySelector('.controlli').style.display = 'none';
+                    document.querySelector('.controlli').style.display = 'none';
                     document.getElementById('input-risposta').style.display = 'none';
                     document.getElementById('prompt-container').style.display = 'none';
                 } else {
                     document.getElementById('nessuna-carta').style.display = 'none';
-                    document.getElementById('quiz-container').querySelector('.controlli').style.display = 'flex';
+                    document.querySelector('.controlli').style.display = 'flex';
                     document.getElementById('input-risposta').style.display = 'block';
                     document.getElementById('prompt-container').style.display = 'block';
                     prossimaParola();
