@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set di Studio Giapponese SRS v4.1 (Sezione Ascolto)</title>
+    <title>Set di Studio Giapponese SRS v4.2 (Fix Completo)</title>
     <style>
         /* --- Stile Generale --- */
         body {
@@ -29,7 +29,7 @@
         /* --- Navigazione --- */
         #main-nav { display: flex; gap: 5px; width: 100%; max-width: 600px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
         .nav-btn {
-            padding: 10px 5px; font-size: 0.9rem; font-weight: 600;
+            padding: 10px 5px; font-size: 0.85rem; font-weight: 600;
             border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s;
             background-color: #e5e5ea; color: #007aff; flex: 1; min-width: 80px; text-align: center;
         }
@@ -52,9 +52,9 @@
         #risultato-controllo { min-height: 40px; font-size: 1.1rem; font-weight: bold; text-align: center; margin: 10px 0; }
         .corretto { color: #2ca049; } .sbagliato { color: #d92c23; }
 
-        /* --- TABELLE KANA --- */
+        /* --- TABELLE KANA (STILE FISSO) --- */
         .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
-        .kana-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 300px; }
+        .kana-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 320px; }
         .kana-table td, .kana-table th { border: 1px solid #eee; padding: 8px 2px; text-align: center; vertical-align: middle; display: table-cell !important; }
         .kana-table th { background-color: #f2f2f7; color: #555; font-size: 0.85rem; font-weight: bold; }
         .k-char { font-size: 1.4rem; font-weight: bold; color: #333; display: block; line-height: 1.2; }
@@ -83,45 +83,22 @@
         .vocab-tag { font-size: 0.7rem; background: #eee; padding: 2px 6px; border-radius: 4px; color: #666; margin-left: 5px; }
         .delete-vocab-btn { background: #ff3b30; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; margin-left: 10px; }
 
-        /* --- STILE SPECIFICO PER ASCOLTO --- */
-        .frase-entry { 
-            display: flex; 
-            align-items: flex-start; 
-            padding: 15px; 
-            background: #fdfdfd; 
-            border: 1px solid #eee; 
-            border-radius: 10px; 
-            margin-bottom: 10px; 
-            gap: 15px;
-        }
-        .play-btn {
-            background-color: #34c759; 
-            color: white; 
-            border: none; 
-            border-radius: 50%; 
-            width: 50px; 
-            height: 50px; 
-            font-size: 1.5rem; 
-            cursor: pointer; 
-            flex-shrink: 0;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.1s;
-        }
+        /* --- STILE ASCOLTO --- */
+        .frase-entry { display: flex; align-items: flex-start; padding: 15px; background: #fdfdfd; border: 1px solid #eee; border-radius: 10px; margin-bottom: 10px; gap: 15px; }
+        .play-btn { background-color: #34c759; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .play-btn:active { transform: scale(0.95); }
         .frase-text { flex-grow: 1; }
         .frase-jpn { font-size: 1.3rem; color: #333; font-weight: bold; margin-bottom: 4px; display: block; }
         .frase-romaji { font-size: 0.9rem; color: #777; margin-bottom: 4px; display: block; }
         .frase-ita { font-size: 1rem; color: #007aff; font-weight: 500; display: block; }
         .frase-tag { font-size: 0.7rem; background: #ddd; color: #444; padding: 2px 6px; border-radius: 4px; float: right; }
-        
         .spoiler-active .frase-ita { background: #e0e0e0; color: transparent; border-radius: 4px; cursor: pointer; user-select: none;}
         .spoiler-active .frase-ita:hover { color: #007aff; background: transparent; }
 
         /* Configurazione Kana */
         .kana-config-panel { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .checkbox-label { display: flex; align-items: center; gap: 8px; background: white; padding: 8px; border: 1px solid #eee; border-radius: 6px; cursor: pointer; font-size: 0.9rem; justify-content: center;}
+        .checkbox-label { display: flex; align-items: center; gap: 8px; background: white; padding: 8px; border: 1px solid #eee; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -161,7 +138,7 @@
                         <button id="pulsante-prossima" class="btn">Prossima</button>
                     </div>
                     <button id="pulsante-elimina" class="btn">Elimina Carta</button>
-                    <div id="nessuna-carta" style="display: none; text-align: center; margin-top:20px; color:#666;"><p>Nessuna carta trovata in questa categoria.</p></div>
+                    <div id="nessuna-carta" style="display: none; text-align: center; margin-top:20px; color:#666;"><p>Nessuna carta trovata.</p></div>
                 </div>
                 <div id="salva-sessione-container" style="margin-top:20px;">
                     <button id="ripassa-errori-btn" class="btn" style="background:#ff9500; margin-bottom:10px;" disabled>Ripassa Errori (0)</button>
@@ -173,7 +150,7 @@
                 <h2>Gestione Dati</h2>
                 <div class="sezione-gestione">
                     <button id="reset-dati-btn" class="btn" style="background-color: #34c759; margin-bottom:10px;">🔄 Ripristina Dati Vocaboli</button>
-                    <button id="svuota-tutto-btn" class="btn" style="background-color: #d92c23;">CANCELLA E RIPRISTINA TUTTO</button>
+                    <button id="svuota-tutto-btn" class="btn" style="background-color: #d92c23;">CANCELLA TUTTO</button>
                 </div>
                 <div class="sezione-gestione">
                     <h3>Aggiungi Parola Singola</h3>
@@ -193,14 +170,14 @@
             <div class="card-ui">
                 <h2>Ascolto Frasi</h2>
                 <div class="filtro-container">
-                    <label style="margin-bottom:5px; display:block; font-weight:bold;">Filtra per Categoria:</label>
+                    <label style="margin-bottom:5px; display:block;">Filtra:</label>
                     <select id="filtro-frasi" onchange="mostraListaFrasi()">
                         <option value="TUTTI">🎧 TUTTE LE FRASI</option>
                     </select>
                 </div>
                 <div style="margin-bottom: 15px; text-align: center;">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="spoiler-mode" onchange="mostraListaFrasi()"> Nascondi traduzione Italiana (Test Ascolto)
+                    <label class="checkbox-label" style="justify-content: center;">
+                        <input type="checkbox" id="spoiler-mode" onchange="mostraListaFrasi()"> Nascondi traduzione (Test Ascolto)
                     </label>
                 </div>
                 <div id="lista-frasi-container"></div>
@@ -233,12 +210,54 @@
                     </div>
                 </div>
                 <button class="btn btn-start-kana" onclick="avviaQuizKana('hiragana')">🏋️ Avvia Quiz Hiragana</button>
+                
                 <h4>Suoni Base (Gojūon)</h4>
-                <div class="table-wrapper"><table class="kana-table" id="h-table-gojuon"></table></div>
-                <h4>Suoni Impuri</h4>
-                <div class="table-wrapper"><table class="kana-table" id="h-table-dakuten"></table></div>
-                <h4>Suoni Contratti</h4>
-                <div class="table-wrapper"><table class="kana-table" id="h-table-yoon"></table></div>
+                <div class="table-wrapper">
+                    <table class="kana-table">
+                        <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
+                        <tr><th>-</th><td><span class="k-char">あ</span><span class="k-romaji">a</span></td><td><span class="k-char">い</span><span class="k-romaji">i</span></td><td><span class="k-char">う</span><span class="k-romaji">u</span></td><td><span class="k-char">え</span><span class="k-romaji">e</span></td><td><span class="k-char">お</span><span class="k-romaji">o</span></td></tr>
+                        <tr><th>K</th><td><span class="k-char">か</span><span class="k-romaji">ka</span></td><td><span class="k-char">き</span><span class="k-romaji">ki</span></td><td><span class="k-char">く</span><span class="k-romaji">ku</span></td><td><span class="k-char">け</span><span class="k-romaji">ke</span></td><td><span class="k-char">こ</span><span class="k-romaji">ko</span></td></tr>
+                        <tr><th>S</th><td><span class="k-char">さ</span><span class="k-romaji">sa</span></td><td><span class="k-char">し</span><span class="k-romaji">shi</span></td><td><span class="k-char">す</span><span class="k-romaji">su</span></td><td><span class="k-char">せ</span><span class="k-romaji">se</span></td><td><span class="k-char">そ</span><span class="k-romaji">so</span></td></tr>
+                        <tr><th>T</th><td><span class="k-char">た</span><span class="k-romaji">ta</span></td><td><span class="k-char">ち</span><span class="k-romaji">chi</span></td><td><span class="k-char">つ</span><span class="k-romaji">tsu</span></td><td><span class="k-char">て</span><span class="k-romaji">te</span></td><td><span class="k-char">と</span><span class="k-romaji">to</span></td></tr>
+                        <tr><th>N</th><td><span class="k-char">な</span><span class="k-romaji">na</span></td><td><span class="k-char">に</span><span class="k-romaji">ni</span></td><td><span class="k-char">ぬ</span><span class="k-romaji">nu</span></td><td><span class="k-char">ね</span><span class="k-romaji">ne</span></td><td><span class="k-char">の</span><span class="k-romaji">no</span></td></tr>
+                        <tr><th>H</th><td><span class="k-char">は</span><span class="k-romaji">ha</span></td><td><span class="k-char">ひ</span><span class="k-romaji">hi</span></td><td><span class="k-char">ふ</span><span class="k-romaji">fu</span></td><td><span class="k-char">へ</span><span class="k-romaji">he</span></td><td><span class="k-char">ほ</span><span class="k-romaji">ho</span></td></tr>
+                        <tr><th>M</th><td><span class="k-char">ま</span><span class="k-romaji">ma</span></td><td><span class="k-char">み</span><span class="k-romaji">mi</span></td><td><span class="k-char">む</span><span class="k-romaji">mu</span></td><td><span class="k-char">め</span><span class="k-romaji">me</span></td><td><span class="k-char">も</span><span class="k-romaji">mo</span></td></tr>
+                        <tr><th>Y</th><td><span class="k-char">や</span><span class="k-romaji">ya</span></td><td></td><td><span class="k-char">ゆ</span><span class="k-romaji">yu</span></td><td></td><td><span class="k-char">よ</span><span class="k-romaji">yo</span></td></tr>
+                        <tr><th>R</th><td><span class="k-char">ら</span><span class="k-romaji">ra</span></td><td><span class="k-char">り</span><span class="k-romaji">ri</span></td><td><span class="k-char">る</span><span class="k-romaji">ru</span></td><td><span class="k-char">れ</span><span class="k-romaji">re</span></td><td><span class="k-char">ろ</span><span class="k-romaji">ro</span></td></tr>
+                        <tr><th>W</th><td><span class="k-char">わ</span><span class="k-romaji">wa</span></td><td></td><td></td><td></td><td><span class="k-char">を</span><span class="k-romaji">wo</span></td></tr>
+                        <tr><th>N</th><td><span class="k-char">ん</span><span class="k-romaji">n</span></td><td></td><td></td><td></td><td></td></tr>
+                    </table>
+                </div>
+
+                <h4>Suoni Impuri (Dakuten)</h4>
+                <div class="table-wrapper">
+                    <table class="kana-table">
+                        <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
+                        <tr><th>G</th><td><span class="k-char">が</span><span class="k-romaji">ga</span></td><td><span class="k-char">ぎ</span><span class="k-romaji">gi</span></td><td><span class="k-char">ぐ</span><span class="k-romaji">gu</span></td><td><span class="k-char">げ</span><span class="k-romaji">ge</span></td><td><span class="k-char">ご</span><span class="k-romaji">go</span></td></tr>
+                        <tr><th>Z</th><td><span class="k-char">ざ</span><span class="k-romaji">za</span></td><td><span class="k-char">じ</span><span class="k-romaji">ji</span></td><td><span class="k-char">ず</span><span class="k-romaji">zu</span></td><td><span class="k-char">ぜ</span><span class="k-romaji">ze</span></td><td><span class="k-char">ぞ</span><span class="k-romaji">zo</span></td></tr>
+                        <tr><th>D</th><td><span class="k-char">だ</span><span class="k-romaji">da</span></td><td><span class="k-char">ぢ</span><span class="k-romaji">ji</span></td><td><span class="k-char">づ</span><span class="k-romaji">zu</span></td><td><span class="k-char">で</span><span class="k-romaji">de</span></td><td><span class="k-char">ど</span><span class="k-romaji">do</span></td></tr>
+                        <tr><th>B</th><td><span class="k-char">ば</span><span class="k-romaji">ba</span></td><td><span class="k-char">び</span><span class="k-romaji">bi</span></td><td><span class="k-char">ぶ</span><span class="k-romaji">bu</span></td><td><span class="k-char">べ</span><span class="k-romaji">be</span></td><td><span class="k-char">ぼ</span><span class="k-romaji">bo</span></td></tr>
+                        <tr><th>P</th><td><span class="k-char">ぱ</span><span class="k-romaji">pa</span></td><td><span class="k-char">ぴ</span><span class="k-romaji">pi</span></td><td><span class="k-char">ぷ</span><span class="k-romaji">pu</span></td><td><span class="k-char">ぺ</span><span class="k-romaji">pe</span></td><td><span class="k-char">ぽ</span><span class="k-romaji">po</span></td></tr>
+                    </table>
+                </div>
+
+                <h4>Suoni Contratti (Yoon)</h4>
+                <div class="table-wrapper">
+                    <table class="kana-table">
+                        <tr><th></th><th>YA</th><th>YU</th><th>YO</th></tr>
+                        <tr><th>K</th><td><span class="k-char">きゃ</span><span class="k-romaji">kya</span></td><td><span class="k-char">きゅ</span><span class="k-romaji">kyu</span></td><td><span class="k-char">きょ</span><span class="k-romaji">kyo</span></td></tr>
+                        <tr><th>S</th><td><span class="k-char">しゃ</span><span class="k-romaji">sha</span></td><td><span class="k-char">しゅ</span><span class="k-romaji">shu</span></td><td><span class="k-char">しょ</span><span class="k-romaji">sho</span></td></tr>
+                        <tr><th>C</th><td><span class="k-char">ちゃ</span><span class="k-romaji">cha</span></td><td><span class="k-char">ちゅ</span><span class="k-romaji">chu</span></td><td><span class="k-char">ちょ</span><span class="k-romaji">cho</span></td></tr>
+                        <tr><th>N</th><td><span class="k-char">にゃ</span><span class="k-romaji">nya</span></td><td><span class="k-char">にゅ</span><span class="k-romaji">nyu</span></td><td><span class="k-char">にょ</span><span class="k-romaji">nyo</span></td></tr>
+                        <tr><th>H</th><td><span class="k-char">ひゃ</span><span class="k-romaji">hya</span></td><td><span class="k-char">ひゅ</span><span class="k-romaji">hyu</span></td><td><span class="k-char">ひょ</span><span class="k-romaji">hyo</span></td></tr>
+                        <tr><th>M</th><td><span class="k-char">みゃ</span><span class="k-romaji">mya</span></td><td><span class="k-char">みゅ</span><span class="k-romaji">myu</span></td><td><span class="k-char">みょ</span><span class="k-romaji">myo</span></td></tr>
+                        <tr><th>R</th><td><span class="k-char">りゃ</span><span class="k-romaji">rya</span></td><td><span class="k-char">りゅ</span><span class="k-romaji">ryu</span></td><td><span class="k-char">りょ</span><span class="k-romaji">ryo</span></td></tr>
+                        <tr><th>G</th><td><span class="k-char">ぎゃ</span><span class="k-romaji">gya</span></td><td><span class="k-char">ぎゅ</span><span class="k-romaji">gyu</span></td><td><span class="k-char">ぎょ</span><span class="k-romaji">gyo</span></td></tr>
+                        <tr><th>J</th><td><span class="k-char">じゃ</span><span class="k-romaji">ja</span></td><td><span class="k-char">じゅ</span><span class="k-romaji">ju</span></td><td><span class="k-char">じょ</span><span class="k-romaji">jo</span></td></tr>
+                        <tr><th>B</th><td><span class="k-char">びゃ</span><span class="k-romaji">bya</span></td><td><span class="k-char">びゅ</span><span class="k-romaji">byu</span></td><td><span class="k-char">びょ</span><span class="k-romaji">byo</span></td></tr>
+                        <tr><th>P</th><td><span class="k-char">ぴゃ</span><span class="k-romaji">pya</span></td><td><span class="k-char">ぴゅ</span><span class="k-romaji">pyu</span></td><td><span class="k-char">ぴょ</span><span class="k-romaji">pyo</span></td></tr>
+                    </table>
+                </div>
             </div>
         </div> 
 
@@ -254,12 +273,54 @@
                     </div>
                 </div>
                 <button class="btn btn-start-kana" onclick="avviaQuizKana('katakana')">🏋️ Avvia Quiz Katakana</button>
+
                 <h4>Suoni Base (Gojūon)</h4>
-                <div class="table-wrapper"><table class="kana-table" id="k-table-gojuon"></table></div>
-                <h4>Suoni Impuri</h4>
-                <div class="table-wrapper"><table class="kana-table" id="k-table-dakuten"></table></div>
-                <h4>Suoni Contratti</h4>
-                <div class="table-wrapper"><table class="kana-table" id="k-table-yoon"></table></div>
+                <div class="table-wrapper">
+                    <table class="kana-table">
+                         <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
+                        <tr><th>-</th><td><span class="k-char">ア</span><span class="k-romaji">a</span></td><td><span class="k-char">イ</span><span class="k-romaji">i</span></td><td><span class="k-char">ウ</span><span class="k-romaji">u</span></td><td><span class="k-char">エ</span><span class="k-romaji">e</span></td><td><span class="k-char">オ</span><span class="k-romaji">o</span></td></tr>
+                        <tr><th>K</th><td><span class="k-char">カ</span><span class="k-romaji">ka</span></td><td><span class="k-char">キ</span><span class="k-romaji">ki</span></td><td><span class="k-char">ク</span><span class="k-romaji">ku</span></td><td><span class="k-char">ケ</span><span class="k-romaji">ke</span></td><td><span class="k-char">コ</span><span class="k-romaji">ko</span></td></tr>
+                        <tr><th>S</th><td><span class="k-char">サ</span><span class="k-romaji">sa</span></td><td><span class="k-char">シ</span><span class="k-romaji">shi</span></td><td><span class="k-char">ス</span><span class="k-romaji">su</span></td><td><span class="k-char">セ</span><span class="k-romaji">se</span></td><td><span class="k-char">ソ</span><span class="k-romaji">so</span></td></tr>
+                        <tr><th>T</th><td><span class="k-char">タ</span><span class="k-romaji">ta</span></td><td><span class="k-char">チ</span><span class="k-romaji">chi</span></td><td><span class="k-char">ツ</span><span class="k-romaji">tsu</span></td><td><span class="k-char">テ</span><span class="k-romaji">te</span></td><td><span class="k-char">ト</span><span class="k-romaji">to</span></td></tr>
+                        <tr><th>N</th><td><span class="k-char">ナ</span><span class="k-romaji">na</span></td><td><span class="k-char">ニ</span><span class="k-romaji">ni</span></td><td><span class="k-char">ヌ</span><span class="k-romaji">nu</span></td><td><span class="k-char">ネ</span><span class="k-romaji">ne</span></td><td><span class="k-char">ノ</span><span class="k-romaji">no</span></td></tr>
+                        <tr><th>H</th><td><span class="k-char">ハ</span><span class="k-romaji">ha</span></td><td><span class="k-char">ヒ</span><span class="k-romaji">hi</span></td><td><span class="k-char">フ</span><span class="k-romaji">fu</span></td><td><span class="k-char">ヘ</span><span class="k-romaji">he</span></td><td><span class="k-char">ホ</span><span class="k-romaji">ho</span></td></tr>
+                        <tr><th>M</th><td><span class="k-char">マ</span><span class="k-romaji">ma</span></td><td><span class="k-char">ミ</span><span class="k-romaji">mi</span></td><td><span class="k-char">ム</span><span class="k-romaji">mu</span></td><td><span class="k-char">メ</span><span class="k-romaji">me</span></td><td><span class="k-char">モ</span><span class="k-romaji">mo</span></td></tr>
+                        <tr><th>Y</th><td><span class="k-char">ヤ</span><span class="k-romaji">ya</span></td><td></td><td><span class="k-char">ユ</span><span class="k-romaji">yu</span></td><td></td><td><span class="k-char">ヨ</span><span class="k-romaji">yo</span></td></tr>
+                        <tr><th>R</th><td><span class="k-char">ラ</span><span class="k-romaji">ra</span></td><td><span class="k-char">リ</span><span class="k-romaji">ri</span></td><td><span class="k-char">ル</span><span class="k-romaji">ru</span></td><td><span class="k-char">レ</span><span class="k-romaji">re</span></td><td><span class="k-char">ロ</span><span class="k-romaji">ro</span></td></tr>
+                        <tr><th>W</th><td><span class="k-char">ワ</span><span class="k-romaji">wa</span></td><td></td><td></td><td></td><td><span class="k-char">ヲ</span><span class="k-romaji">wo</span></td></tr>
+                        <tr><th>N</th><td><span class="k-char">ン</span><span class="k-romaji">n</span></td><td></td><td></td><td></td><td></td></tr>
+                    </table>
+                </div>
+
+                <h4>Suoni Impuri (Dakuten)</h4>
+                <div class="table-wrapper">
+                    <table class="kana-table">
+                        <tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
+                        <tr><th>G</th><td><span class="k-char">ガ</span><span class="k-romaji">ga</span></td><td><span class="k-char">ギ</span><span class="k-romaji">gi</span></td><td><span class="k-char">グ</span><span class="k-romaji">gu</span></td><td><span class="k-char">ゲ</span><span class="k-romaji">ge</span></td><td><span class="k-char">ゴ</span><span class="k-romaji">go</span></td></tr>
+                        <tr><th>Z</th><td><span class="k-char">ザ</span><span class="k-romaji">za</span></td><td><span class="k-char">ジ</span><span class="k-romaji">ji</span></td><td><span class="k-char">ズ</span><span class="k-romaji">zu</span></td><td><span class="k-char">ゼ</span><span class="k-romaji">ze</span></td><td><span class="k-char">ゾ</span><span class="k-romaji">zo</span></td></tr>
+                        <tr><th>D</th><td><span class="k-char">ダ</span><span class="k-romaji">da</span></td><td><span class="k-char">ヂ</span><span class="k-romaji">ji</span></td><td><span class="k-char">ヅ</span><span class="k-romaji">zu</span></td><td><span class="k-char">デ</span><span class="k-romaji">de</span></td><td><span class="k-char">ド</span><span class="k-romaji">do</span></td></tr>
+                        <tr><th>B</th><td><span class="k-char">バ</span><span class="k-romaji">ba</span></td><td><span class="k-char">ビ</span><span class="k-romaji">bi</span></td><td><span class="k-char">ブ</span><span class="k-romaji">bu</span></td><td><span class="k-char">ベ</span><span class="k-romaji">be</span></td><td><span class="k-char">ボ</span><span class="k-romaji">bo</span></td></tr>
+                        <tr><th>P</th><td><span class="k-char">パ</span><span class="k-romaji">pa</span></td><td><span class="k-char">ピ</span><span class="k-romaji">pi</span></td><td><span class="k-char">プ</span><span class="k-romaji">pu</span></td><td><span class="k-char">ペ</span><span class="k-romaji">pe</span></td><td><span class="k-char">ポ</span><span class="k-romaji">po</span></td></tr>
+                    </table>
+                </div>
+
+                <h4>Suoni Contratti (Yoon)</h4>
+                <div class="table-wrapper">
+                    <table class="kana-table">
+                        <tr><th></th><th>YA</th><th>YU</th><th>YO</th></tr>
+                        <tr><th>K</th><td><span class="k-char">キャ</span><span class="k-romaji">kya</span></td><td><span class="k-char">キュ</span><span class="k-romaji">kyu</span></td><td><span class="k-char">キョ</span><span class="k-romaji">kyo</span></td></tr>
+                        <tr><th>S</th><td><span class="k-char">シャ</span><span class="k-romaji">sha</span></td><td><span class="k-char">シュ</span><span class="k-romaji">shu</span></td><td><span class="k-char">ショ</span><span class="k-romaji">sho</span></td></tr>
+                        <tr><th>C</th><td><span class="k-char">チャ</span><span class="k-romaji">cha</span></td><td><span class="k-char">チュ</span><span class="k-romaji">chu</span></td><td><span class="k-char">チョ</span><span class="k-romaji">cho</span></td></tr>
+                        <tr><th>N</th><td><span class="k-char">ニャ</span><span class="k-romaji">nya</span></td><td><span class="k-char">ニュ</span><span class="k-romaji">nyu</span></td><td><span class="k-char">ニョ</span><span class="k-romaji">nyo</span></td></tr>
+                        <tr><th>H</th><td><span class="k-char">ヒャ</span><span class="k-romaji">hya</span></td><td><span class="k-char">ヒュ</span><span class="k-romaji">hyu</span></td><td><span class="k-char">ヒョ</span><span class="k-romaji">hyo</span></td></tr>
+                        <tr><th>M</th><td><span class="k-char">ミャ</span><span class="k-romaji">mya</span></td><td><span class="k-char">ミュ</span><span class="k-romaji">myu</span></td><td><span class="k-char">ミョ</span><span class="k-romaji">myo</span></td></tr>
+                        <tr><th>R</th><td><span class="k-char">リャ</span><span class="k-romaji">rya</span></td><td><span class="k-char">リュ</span><span class="k-romaji">ryu</span></td><td><span class="k-char">リョ</span><span class="k-romaji">ryo</span></td></tr>
+                        <tr><th>G</th><td><span class="k-char">ギャ</span><span class="k-romaji">gya</span></td><td><span class="k-char">ギュ</span><span class="k-romaji">gyu</span></td><td><span class="k-char">ギョ</span><span class="k-romaji">gyo</span></td></tr>
+                        <tr><th>J</th><td><span class="k-char">ジャ</span><span class="k-romaji">ja</span></td><td><span class="k-char">ジュ</span><span class="k-romaji">ju</span></td><td><span class="k-char">ジョ</span><span class="k-romaji">jo</span></td></tr>
+                        <tr><th>B</th><td><span class="k-char">ビャ</span><span class="k-romaji">bya</span></td><td><span class="k-char">ビュ</span><span class="k-romaji">byu</span></td><td><span class="k-char">ビョ</span><span class="k-romaji">byo</span></td></tr>
+                        <tr><th>P</th><td><span class="k-char">ピャ</span><span class="k-romaji">pya</span></td><td><span class="k-char">ピュ</span><span class="k-romaji">pyu</span></td><td><span class="k-char">ピョ</span><span class="k-romaji">pyo</span></td></tr>
+                    </table>
+                </div>
             </div>
         </div> 
         
@@ -652,7 +713,6 @@ Guardo un film.,Eiga o mimasu.,映画を見ます。,Tempo Libero
             caricaMazzi();
             caricaFrasi(); // Carica le frasi
             setupEventListeners();
-            costruisciTabelleKana();
             mostraModulo('quiz');
         });
 
@@ -1152,30 +1212,6 @@ Guardo un film.,Eiga o mimasu.,映画を見ます。,Tempo Libero
             }
             return array;
         }
-        
-        // FUNZIONE COSTRUZIONE TABELLE
-        function costruisciTabelleKana() {
-            // Helper per riempire le tabelle
-            const fillTable = (tableId, dataset, rowIndices) => {
-                const table = document.getElementById(tableId);
-                const colHeaders = tableId.includes('yoon') ? ['','YA','YU','YO'] : ['','A','I','U','E','O'];
-                
-                // Header Row
-                let html = '<tr>';
-                colHeaders.forEach(h => html += `<th>${h}</th>`);
-                html += '</tr>';
-                
-                // Data Rows
-                rowIndices.forEach(idx => {
-                    // Logic to reconstruct rows based on dataset structure
-                    // Questo è semplificato, in produzione userei una struttura dati migliore per le righe
-                    // Per ora, lascio vuoto o statico se complesso da generare dinamicamente senza refactoring massiccio
-                });
-                
-                // NOTA: Per brevità e per non rompere il layout, ho hardcodato le tabelle nell'HTML sopra.
-                // Questa funzione servirebbe per generarle dinamicamente, ma l'HTML statico è più sicuro per il layout fisso.
-            };
-        }
 
         function caricaMazzi() {
             const dP = localStorage.getItem(KEY_MAZZO_PRINCIPALE);
@@ -1184,9 +1220,7 @@ Guardo un film.,Eiga o mimasu.,映画を見ます。,Tempo Libero
             mazzoErroriPrioritari = dE ? JSON.parse(dE) : [];
             mazzoPrincipale.forEach(c => { if(typeof c.level==='undefined') c.level=0; c.type = 'vocab'; });
 
-            // Se vuoto, carica default
             if (mazzoPrincipale.length === 0) { importaDatiDaStringa(DATI_INIZIALI_CSV); return; }
-            
             aggiornaFiltroCategorie(); creaNuovoSet();
             if(modalitaQuiz === 'normale') {
                 if(mazzoSessioneCorrente.length === 0 && (mazzoPrincipale.length > 0 || mazzoErroriPrioritari.length > 0)) {
