@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v16.0 (Scelta Multipla)</title>
+    <title>Giapponese SRS v17.0 (Scelta Multipla)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -28,23 +28,23 @@
         /* --- UI INPUT & FEEDBACK --- */
         .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; transition: all 0.3s; }
         
-        /* FEEDBACK VISIVO */
         .feedback-box { text-align: center; font-weight: bold; font-size: 1.2rem; padding: 15px; border-radius: 12px; margin: 15px 0; border: 2px solid transparent; }
         .fb-corretto { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
         .fb-sbagliato { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
 
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; transition: 0.1s; }
+        .btn:active { transform: scale(0.98); }
         .btn-blue { background-color: #007aff; } 
         .btn-green { background-color: #28a745; } 
         .btn-orange { background-color: #fd7e14; }
         .btn-red { background-color: #dc3545; }
 
-        /* --- MULTIPLE CHOICE BUTTONS --- */
-        #choices-area { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        /* --- PULSANTI SCELTA MULTIPLA --- */
+        #choices-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .choice-btn {
-            background: #f8f9fa; border: 2px solid #e9ecef; padding: 15px;
-            font-size: 1.5rem; border-radius: 12px; cursor: pointer; transition: 0.2s;
-            font-weight: bold; color: #333;
+            background: #f8f9fa; border: 2px solid #e9ecef; padding: 20px;
+            font-size: 2rem; border-radius: 16px; cursor: pointer; transition: 0.2s;
+            font-weight: bold; color: #333; display: flex; justify-content: center; align-items: center;
         }
         .choice-btn:hover { background: #e2e6ea; border-color: #adb5bd; }
         .btn-correct { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724 !important; }
@@ -152,7 +152,7 @@
             <div class="card">
                 <h2>Hiragana</h2>
                 <div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;">
-                    <label class="mix-toggle"><input type="checkbox" id="h-mix-mode"> 🔀 Modalità Mista (Quiz)</label>
+                    <label class="mix-toggle"><input type="checkbox" id="h-mix-mode"> 🔀 Modalità Mista (Include Scelta Multipla)</label>
                     <div class="config-grid" id="h-config"></div>
                     <div style="display:flex; gap:10px; margin-top:10px;">
                         <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', true)">Tutto</button>
@@ -168,7 +168,7 @@
             <div class="card">
                 <h2>Katakana</h2>
                 <div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;">
-                    <label class="mix-toggle"><input type="checkbox" id="k-mix-mode"> 🔀 Modalità Mista (Quiz)</label>
+                    <label class="mix-toggle"><input type="checkbox" id="k-mix-mode"> 🔀 Modalità Mista (Include Scelta Multipla)</label>
                     <div class="config-grid" id="k-config"></div>
                     <div style="display:flex; gap:10px; margin-top:10px;">
                         <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', true)">Tutto</button>
@@ -194,13 +194,13 @@
 
         // --- STATO ---
         let vocaboli = []; let frasi = []; let sessione = []; let errori = []; let card = null;
-        let punteggio = { ok:0, err:0 }; let mode = 'vocab'; let mixMode = false; let currentDataset = [];
+        let punteggio = { ok:0, err:0 }; let mode = 'vocab'; let mixMode = false; let activePool = []; // Pool per distruttori
 
         // --- AVVIO E SYNC ---
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v16')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v16'));
-                if(localStorage.getItem('srs_frasi_v16')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v16'));
+                if(localStorage.getItem('srs_vocab_v17')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v17'));
+                if(localStorage.getItem('srs_frasi_v17')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v17'));
             } catch(e) { localStorage.clear(); }
 
             aggiornaConta(); popolaFiltri();
@@ -300,7 +300,6 @@
 
             // Determina Modalità
             let showInput = true;
-            let showChoices = false;
 
             if(mode === 'vocab') {
                 const dir = Math.random() > 0.5 ? 'j2i' : 'i2j';
@@ -316,8 +315,6 @@
                 }
             } else {
                 // KANA LOGIC
-                // Dir k2r = Kana -> Romaji (Input)
-                // Dir r2k = Romaji -> Kana (Scelta Multipla)
                 let dir = 'k2r';
                 if(mixMode && Math.random() > 0.5) dir = 'r2k';
                 card.dir = dir;
@@ -331,7 +328,7 @@
                     document.getElementById('q-label').innerText = "SELEZIONA IL KANA";
                     document.getElementById('prompt-principale').innerText = card.r;
                     document.getElementById('prompt-secondario').innerText = "";
-                    showInput = false; showChoices = true;
+                    showInput = false;
                     generaScelte(card);
                 }
             }
@@ -346,13 +343,21 @@
             }
         }
 
-        // GENERATORE PULSANTI SCELTA MULTIPLA
+        // GENERATORE PULSANTI SCELTA MULTIPLA (DALLE RIGHE SELEZIONATE)
         function generaScelte(corretta) {
             const div = document.getElementById('choices-area');
             div.innerHTML = '';
             
-            // Trova 3 distrattori casuali dallo stesso dataset
-            let pool = currentDataset.filter(x => x.k !== corretta.k);
+            // Trova 3 distrattori SOLO dalla activePool (righe selezionate)
+            let pool = activePool.filter(x => x.k !== corretta.k);
+            
+            // Se la pool è troppo piccola (es. ho selezionato solo 5 caratteri), aggiungi opzioni a caso
+            if(pool.length < 3) {
+               // Fallback: aggiungi tutto l'alfabeto se non ci sono abbastanza opzioni
+               pool = (mode==='kana' && corretta.k.match(/[あ-ん]/)) ? RAW_HIRAGANA : RAW_KATAKANA;
+               pool = pool.filter(x => x.k !== corretta.k);
+            }
+
             let options = pool.sort(() => 0.5 - Math.random()).slice(0, 3);
             options.push(corretta);
             options.sort(() => 0.5 - Math.random()); // Mescola
@@ -367,9 +372,8 @@
         }
 
         function verificaScelta(selezionata, corretta, btnElement) {
-            // Disabilita tutti i pulsanti
             const btns = document.querySelectorAll('.choice-btn');
-            btns.forEach(b => b.disabled = true);
+            btns.forEach(b => b.disabled = true); // Disabilita click
 
             const feed = document.getElementById('feedback');
             feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
@@ -385,7 +389,6 @@
                 btnElement.classList.add('btn-wrong');
                 feed.classList.add('fb-sbagliato');
                 feed.innerHTML = `❌ Sbagliato! Era: <b>${corretta.k}</b>`;
-                // Evidenzia quella giusta
                 btns.forEach(b => { if(b.innerText === corretta.k) b.classList.add('btn-correct'); });
             }
             
@@ -455,7 +458,6 @@
 
         function startKanaQuiz(prefix) {
             const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA;
-            currentDataset = dataset; // Salva per scelta multipla
             const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`);
             const mixCheck = document.getElementById(prefix + '-mix-mode');
             mixMode = mixCheck.checked;
@@ -468,6 +470,7 @@
 
             if(pool.length === 0) { alert("Seleziona almeno una riga"); return; }
             
+            activePool = pool; // Salva la selezione per i distrattori
             sessione = pool.sort(() => 0.5 - Math.random());
             mode = 'kana';
             switchTab('quiz');
@@ -475,7 +478,9 @@
             document.getElementById('end-session-box').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
             document.getElementById('msg-no-data').classList.add('hidden');
-            errori = []; punteggio = {ok:0, err:0};
+            
+            errori = []; 
+            punteggio = {ok:0, err:0};
             prossima();
         }
 
@@ -493,7 +498,7 @@
                         count++;
                     }
                 });
-                localStorage.setItem('srs_vocab_v16', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v17', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
@@ -504,7 +509,7 @@
                         count++;
                     }
                 });
-                localStorage.setItem('srs_frasi_v16', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v17', JSON.stringify(frasi));
             }
             if(reload) { alert("Caricati: " + count); location.reload(); }
         }
