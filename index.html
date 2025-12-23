@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v12.0 (Ripasso)</title>
+    <title>Giapponese SRS v13.0 (Feedback Visivo)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -14,11 +14,8 @@
 
         /* --- NOTIFICHE --- */
         #sync-status {
-            position: fixed; top: 10px; right: 10px; 
-            padding: 10px 15px; border-radius: 20px; 
-            font-size: 0.8rem; font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: none; z-index: 1000;
+            position: fixed; top: 10px; right: 10px; padding: 10px 15px; border-radius: 20px; 
+            font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; z-index: 1000;
         }
         .sync-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .sync-loading { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
@@ -28,24 +25,27 @@
         .nav-btn { flex: 1; padding: 12px; border: none; border-radius: 25px; background-color: #fff; color: #555; font-weight: 600; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
         .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 8px rgba(0,122,255,0.3); }
 
-        /* --- UI --- */
-        .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; transition: background 0.3s; }
+        /* --- UI INPUT & FEEDBACK --- */
+        .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; transition: all 0.3s; }
+        
+        /* CLASSI PER IL FEEDBACK VISIVO */
+        .correct-bg { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724 !important; }
+        .wrong-bg { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24 !important; }
+        
+        .feedback-msg { font-weight: bold; margin-top: 10px; font-size: 1.1rem; min-height: 24px; text-align: center; }
+        .text-ok { color: #28a745; }
+        .text-err { color: #dc3545; }
+
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; transition: 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-blue { background-color: #007aff; } 
-        .btn-green { background-color: #34c759; } 
-        .btn-red { background-color: #ff3b30; }
-        .btn-orange { background-color: #ff9500; }
+        .btn-green { background-color: #28a745; } 
+        .btn-red { background-color: #dc3545; }
+        .btn-orange { background-color: #fd7e14; }
 
-        /* --- QUIZ --- */
+        /* --- QUIZ LAYOUT --- */
         #prompt-principale { font-size: 2.4rem; margin: 15px 0; text-align: center; font-weight: 500; }
         #prompt-secondario { font-size: 1.1rem; color: #666; text-align: center; margin-bottom: 20px; }
-        #risultato-controllo { text-align: center; font-weight: bold; min-height: 40px; margin: 10px 0; font-size: 1.1rem; padding: 10px; border-radius: 8px; }
-        
-        .box-corretto { background-color: #d4edda; border-color: #c3e6cb; }
-        .box-sbagliato { background-color: #f8d7da; border-color: #f5c6cb; }
-        .text-corretto { color: #155724; }
-        .text-sbagliato { color: #721c24; }
 
         /* --- ASCOLTO --- */
         .frase-entry { display: flex; align-items: flex-start; background: #ffffff; border-bottom: 1px solid #eee; padding: 15px 10px; gap: 15px; }
@@ -95,19 +95,20 @@
                     
                     <input type="text" id="input-risposta" class="input-box" placeholder="Scrivi qui..." autocomplete="off">
                     
-                    <div id="risultato-controllo"></div>
+                    <div id="feedback-area" class="feedback-msg"></div>
 
-                    <div style="display:flex; gap:10px;">
+                    <div style="margin-top:15px;">
                         <button id="btn-check" class="btn btn-blue" onclick="controlla()">Controlla</button>
-                        <button id="btn-next" class="btn btn-green hidden" onclick="prossima()">Prossima</button>
+                        <button id="btn-next" class="btn btn-green hidden" onclick="prossima()">Prossima →</button>
                     </div>
                 </div>
 
-                <div id="end-session-box" class="hidden" style="text-align:center;">
+                <div id="end-session-box" class="hidden" style="text-align:center; padding:20px;">
                     <h2 id="end-msg">Sessione Completata!</h2>
-                    <p id="end-stat">...</p>
-                    <button id="btn-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">Ripassa Errori</button>
-                    <button class="btn btn-blue" onclick="openVocabQuiz()">Nuova Sessione</button>
+                    <p id="end-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
+                    
+                    <button id="btn-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
+                    <button class="btn btn-blue" onclick="openVocabQuiz()" style="margin-top:10px;">Nuova Sessione</button>
                 </div>
 
                 <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">
@@ -199,8 +200,8 @@
         // --- AVVIO E SYNC ---
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v12')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v12'));
-                if(localStorage.getItem('srs_frasi_v12')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v12'));
+                if(localStorage.getItem('srs_vocab_v13')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v13'));
+                if(localStorage.getItem('srs_frasi_v13')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v13'));
             } catch(e) { localStorage.clear(); }
 
             aggiornaConta();
@@ -271,15 +272,15 @@
                 sessione = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
             }
             
-            errori = []; // Resetta errori nuova sessione
+            errori = []; 
             punteggio = { ok:0, err:0 };
             prossima();
         }
 
         function avviaRipasso() {
-            sessione = [...errori]; // Carica gli errori
-            errori = []; // Resetta contenitore
-            mode = mode; // Mantieni modalità
+            sessione = [...errori]; 
+            errori = []; 
+            mode = mode; 
             document.getElementById('end-session-box').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
             prossima();
@@ -290,8 +291,8 @@
                 // FINE SESSIONE
                 document.getElementById('quiz-area').classList.add('hidden');
                 document.getElementById('end-session-box').classList.remove('hidden');
-                document.getElementById('end-msg').innerText = errori.length > 0 ? "Sessione Conclusa con Errori" : "Sessione Perfetta!";
-                document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
+                document.getElementById('end-msg').innerText = errori.length > 0 ? "Sessione Conclusa" : "Perfetto!";
+                document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} corretti, ${punteggio.err} errori.`;
                 
                 const btnRip = document.getElementById('btn-ripasso');
                 if(errori.length > 0) {
@@ -304,18 +305,20 @@
             }
 
             card = sessione.pop();
+            
+            // RESET UI
             const input = document.getElementById('input-risposta');
-            input.value = ''; input.disabled = false; input.classList.remove('hidden'); input.focus();
-            input.classList.remove('box-corretto', 'box-sbagliato'); // Reset colori
-
+            const feedback = document.getElementById('feedback-area');
+            input.value = ''; 
+            input.disabled = false; 
+            input.classList.remove('hidden', 'correct-bg', 'wrong-bg'); 
+            input.focus();
+            
+            feedback.innerHTML = '';
+            
             document.getElementById('btn-check').classList.remove('hidden');
             document.getElementById('btn-next').classList.add('hidden');
             
-            // Reset Feedback
-            const res = document.getElementById('risultato-controllo');
-            res.innerText = '';
-            res.classList.remove('box-corretto', 'box-sbagliato');
-
             document.getElementById('punteggio').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
 
             if(mode === 'vocab') {
@@ -339,8 +342,10 @@
 
         function controlla() {
             const input = document.getElementById('input-risposta');
+            const feedback = document.getElementById('feedback-area');
             const user = input.value.trim().toLowerCase();
-            let ok = false; let ans = "";
+            let ok = false; 
+            let ans = "";
 
             // Logica controllo
             if(mode === 'vocab') {
@@ -355,21 +360,17 @@
                 if(user == card.r) ok = true;
                 ans = card.r;
             }
-
-            const res = document.getElementById('risultato-controllo');
             
             if(ok) {
-                res.innerHTML = '<span class="text-corretto">Esatto!</span>';
-                res.classList.add('box-corretto');
-                input.classList.add('box-corretto');
                 punteggio.ok++;
+                input.classList.add('correct-bg');
+                feedback.innerHTML = '<span class="text-ok">Esatto!</span>';
                 if(mode==='vocab' && card.dir==='j2i') parla(card.jpn);
             } else {
-                res.innerHTML = `<span class="text-sbagliato">Sbagliato. Era: <b>${ans}</b></span>`;
-                res.classList.add('box-sbagliato');
-                input.classList.add('box-sbagliato');
                 punteggio.err++;
                 errori.push(card); // Salva per ripasso
+                input.classList.add('wrong-bg');
+                feedback.innerHTML = `<span class="text-err">Sbagliato! Era: <b>${ans}</b></span>`;
             }
 
             input.disabled = true;
@@ -415,7 +416,7 @@
             document.getElementById('end-session-box').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
             document.getElementById('msg-no-data').classList.add('hidden');
-            errori = []; // Reset errori per sessione kana
+            errori = []; 
             punteggio = {ok:0, err:0};
             prossima();
         }
@@ -437,7 +438,7 @@
                         count++;
                     }
                 });
-                localStorage.setItem('srs_vocab_v12', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v13', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
@@ -451,7 +452,7 @@
                         count++;
                     }
                 });
-                localStorage.setItem('srs_frasi_v12', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v13', JSON.stringify(frasi));
             }
             if(reload) { alert("Caricati: " + count); location.reload(); }
         }
