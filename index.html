@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v9.0 (Layout Chat)</title>
+    <title>Giapponese SRS v10.1 (Sync Attivo)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -11,6 +11,18 @@
         .container { width: 100%; max-width: 600px; margin-bottom: 50px; }
         .card { background: #ffffff; padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .hidden { display: none !important; }
+
+        /* --- NOTIFICA SYNC --- */
+        #sync-status {
+            position: fixed; top: 10px; right: 10px; 
+            padding: 10px 15px; border-radius: 20px; 
+            font-size: 0.8rem; font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: none; z-index: 1000;
+        }
+        .sync-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .sync-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .sync-loading { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
 
         /* --- MENU --- */
         #main-nav { display: flex; gap: 8px; width: 100%; max-width: 600px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
@@ -29,41 +41,13 @@
         #risultato-controllo { text-align: center; font-weight: bold; min-height: 30px; margin: 10px 0; font-size: 1.2rem; }
         .corretto { color: #34c759; } .sbagliato { color: #ff3b30; }
 
-        /* --- ASCOLTO (NUOVO LAYOUT CHAT) --- */
-        .frase-entry { 
-            display: flex; 
-            align-items: flex-start; 
-            background: #ffffff; 
-            border-bottom: 1px solid #eee; 
-            padding: 15px 10px; 
-            gap: 15px; 
-        }
-        .frase-entry:last-child { border-bottom: none; }
-        
-        .play-btn { 
-            width: 48px; height: 48px; border-radius: 50%; 
-            background: #007aff; color: white; border: none; 
-            font-size: 1.2rem; cursor: pointer; flex-shrink: 0; 
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 4px 6px rgba(0,122,255,0.2);
-        }
-        
+        /* --- ASCOLTO (CHAT LAYOUT) --- */
+        .frase-entry { display: flex; align-items: flex-start; background: #ffffff; border-bottom: 1px solid #eee; padding: 15px 10px; gap: 15px; }
+        .play-btn { width: 48px; height: 48px; border-radius: 50%; background: #007aff; color: white; border: none; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,122,255,0.2); }
         .frase-text { flex-grow: 1; }
-        
-        .frase-jpn { 
-            font-weight: bold; font-size: 1.25rem; 
-            display: block; color: #333; margin-bottom: 4px; line-height: 1.4;
-        }
-        .frase-rom { 
-            font-size: 0.9rem; color: #888; display: block; margin-bottom: 6px; 
-        }
-        .frase-ita { 
-            color: #007aff; font-size: 1rem; font-weight: 500; 
-            display: block; cursor: pointer; background: #f0f8ff; 
-            padding: 5px 8px; border-radius: 6px; display: inline-block;
-        }
-        
-        /* Spoiler mode */
+        .frase-jpn { font-weight: bold; font-size: 1.25rem; display: block; color: #333; margin-bottom: 4px; line-height: 1.4; }
+        .frase-rom { font-size: 0.9rem; color: #888; display: block; margin-bottom: 6px; }
+        .frase-ita { color: #007aff; font-size: 1rem; font-weight: 500; display: block; cursor: pointer; background: #f0f8ff; padding: 5px 8px; border-radius: 6px; display: inline-block; }
         .spoiler .frase-ita { background: #e0e0e0; color: transparent; }
         .spoiler .frase-ita:hover { background: #f0f8ff; color: #007aff; }
 
@@ -79,6 +63,7 @@
 </head>
 <body>
 
+    <div id="sync-status"></div>
     <h1>Set di Studio Giapponese</h1>
 
     <nav id="main-nav">
@@ -105,7 +90,9 @@
                     <button id="btn-check" class="btn btn-blue" onclick="controlla()">Controlla</button>
                     <button id="btn-next" class="btn btn-green hidden" onclick="prossima()">Prossima</button>
                 </div>
-                <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">Nessun vocabolo caricato.<br>Vai in "Gestione".</div>
+                <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">
+                    Sincronizzazione dati in corso...<br>Attendi qualche secondo.
+                </div>
             </div>
         </div>
 
@@ -128,33 +115,14 @@
 
         <div id="tab-gestione" class="modulo-content hidden">
             <div class="card">
-                <h2>Gestione Dati</h2>
+                <h2>Stato Dati</h2>
+                <p>Vocaboli in memoria: <b id="count-v">0</b></p>
+                <p>Frasi in memoria: <b id="count-f">0</b></p>
                 
-                <div style="border:2px dashed #ddd; padding:20px; margin-bottom:20px; border-radius:12px; background:#fafafa;">
-                    <h3 style="margin-top:0;">1. Carica Vocaboli</h3>
-                    <p style="font-size:0.8rem; color:#666;">Formato: Ita | Eng | Jpn | Rom | Tag</p>
-                    <input type="text" id="url-vocab" class="input-box" placeholder="Link RAW GitHub...">
-                    <button class="btn btn-blue" onclick="scarica('vocab')">Scarica da GitHub</button>
-                    <div style="margin-top:10px; text-align:center;">
-                        <span style="font-size:0.9rem;">oppure File Locale:</span>
-                        <input type="file" onchange="leggiFile(this, 'vocab')" style="margin-top:5px;">
-                    </div>
-                </div>
-
-                <div style="border:2px dashed #ddd; padding:20px; margin-bottom:20px; border-radius:12px; background:#fafafa;">
-                    <h3 style="margin-top:0;">2. Carica Dialoghi/Frasi</h3>
-                    <p style="font-size:0.8rem; color:#666;">Formato: Ita | Rom | Jpn | Tag</p>
-                    <input type="text" id="url-frasi" class="input-box" placeholder="Link RAW GitHub...">
-                    <button class="btn btn-blue" onclick="scarica('frasi')">Scarica da GitHub</button>
-                    <div style="margin-top:10px; text-align:center;">
-                        <span style="font-size:0.9rem;">oppure File Locale:</span>
-                        <input type="file" onchange="leggiFile(this, 'frasi')" style="margin-top:5px;">
-                    </div>
-                </div>
-
-                <div style="text-align:center; padding-top:10px; border-top:1px solid #eee;">
-                    <p>Vocaboli: <b id="count-v">0</b> | Dialoghi: <b id="count-f">0</b></p>
-                    <button class="btn btn-red" onclick="resetTotale()">CANCELLA TUTTO</button>
+                <div style="margin-top:20px; padding-top:15px; border-top:1px solid #eee;">
+                    <p style="font-size:0.8rem; color:#666;">I dati si aggiornano automaticamente all'avvio.<br>Se serve, premi qui:</p>
+                    <button class="btn btn-blue" onclick="forceSync()">🔄 Forza Aggiornamento Ora</button>
+                    <button class="btn btn-red" style="margin-top:10px;" onclick="resetTotale()">🗑 Reset Completo</button>
                 </div>
             </div>
         </div>
@@ -170,9 +138,7 @@
                     </div>
                     <button class="btn btn-green" onclick="startKanaQuiz('h')">AVVIA QUIZ</button>
                 </div>
-                <div style="overflow-x:auto;">
-                    <table class="kana-table" id="h-table"></table>
-                </div>
+                <div style="overflow-x:auto;"><table class="kana-table" id="h-table"></table></div>
             </div>
         </div>
 
@@ -187,57 +153,26 @@
                     </div>
                     <button class="btn btn-green" onclick="startKanaQuiz('k')">AVVIA QUIZ</button>
                 </div>
-                <div style="overflow-x:auto;">
-                    <table class="kana-table" id="k-table"></table>
-                </div>
+                <div style="overflow-x:auto;"><table class="kana-table" id="k-table"></table></div>
             </div>
         </div>
 
     </div>
 
     <script>
-        // --- DATASETS KANA ---
-        const RAW_HIRAGANA = [
-            {k:'あ',r:'a'},{k:'い',r:'i'},{k:'う',r:'u'},{k:'え',r:'e'},{k:'お',r:'o'},
-            {k:'か',r:'ka'},{k:'き',r:'ki'},{k:'く',r:'ku'},{k:'け',r:'ke'},{k:'こ',r:'ko'},
-            {k:'さ',r:'sa'},{k:'し',r:'shi'},{k:'す',r:'su'},{k:'せ',r:'se'},{k:'そ',r:'so'},
-            {k:'た',r:'ta'},{k:'ち',r:'chi'},{k:'つ',r:'tsu'},{k:'て',r:'te'},{k:'と',r:'to'},
-            {k:'な',r:'na'},{k:'に',r:'ni'},{k:'ぬ',r:'nu'},{k:'ね',r:'ne'},{k:'の',r:'no'},
-            {k:'は',r:'ha'},{k:'ひ',r:'hi'},{k:'ふ',r:'fu'},{k:'へ',r:'he'},{k:'ほ',r:'ho'},
-            {k:'ま',r:'ma'},{k:'み',r:'mi'},{k:'む',r:'mu'},{k:'め',r:'me'},{k:'も',r:'mo'},
-            {k:'や',r:'ya'},{k:'ゆ',r:'yu'},{k:'よ',r:'yo'},
-            {k:'ら',r:'ra'},{k:'り',r:'ri'},{k:'る',r:'ru'},{k:'れ',r:'re'},{k:'ろ',r:'ro'},
-            {k:'わ',r:'wa'},{k:'を',r:'wo'},{k:'ん',r:'n'},
-            {k:'が',r:'ga'},{k:'ぎ',r:'gi'},{k:'ぐ',r:'gu'},{k:'げ',r:'ge'},{k:'ご',r:'go'},
-            {k:'ざ',r:'za'},{k:'じ',r:'ji'},{k:'ず',r:'zu'},{k:'ぜ',r:'ze'},{k:'ぞ',r:'zo'},
-            {k:'だ',r:'da'},{k:'ぢ',r:'ji'},{k:'づ',r:'zu'},{k:'で',r:'de'},{k:'ど',r:'do'},
-            {k:'ば',r:'ba'},{k:'び',r:'bi'},{k:'ぶ',r:'bu'},{k:'べ',r:'be'},{k:'ぼ',r:'bo'},
-            {k:'ぱ',r:'pa'},{k:'ぴ',r:'pi'},{k:'ぷ',r:'pu'},{k:'ぺ',r:'pe'},{k:'ぽ',r:'po'}
-        ];
+        // ======================================================
+        // --- CONFIGURAZIONE LINK GITHUB ---
+        // ======================================================
         
-        const RAW_KATAKANA = [
-            {k:'ア',r:'a'},{k:'イ',r:'i'},{k:'ウ',r:'u'},{k:'エ',r:'e'},{k:'オ',r:'o'},
-            {k:'カ',r:'ka'},{k:'キ',r:'ki'},{k:'ク',r:'ku'},{k:'ケ',r:'ke'},{k:'コ',r:'ko'},
-            {k:'サ',r:'sa'},{k:'シ',r:'shi'},{k:'ス',r:'su'},{k:'セ',r:'se'},{k:'ソ',r:'so'},
-            {k:'タ',r:'ta'},{k:'チ',r:'chi'},{k:'ツ',r:'tsu'},{k:'テ',r:'te'},{k:'ト',r:'to'},
-            {k:'ナ',r:'na'},{k:'ニ',r:'ni'},{k:'ヌ',r:'nu'},{k:'ネ',r:'ne'},{k:'ノ',r:'no'},
-            {k:'ハ',r:'ha'},{k:'ヒ',r:'hi'},{k:'フ',r:'fu'},{k:'ヘ',r:'he'},{k:'ホ',r:'ho'},
-            {k:'マ',r:'ma'},{k:'ミ',r:'mi'},{k:'ム',r:'mu'},{k:'メ',r:'me'},{k:'モ',r:'mo'},
-            {k:'ヤ',r:'ya'},{k:'ユ',r:'yu'},{k:'ヨ',r:'yo'},
-            {k:'ラ',r:'ra'},{k:'リ',r:'ri'},{k:'ル',r:'ru'},{k:'レ',r:'re'},{k:'ロ',r:'ro'},
-            {k:'ワ',r:'wa'},{k:'ヲ',r:'wo'},{k:'ン',r:'n'},
-            {k:'ガ',r:'ga'},{k:'ギ',r:'gi'},{k:'グ',r:'gu'},{k:'ゲ',r:'ge'},{k:'ゴ',r:'go'},
-            {k:'ザ',r:'za'},{k:'ジ',r:'ji'},{k:'ズ',r:'zu'},{k:'ゼ',r:'ze'},{k:'ゾ',r:'zo'},
-            {k:'ダ',r:'da'},{k:'ヂ',r:'ji'},{k:'ヅ',r:'zu'},{k:'デ',r:'de'},{k:'ド',r:'do'},
-            {k:'バ',r:'ba'},{k:'ビ',r:'bi'},{k:'ブ',r:'bu'},{k:'ベ',r:'be'},{k:'ボ',r:'bo'},
-            {k:'パ',r:'pa'},{k:'ピ',r:'pi'},{k:'プ',r:'pu'},{k:'ペ',r:'pe'},{k:'ポ',r:'po'}
-        ];
+        const LINK_VOCABOLI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/importa.csv";
+        const LINK_FRASI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/frasi.csv";
 
-        const KANA_GROUPS = {
-            'Vocali': [0,5], 'K': [5,10], 'S': [10,15], 'T': [15,20], 'N': [20,25], 
-            'H': [25,30], 'M': [30,35], 'Y': [35,38], 'R': [38,43], 'W/N': [43,46],
-            'Dakuten': [46,71]
-        };
+        // ======================================================
+
+        // --- DATASETS KANA (Statici) ---
+        const RAW_HIRAGANA=[{k:'あ',r:'a'},{k:'い',r:'i'},{k:'う',r:'u'},{k:'え',r:'e'},{k:'お',r:'o'},{k:'か',r:'ka'},{k:'き',r:'ki'},{k:'く',r:'ku'},{k:'け',r:'ke'},{k:'こ',r:'ko'},{k:'さ',r:'sa'},{k:'し',r:'shi'},{k:'す',r:'su'},{k:'せ',r:'se'},{k:'そ',r:'so'},{k:'た',r:'ta'},{k:'ち',r:'chi'},{k:'つ',r:'tsu'},{k:'て',r:'te'},{k:'と',r:'to'},{k:'な',r:'na'},{k:'に',r:'ni'},{k:'ぬ',r:'nu'},{k:'ね',r:'ne'},{k:'の',r:'no'},{k:'は',r:'ha'},{k:'ひ',r:'hi'},{k:'ふ',r:'fu'},{k:'へ',r:'he'},{k:'ほ',r:'ho'},{k:'ま',r:'ma'},{k:'み',r:'mi'},{k:'む',r:'mu'},{k:'め',r:'me'},{k:'も',r:'mo'},{k:'や',r:'ya'},{k:'ゆ',r:'yu'},{k:'よ',r:'yo'},{k:'ら',r:'ra'},{k:'り',r:'ri'},{k:'る',r:'ru'},{k:'れ',r:'re'},{k:'ろ',r:'ro'},{k:'わ',r:'wa'},{k:'を',r:'wo'},{k:'ん',r:'n'},{k:'が',r:'ga'},{k:'ぎ',r:'gi'},{k:'ぐ',r:'gu'},{k:'げ',r:'ge'},{k:'ご',r:'go'},{k:'ざ',r:'za'},{k:'じ',r:'ji'},{k:'ず',r:'zu'},{k:'ぜ',r:'ze'},{k:'ぞ',r:'zo'},{k:'だ',r:'da'},{k:'ぢ',r:'ji'},{k:'づ',r:'zu'},{k:'で',r:'de'},{k:'ど',r:'do'},{k:'ば',r:'ba'},{k:'び',r:'bi'},{k:'ぶ',r:'bu'},{k:'べ',r:'be'},{k:'ぼ',r:'bo'},{k:'ぱ',r:'pa'},{k:'ぴ',r:'pi'},{k:'ぷ',r:'pu'},{k:'ぺ',r:'pe'},{k:'ぽ',r:'po'},{k:'きゃ',r:'kya'},{k:'きゅ',r:'kyu'},{k:'きょ',r:'kyo'},{k:'しゃ',r:'sha'},{k:'しゅ',r:'shu'},{k:'しょ',r:'sho'},{k:'ちゃ',r:'cha'},{k:'ちゅ',r:'chu'},{k:'ちょ',r:'cho'},{k:'にゃ',r:'nya'},{k:'にゅ',r:'nyu'},{k:'にょ',r:'nyo'},{k:'ひゃ',r:'hya'},{k:'ひゅ',r:'hyu'},{k:'ひょ',r:'hyo'},{k:'みゃ',r:'mya'},{k:'みゅ',r:'myu'},{k:'みょ',r:'myo'},{k:'りゃ',r:'rya'},{k:'りゅ',r:'ryu'},{k:'りょ',r:'ryo'},{k:'ぎゃ',r:'gya'},{k:'ぎゅ',r:'gyu'},{k:'ぎょ',r:'gyo'},{k:'じゃ',r:'ja'},{k:'じゅ',r:'ju'},{k:'じょ',r:'jo'},{k:'びゃ',r:'bya'},{k:'びゅ',r:'byu'},{k:'びょ',r:'byo'},{k:'ぴゃ',r:'pya'},{k:'ぴゅ',r:'pyu'},{k:'ぴょ',r:'pyo'}];
+        const RAW_KATAKANA=[{k:'ア',r:'a'},{k:'イ',r:'i'},{k:'ウ',r:'u'},{k:'エ',r:'e'},{k:'オ',r:'o'},{k:'カ',r:'ka'},{k:'キ',r:'ki'},{k:'ク',r:'ku'},{k:'ケ',r:'ke'},{k:'コ',r:'ko'},{k:'サ',r:'sa'},{k:'シ',r:'shi'},{k:'ス',r:'su'},{k:'セ',r:'se'},{k:'ソ',r:'so'},{k:'タ',r:'ta'},{k:'チ',r:'chi'},{k:'ツ',r:'tsu'},{k:'テ',r:'te'},{k:'ト',r:'to'},{k:'ナ',r:'na'},{k:'ニ',r:'ni'},{k:'ヌ',r:'nu'},{k:'ネ',r:'ne'},{k:'ノ',r:'no'},{k:'ハ',r:'ha'},{k:'ヒ',r:'hi'},{k:'フ',r:'fu'},{k:'ヘ',r:'he'},{k:'ホ',r:'ho'},{k:'マ',r:'ma'},{k:'ミ',r:'mi'},{k:'ム',r:'mu'},{k:'メ',r:'me'},{k:'モ',r:'mo'},{k:'ヤ',r:'ya'},{k:'ユ',r:'yu'},{k:'ヨ',r:'yo'},{k:'ラ',r:'ra'},{k:'リ',r:'ri'},{k:'ル',r:'ru'},{k:'レ',r:'re'},{k:'ロ',r:'ro'},{k:'ワ',r:'wa'},{k:'ヲ',r:'wo'},{k:'ン',r:'n'},{k:'ガ',r:'ga'},{k:'ギ',r:'gi'},{k:'グ',r:'gu'},{k:'ゲ',r:'ge'},{k:'ゴ',r:'go'},{k:'ザ',r:'za'},{k:'ジ',r:'ji'},{k:'ズ',r:'zu'},{k:'ゼ',r:'ze'},{k:'ゾ',r:'zo'},{k:'ダ',r:'da'},{k:'ヂ',r:'ji'},{k:'ヅ',r:'zu'},{k:'デ',r:'de'},{k:'ド',r:'do'},{k:'バ',r:'ba'},{k:'ビ',r:'bi'},{k:'ブ',r:'bu'},{k:'ベ',r:'be'},{k:'ボ',r:'bo'},{k:'パ',r:'pa'},{k:'ピ',r:'pi'},{k:'プ',r:'pu'},{k:'ペ',r:'pe'},{k:'ポ',r:'po'},{k:'キャ',r:'kya'},{k:'キュ',r:'kyu'},{k:'キョ',r:'kyo'},{k:'シャ',r:'sha'},{k:'シュ',r:'shu'},{k:'ショ',r:'sho'},{k:'チャ',r:'cha'},{k:'チュ',r:'chu'},{k:'チョ',r:'cho'},{k:'ニャ',r:'nya'},{k:'ニュ',r:'nyu'},{k:'ニョ',r:'nyo'},{k:'ヒャ',r:'hya'},{k:'ヒュ',r:'hyu'},{k:'ヒョ',r:'hyo'},{k:'ミャ',r:'mya'},{k:'ミュ',r:'myu'},{k:'ミョ',r:'myo'},{k:'リャ',r:'rya'},{k:'リュ',r:'ryu'},{k:'リョ',r:'ryo'},{k:'ギャ',r:'gya'},{k:'ギュ',r:'gyu'},{k:'ギョ',r:'gyo'},{k:'ジャ',r:'ja'},{k:'ジュ',r:'ju'},{k:'ジョ',r:'jo'},{k:'ビャ',r:'bya'},{k:'ビュ',r:'byu'},{k:'ビョ',r:'byo'},{k:'ピャ',r:'pya'},{k:'ピュ',r:'pyu'},{k:'ピョ',r:'pyo'}];
+        const KANA_GROUPS = {'Vocali':[0,5],'K':[5,10],'S':[10,15],'T':[15,20],'N':[20,25],'H':[25,30],'M':[30,35],'Y':[35,38],'R':[38,43],'W/N':[43,46],'Dakuten':[46,71],'Yoon':[71,104]};
 
         // --- STATO ---
         let vocaboli = [];
@@ -247,13 +182,15 @@
         let punteggio = { ok:0, err:0 };
         let mode = 'vocab'; 
 
-        // --- AVVIO ---
+        // --- AVVIO E SYNC ---
         window.onload = function() {
+            // 1. Carica dati salvati
             try {
-                if(localStorage.getItem('srs_vocab_v9')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v9'));
-                if(localStorage.getItem('srs_frasi_v9')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v9'));
+                if(localStorage.getItem('srs_vocab_v10')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v10'));
+                if(localStorage.getItem('srs_frasi_v10')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v10'));
             } catch(e) { localStorage.clear(); }
 
+            // 2. Setup Interfaccia
             aggiornaConta();
             popolaFiltri();
             renderTabelle('h', RAW_HIRAGANA);
@@ -261,6 +198,12 @@
             renderFrasi();
             if(vocaboli.length > 0) nuovaSessione();
 
+            // 3. Auto-Sync da GitHub
+            if(LINK_VOCABOLI.startsWith('http') || LINK_FRASI.startsWith('http')) {
+                forceSync();
+            }
+
+            // 4. Listener
             document.getElementById('input-risposta').addEventListener('keydown', function(e){
                 if(e.key === 'Enter') {
                     if(!document.getElementById('btn-check').classList.contains('hidden')) controlla();
@@ -269,6 +212,46 @@
             });
         };
 
+        function showNotification(msg, type) {
+            const el = document.getElementById('sync-status');
+            el.className = type;
+            el.innerText = msg;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+        }
+
+        function forceSync() {
+            showNotification("Sincronizzazione in corso...", "sync-loading");
+            
+            let p1 = Promise.resolve();
+            let p2 = Promise.resolve();
+
+            if(LINK_VOCABOLI) {
+                p1 = fetch(LINK_VOCABOLI).then(r=>r.text()).then(t => {
+                    parseCSV(t, 'vocab', false);
+                });
+            }
+            if(LINK_FRASI) {
+                p2 = fetch(LINK_FRASI).then(r=>r.text()).then(t => {
+                    parseCSV(t, 'frasi', false);
+                });
+            }
+
+            Promise.all([p1, p2])
+                .then(() => {
+                    showNotification("Dati aggiornati da GitHub!", "sync-success");
+                    aggiornaConta();
+                    popolaFiltri();
+                    renderFrasi();
+                    if(vocaboli.length > 0 && sessione.length === 0) nuovaSessione();
+                })
+                .catch(e => {
+                    showNotification("Errore Sincronizzazione", "sync-error");
+                    console.error(e);
+                });
+        }
+
+        // --- NAVIGAZIONE ---
         function switchTab(id) {
             document.querySelectorAll('.modulo-content').forEach(d => d.classList.add('hidden'));
             document.getElementById('tab-'+id).classList.remove('hidden');
@@ -295,7 +278,6 @@
                 }
                 document.getElementById('quiz-area').classList.remove('hidden');
                 document.getElementById('msg-no-data').classList.add('hidden');
-                
                 sessione = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
             }
             punteggio = { ok:0, err:0 };
@@ -416,42 +398,24 @@
             prossima();
         }
 
-        // --- IMPORT/EXPORT (CON SEPARATORE PIPE |) ---
-        function scarica(type) {
-            const url = document.getElementById(type==='vocab'?'url-vocab':'url-frasi').value;
-            if(!url) { alert("Link mancante"); return; }
-            fetch(url).then(r=>r.text()).then(t => parseCSV(t, type)).catch(e => alert("Errore: "+e));
-        }
-
-        function leggiFile(input, type) {
-            const f = input.files[0];
-            if(!f) return;
-            const r = new FileReader();
-            r.onload = e => parseCSV(e.target.result, type);
-            r.readAsText(f);
-        }
-
-        function parseCSV(text, type) {
+        // --- PARSING & IMPORT ---
+        function parseCSV(text, type, reload) {
             const lines = text.trim().split('\n');
             let count = 0;
             if(type === 'vocab') {
                 vocaboli = [];
                 lines.forEach(l => {
-                    // Cerca il separatore Pipe | se non c'è usa virgola
                     const sep = l.includes('|') ? '|' : ',';
                     const p = l.split(sep);
                     if(p.length >= 4) {
                         vocaboli.push({
-                            ita:p[0].trim(), 
-                            eng:p[1].trim(), 
-                            jpn:p[2].trim(), 
-                            rom:p[3].trim(), 
-                            tag:p[4]?p[4].trim():'Gen'
+                            ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), 
+                            rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'
                         });
                         count++;
                     }
                 });
-                localStorage.setItem('srs_vocab_v9', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v10', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
@@ -459,18 +423,16 @@
                     const p = l.split(sep);
                     if(p.length >= 3) {
                         frasi.push({
-                            ita:p[0].trim(), 
-                            rom:p[1].trim(), 
-                            jpn:p[2].trim(), 
+                            ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), 
                             tag:p[3]?p[3].trim():'Gen'
                         });
                         count++;
                     }
                 });
-                localStorage.setItem('srs_frasi_v9', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v10', JSON.stringify(frasi));
             }
-            alert("Caricati: " + count);
-            location.reload();
+            
+            if(reload) { alert("Caricati: " + count); location.reload(); }
         }
 
         function resetTotale() {
@@ -498,11 +460,9 @@
             const div = document.getElementById('lista-frasi');
             const spoiler = document.getElementById('spoiler-check').checked;
             const filter = document.getElementById('filtro-frasi').value;
-            
             div.innerHTML = '';
             
             const list = (filter === 'TUTTI') ? frasi : frasi.filter(f => f.tag === filter);
-
             if(list.length === 0) { div.innerHTML = '<p style="text-align:center">Nessuna frase</p>'; return; }
             
             list.forEach(f => {
