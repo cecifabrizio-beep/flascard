@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v10.1 (Sync Attivo)</title>
+    <title>Giapponese SRS v11.0 (Fix Kana Quiz)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -21,7 +21,6 @@
             display: none; z-index: 1000;
         }
         .sync-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .sync-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .sync-loading { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
 
         /* --- MENU --- */
@@ -67,7 +66,7 @@
     <h1>Set di Studio Giapponese</h1>
 
     <nav id="main-nav">
-        <button class="nav-btn active" onclick="switchTab('quiz')">Quiz</button>
+        <button class="nav-btn active" onclick="switchTab('quiz'); openVocabQuiz()">Quiz Vocaboli</button>
         <button class="nav-btn" onclick="switchTab('ascolto')">Ascolto</button>
         <button class="nav-btn" onclick="switchTab('hiragana')">Hiragana</button>
         <button class="nav-btn" onclick="switchTab('katakana')">Katakana</button>
@@ -79,7 +78,8 @@
         <div id="tab-quiz" class="modulo-content">
             <div class="card">
                 <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio">Pronto</div>
-                <select id="filtro-cat" class="input-box" onchange="nuovaSessione()"><option value="TUTTI">Tutte le Categorie</option></select>
+                
+                <select id="filtro-cat" class="input-box" onchange="openVocabQuiz()"><option value="TUTTI">Tutte le Categorie</option></select>
                 
                 <div id="quiz-area">
                     <div style="text-align:center; color:#aaa; font-size:0.85rem; font-weight:bold; letter-spacing:1px;" id="q-label">DOMANDA</div>
@@ -91,7 +91,7 @@
                     <button id="btn-next" class="btn btn-green hidden" onclick="prossima()">Prossima</button>
                 </div>
                 <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">
-                    Sincronizzazione dati in corso...<br>Attendi qualche secondo.
+                    Caricamento dati in corso...<br>(O controlla i link in "Gestione")
                 </div>
             </div>
         </div>
@@ -118,10 +118,8 @@
                 <h2>Stato Dati</h2>
                 <p>Vocaboli in memoria: <b id="count-v">0</b></p>
                 <p>Frasi in memoria: <b id="count-f">0</b></p>
-                
                 <div style="margin-top:20px; padding-top:15px; border-top:1px solid #eee;">
-                    <p style="font-size:0.8rem; color:#666;">I dati si aggiornano automaticamente all'avvio.<br>Se serve, premi qui:</p>
-                    <button class="btn btn-blue" onclick="forceSync()">🔄 Forza Aggiornamento Ora</button>
+                    <button class="btn btn-blue" onclick="forceSync()">🔄 Forza Aggiornamento</button>
                     <button class="btn btn-red" style="margin-top:10px;" onclick="resetTotale()">🗑 Reset Completo</button>
                 </div>
             </div>
@@ -136,7 +134,7 @@
                         <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', true)">Tutto</button>
                         <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', false)">Nulla</button>
                     </div>
-                    <button class="btn btn-green" onclick="startKanaQuiz('h')">AVVIA QUIZ</button>
+                    <button class="btn btn-green" onclick="startKanaQuiz('h')">AVVIA QUIZ HIRAGANA</button>
                 </div>
                 <div style="overflow-x:auto;"><table class="kana-table" id="h-table"></table></div>
             </div>
@@ -151,7 +149,7 @@
                         <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', true)">Tutto</button>
                         <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', false)">Nulla</button>
                     </div>
-                    <button class="btn btn-green" onclick="startKanaQuiz('k')">AVVIA QUIZ</button>
+                    <button class="btn btn-green" onclick="startKanaQuiz('k')">AVVIA QUIZ KATAKANA</button>
                 </div>
                 <div style="overflow-x:auto;"><table class="kana-table" id="k-table"></table></div>
             </div>
@@ -160,16 +158,11 @@
     </div>
 
     <script>
-        // ======================================================
-        // --- CONFIGURAZIONE LINK GITHUB ---
-        // ======================================================
-        
+        // === CONFIGURAZIONE LINK ===
         const LINK_VOCABOLI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/importa.csv";
         const LINK_FRASI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/frasi.csv";
 
-        // ======================================================
-
-        // --- DATASETS KANA (Statici) ---
+        // --- DATASETS KANA ---
         const RAW_HIRAGANA=[{k:'あ',r:'a'},{k:'い',r:'i'},{k:'う',r:'u'},{k:'え',r:'e'},{k:'お',r:'o'},{k:'か',r:'ka'},{k:'き',r:'ki'},{k:'く',r:'ku'},{k:'け',r:'ke'},{k:'こ',r:'ko'},{k:'さ',r:'sa'},{k:'し',r:'shi'},{k:'す',r:'su'},{k:'せ',r:'se'},{k:'そ',r:'so'},{k:'た',r:'ta'},{k:'ち',r:'chi'},{k:'つ',r:'tsu'},{k:'て',r:'te'},{k:'と',r:'to'},{k:'な',r:'na'},{k:'に',r:'ni'},{k:'ぬ',r:'nu'},{k:'ね',r:'ne'},{k:'の',r:'no'},{k:'は',r:'ha'},{k:'ひ',r:'hi'},{k:'ふ',r:'fu'},{k:'へ',r:'he'},{k:'ほ',r:'ho'},{k:'ま',r:'ma'},{k:'み',r:'mi'},{k:'む',r:'mu'},{k:'め',r:'me'},{k:'も',r:'mo'},{k:'や',r:'ya'},{k:'ゆ',r:'yu'},{k:'よ',r:'yo'},{k:'ら',r:'ra'},{k:'り',r:'ri'},{k:'る',r:'ru'},{k:'れ',r:'re'},{k:'ろ',r:'ro'},{k:'わ',r:'wa'},{k:'を',r:'wo'},{k:'ん',r:'n'},{k:'が',r:'ga'},{k:'ぎ',r:'gi'},{k:'ぐ',r:'gu'},{k:'げ',r:'ge'},{k:'ご',r:'go'},{k:'ざ',r:'za'},{k:'じ',r:'ji'},{k:'ず',r:'zu'},{k:'ぜ',r:'ze'},{k:'ぞ',r:'zo'},{k:'だ',r:'da'},{k:'ぢ',r:'ji'},{k:'づ',r:'zu'},{k:'で',r:'de'},{k:'ど',r:'do'},{k:'ば',r:'ba'},{k:'び',r:'bi'},{k:'ぶ',r:'bu'},{k:'べ',r:'be'},{k:'ぼ',r:'bo'},{k:'ぱ',r:'pa'},{k:'ぴ',r:'pi'},{k:'ぷ',r:'pu'},{k:'ぺ',r:'pe'},{k:'ぽ',r:'po'},{k:'きゃ',r:'kya'},{k:'きゅ',r:'kyu'},{k:'きょ',r:'kyo'},{k:'しゃ',r:'sha'},{k:'しゅ',r:'shu'},{k:'しょ',r:'sho'},{k:'ちゃ',r:'cha'},{k:'ちゅ',r:'chu'},{k:'ちょ',r:'cho'},{k:'にゃ',r:'nya'},{k:'にゅ',r:'nyu'},{k:'にょ',r:'nyo'},{k:'ひゃ',r:'hya'},{k:'ひゅ',r:'hyu'},{k:'ひょ',r:'hyo'},{k:'みゃ',r:'mya'},{k:'みゅ',r:'myu'},{k:'みょ',r:'myo'},{k:'りゃ',r:'rya'},{k:'りゅ',r:'ryu'},{k:'りょ',r:'ryo'},{k:'ぎゃ',r:'gya'},{k:'ぎゅ',r:'gyu'},{k:'ぎょ',r:'gyo'},{k:'じゃ',r:'ja'},{k:'じゅ',r:'ju'},{k:'じょ',r:'jo'},{k:'びゃ',r:'bya'},{k:'びゅ',r:'byu'},{k:'びょ',r:'byo'},{k:'ぴゃ',r:'pya'},{k:'ぴゅ',r:'pyu'},{k:'ぴょ',r:'pyo'}];
         const RAW_KATAKANA=[{k:'ア',r:'a'},{k:'イ',r:'i'},{k:'ウ',r:'u'},{k:'エ',r:'e'},{k:'オ',r:'o'},{k:'カ',r:'ka'},{k:'キ',r:'ki'},{k:'ク',r:'ku'},{k:'ケ',r:'ke'},{k:'コ',r:'ko'},{k:'サ',r:'sa'},{k:'シ',r:'shi'},{k:'ス',r:'su'},{k:'セ',r:'se'},{k:'ソ',r:'so'},{k:'タ',r:'ta'},{k:'チ',r:'chi'},{k:'ツ',r:'tsu'},{k:'テ',r:'te'},{k:'ト',r:'to'},{k:'ナ',r:'na'},{k:'ニ',r:'ni'},{k:'ヌ',r:'nu'},{k:'ネ',r:'ne'},{k:'ノ',r:'no'},{k:'ハ',r:'ha'},{k:'ヒ',r:'hi'},{k:'フ',r:'fu'},{k:'ヘ',r:'he'},{k:'ホ',r:'ho'},{k:'マ',r:'ma'},{k:'ミ',r:'mi'},{k:'ム',r:'mu'},{k:'メ',r:'me'},{k:'モ',r:'mo'},{k:'ヤ',r:'ya'},{k:'ユ',r:'yu'},{k:'ヨ',r:'yo'},{k:'ラ',r:'ra'},{k:'リ',r:'ri'},{k:'ル',r:'ru'},{k:'レ',r:'re'},{k:'ロ',r:'ro'},{k:'ワ',r:'wa'},{k:'ヲ',r:'wo'},{k:'ン',r:'n'},{k:'ガ',r:'ga'},{k:'ギ',r:'gi'},{k:'グ',r:'gu'},{k:'ゲ',r:'ge'},{k:'ゴ',r:'go'},{k:'ザ',r:'za'},{k:'ジ',r:'ji'},{k:'ズ',r:'zu'},{k:'ゼ',r:'ze'},{k:'ゾ',r:'zo'},{k:'ダ',r:'da'},{k:'ヂ',r:'ji'},{k:'ヅ',r:'zu'},{k:'デ',r:'de'},{k:'ド',r:'do'},{k:'バ',r:'ba'},{k:'ビ',r:'bi'},{k:'ブ',r:'bu'},{k:'ベ',r:'be'},{k:'ボ',r:'bo'},{k:'パ',r:'pa'},{k:'ピ',r:'pi'},{k:'プ',r:'pu'},{k:'ペ',r:'pe'},{k:'ポ',r:'po'},{k:'キャ',r:'kya'},{k:'キュ',r:'kyu'},{k:'キョ',r:'kyo'},{k:'シャ',r:'sha'},{k:'シュ',r:'shu'},{k:'ショ',r:'sho'},{k:'チャ',r:'cha'},{k:'チュ',r:'chu'},{k:'チョ',r:'cho'},{k:'ニャ',r:'nya'},{k:'ニュ',r:'nyu'},{k:'ニョ',r:'nyo'},{k:'ヒャ',r:'hya'},{k:'ヒュ',r:'hyu'},{k:'ヒョ',r:'hyo'},{k:'ミャ',r:'mya'},{k:'ミュ',r:'myu'},{k:'ミョ',r:'myo'},{k:'リャ',r:'rya'},{k:'リュ',r:'ryu'},{k:'リョ',r:'ryo'},{k:'ギャ',r:'gya'},{k:'ギュ',r:'gyu'},{k:'ギョ',r:'gyo'},{k:'ジャ',r:'ja'},{k:'ジュ',r:'ju'},{k:'ジョ',r:'jo'},{k:'ビャ',r:'bya'},{k:'ビュ',r:'byu'},{k:'ビョ',r:'byo'},{k:'ピャ',r:'pya'},{k:'ピュ',r:'pyu'},{k:'ピョ',r:'pyo'}];
         const KANA_GROUPS = {'Vocali':[0,5],'K':[5,10],'S':[10,15],'T':[15,20],'N':[20,25],'H':[25,30],'M':[30,35],'Y':[35,38],'R':[38,43],'W/N':[43,46],'Dakuten':[46,71],'Yoon':[71,104]};
@@ -184,26 +177,20 @@
 
         // --- AVVIO E SYNC ---
         window.onload = function() {
-            // 1. Carica dati salvati
             try {
-                if(localStorage.getItem('srs_vocab_v10')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v10'));
-                if(localStorage.getItem('srs_frasi_v10')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v10'));
+                if(localStorage.getItem('srs_vocab_v11')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v11'));
+                if(localStorage.getItem('srs_frasi_v11')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v11'));
             } catch(e) { localStorage.clear(); }
 
-            // 2. Setup Interfaccia
             aggiornaConta();
             popolaFiltri();
             renderTabelle('h', RAW_HIRAGANA);
             renderTabelle('k', RAW_KATAKANA);
             renderFrasi();
-            if(vocaboli.length > 0) nuovaSessione();
+            
+            // Sync automatico
+            if(LINK_VOCABOLI && LINK_FRASI) forceSync();
 
-            // 3. Auto-Sync da GitHub
-            if(LINK_VOCABOLI.startsWith('http') || LINK_FRASI.startsWith('http')) {
-                forceSync();
-            }
-
-            // 4. Listener
             document.getElementById('input-risposta').addEventListener('keydown', function(e){
                 if(e.key === 'Enter') {
                     if(!document.getElementById('btn-check').classList.contains('hidden')) controlla();
@@ -214,41 +201,24 @@
 
         function showNotification(msg, type) {
             const el = document.getElementById('sync-status');
-            el.className = type;
-            el.innerText = msg;
-            el.style.display = 'block';
+            el.className = type; el.innerText = msg; el.style.display = 'block';
             setTimeout(() => { el.style.display = 'none'; }, 4000);
         }
 
         function forceSync() {
-            showNotification("Sincronizzazione in corso...", "sync-loading");
-            
-            let p1 = Promise.resolve();
-            let p2 = Promise.resolve();
-
-            if(LINK_VOCABOLI) {
-                p1 = fetch(LINK_VOCABOLI).then(r=>r.text()).then(t => {
-                    parseCSV(t, 'vocab', false);
-                });
-            }
-            if(LINK_FRASI) {
-                p2 = fetch(LINK_FRASI).then(r=>r.text()).then(t => {
-                    parseCSV(t, 'frasi', false);
-                });
-            }
-
-            Promise.all([p1, p2])
-                .then(() => {
-                    showNotification("Dati aggiornati da GitHub!", "sync-success");
-                    aggiornaConta();
-                    popolaFiltri();
-                    renderFrasi();
-                    if(vocaboli.length > 0 && sessione.length === 0) nuovaSessione();
-                })
-                .catch(e => {
-                    showNotification("Errore Sincronizzazione", "sync-error");
-                    console.error(e);
-                });
+            showNotification("Sync...", "sync-loading");
+            Promise.all([
+                fetch(LINK_VOCABOLI).then(r=>r.text()),
+                fetch(LINK_FRASI).then(r=>r.text())
+            ]).then(([txtV, txtF]) => {
+                parseCSV(txtV, 'vocab', false);
+                parseCSV(txtF, 'frasi', false);
+                showNotification("Dati Aggiornati!", "sync-success");
+                aggiornaConta(); popolaFiltri(); renderFrasi();
+                if(vocaboli.length > 0) openVocabQuiz(); // Avvia quiz se ci sono dati
+            }).catch(e => {
+                showNotification("Errore Sync", "sync-error");
+            });
         }
 
         // --- NAVIGAZIONE ---
@@ -257,15 +227,16 @@
             document.getElementById('tab-'+id).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
-            
-            if(id === 'quiz') {
-                mode = 'vocab';
-                document.getElementById('filtro-cat').classList.remove('hidden');
-                if(vocaboli.length > 0) nuovaSessione();
-            }
         }
 
-        // --- QUIZ ENGINE ---
+        // --- QUIZ FUNCTIONS ---
+        function openVocabQuiz() {
+            // Questa funzione imposta esplicitamente la modalità vocaboli
+            mode = 'vocab';
+            document.getElementById('filtro-cat').classList.remove('hidden');
+            nuovaSessione();
+        }
+
         function nuovaSessione() {
             if(mode === 'vocab') {
                 const cat = document.getElementById('filtro-cat').value;
@@ -389,16 +360,19 @@
             if(pool.length === 0) { alert("Seleziona almeno una riga"); return; }
             
             sessione = pool.sort(() => 0.5 - Math.random());
+            
+            // IMPOSTA LA MODALITA' KANA E CAMBIA SCHEDA
             mode = 'kana';
             switchTab('quiz');
-            document.getElementById('filtro-cat').classList.add('hidden');
+            document.getElementById('filtro-cat').classList.add('hidden'); // Nasconde filtro vocaboli
             document.getElementById('quiz-area').classList.remove('hidden');
             document.getElementById('msg-no-data').classList.add('hidden');
+            
             punteggio = {ok:0, err:0};
             prossima();
         }
 
-        // --- PARSING & IMPORT ---
+        // --- PARSER ---
         function parseCSV(text, type, reload) {
             const lines = text.trim().split('\n');
             let count = 0;
@@ -415,7 +389,7 @@
                         count++;
                     }
                 });
-                localStorage.setItem('srs_vocab_v10', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v11', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
@@ -429,9 +403,8 @@
                         count++;
                     }
                 });
-                localStorage.setItem('srs_frasi_v10', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v11', JSON.stringify(frasi));
             }
-            
             if(reload) { alert("Caricati: " + count); location.reload(); }
         }
 
