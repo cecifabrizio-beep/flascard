@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v7.0 (Tabelle Fisse)</title>
+    <title>Giapponese SRS v7.1 (Fix Import)</title>
     <style>
         /* --- STILE GENERALE --- */
         body {
@@ -38,7 +38,7 @@
 
         /* --- UI ELEMENTI --- */
         .input-box {
-            width: 100%; padding: 12px; font-size: 1.2rem; border: 2px solid #ddd;
+            width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd;
             border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; text-align: center;
         }
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; }
@@ -49,7 +49,7 @@
         /* --- QUIZ --- */
         #prompt-container { text-align: center; margin: 20px 0; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
         #prompt-label { font-size: 0.8rem; font-weight: bold; color: #999; text-transform: uppercase; margin-bottom: 5px; }
-        #prompt-principale { font-size: 2.5rem; margin: 5px 0; color: #333; }
+        #prompt-principale { font-size: 2.2rem; margin: 5px 0; color: #333; }
         #prompt-secondario { font-size: 1.1rem; color: #666; font-style: italic; }
         #risultato-controllo { text-align: center; font-weight: bold; min-height: 30px; margin: 10px 0; }
         .corretto { color: #34c759; } .sbagliato { color: #ff3b30; }
@@ -120,7 +120,7 @@
                 </div>
                 
                 <div id="no-data-msg" class="hidden" style="text-align:center; padding:20px; color:#666;">
-                    Nessun dato caricato.
+                    Nessun dato caricato.<br>Vai su <b>⚙️ Gestione</b> per caricare i dati.
                 </div>
             </div>
         </div>
@@ -146,7 +146,7 @@
                 <h2>Gestione Dati</h2>
                 
                 <div class="import-section">
-                    <h3>1. Vocaboli</h3>
+                    <h3>1. Vocaboli (CSV)</h3>
                     <div style="display:flex; gap:5px; margin-bottom:10px;">
                         <input type="text" id="url-vocaboli" class="input-box" style="margin:0; font-size:0.9rem;" placeholder="Link RAW GitHub...">
                         <button class="btn btn-blue" style="width:auto; margin:0;" onclick="scaricaDaGithub('vocaboli')">Scarica</button>
@@ -155,7 +155,7 @@
                 </div>
 
                 <div class="import-section">
-                    <h3>2. Frasi</h3>
+                    <h3>2. Frasi (CSV)</h3>
                     <div style="display:flex; gap:5px; margin-bottom:10px;">
                         <input type="text" id="url-frasi" class="input-box" style="margin:0; font-size:0.9rem;" placeholder="Link RAW GitHub...">
                         <button class="btn btn-blue" style="width:auto; margin:0;" onclick="scaricaDaGithub('frasi')">Scarica</button>
@@ -164,7 +164,8 @@
                 </div>
 
                 <div style="text-align:center; border-top:1px solid #eee; padding-top:15px;">
-                    <p>Vocaboli: <b id="count-vocab">0</b> | Frasi: <b id="count-frasi">0</b></p>
+                    <p>Vocaboli in memoria: <b id="count-vocab">0</b></p>
+                    <p>Frasi in memoria: <b id="count-frasi">0</b></p>
                     <button class="btn btn-red" onclick="cancellaTutto()">🗑 CANCELLA TUTTO</button>
                 </div>
             </div>
@@ -219,12 +220,12 @@
                          <tr><th>C</th><td><span class="kc">ちゃ</span><span class="kr">cha</span></td><td><span class="kc">ちゅ</span><span class="kr">chu</span></td><td><span class="kc">ちょ</span><span class="kr">cho</span></td></tr>
                          <tr><th>N</th><td><span class="kc">にゃ</span><span class="kr">nya</span></td><td><span class="kc">にゅ</span><span class="kr">nyu</span></td><td><span class="kc">にょ</span><span class="kr">nyo</span></td></tr>
                          <tr><th>H</th><td><span class="kc">ひゃ</span><span class="kr">hya</span></td><td><span class="kc">ひゅ</span><span class="kr">hyu</span></td><td><span class="kc">ひょ</span><span class="kr">hyo</span></td></tr>
-                         <tr><th>M</th><td><span class="kc">みゃ</span><span class="kr">mya</span></td><td><span class="kc">みゅ</span><span class="kr">myu</span></td><td><span class="kc">みょ</span><span class="kr">myo</span></td></tr>
-                         <tr><th>R</th><td><span class="kc">りゃ</span><span class="kr">rya</span></td><td><span class="kc">りゅ</span><span class="kr">ryu</span></td><td><span class="kc">りょ</span><span class="kr">ryo</span></td></tr>
-                         <tr><th>G</th><td><span class="kc">ぎゃ</span><span class="kr">gya</span></td><td><span class="kc">ぎゅ</span><span class="kr">gyu</span></td><td><span class="kc">ぎょ</span><span class="kr">gyo</span></td></tr>
-                         <tr><th>J</th><td><span class="kc">じゃ</span><span class="kr">ja</span></td><td><span class="kc">じゅ</span><span class="kr">ju</span></td><td><span class="kc">じょ</span><span class="kr">jo</span></td></tr>
-                         <tr><th>B</th><td><span class="kc">びゃ</span><span class="kr">bya</span></td><td><span class="kc">びゅ</span><span class="kr">byu</span></td><td><span class="kc">びょ</span><span class="kr">byo</span></td></tr>
-                         <tr><th>P</th><td><span class="kc">ぴゃ</span><span class="kr">pya</span></td><td><span class="kc">ぴゅ</span><span class="kr">pyu</span></td><td><span class="kc">ぴょ</span><span class="kr">pyo</span></td></tr>
+                         <tr><th>M</th><td><span class="kc">みゃ</span><span class="kr">mya</span></td><td><span class="kc">ミュ</span><span class="kr">myu</span></td><td><span class="kc">みょ</span><span class="kr">myo</span></td></tr>
+                         <tr><th>R</th><td><span class="kc">りゃ</span><span class="kr">rya</span></td><td><span class="kc">リュ</span><span class="kr">ryu</span></td><td><span class="kc">リョ</span><span class="kr">ryo</span></td></tr>
+                         <tr><th>G</th><td><span class="kc">ぎゃ</span><span class="kr">gya</span></td><td><span class="kc">ギュ</span><span class="kr">gyu</span></td><td><span class="kc">ギョ</span><span class="kr">gyo</span></td></tr>
+                         <tr><th>J</th><td><span class="kc">じゃ</span><span class="kr">ja</span></td><td><span class="kc">ジュ</span><span class="kr">ju</span></td><td><span class="kc">ジョ</span><span class="kr">jo</span></td></tr>
+                         <tr><th>B</th><td><span class="kc">ビャ</span><span class="kr">bya</span></td><td><span class="kc">ビュ</span><span class="kr">byu</span></td><td><span class="kc">ビョ</span><span class="kr">byo</span></td></tr>
+                         <tr><th>P</th><td><span class="kc">ピャ</span><span class="kr">pya</span></td><td><span class="kc">ピュ</span><span class="kr">pyu</span></td><td><span class="kc">ピョ</span><span class="kr">pyo</span></td></tr>
                     </table>
                 </div>
             </div>
@@ -378,8 +379,11 @@
         // --- AVVIO ---
         window.onload = function() {
             caricaDati();
+            
+            // Genera configuratori Quiz Kana
             generaConfigPanel('h');
             generaConfigPanel('k');
+            
             aggiornaUI();
 
             // Listener Invio
@@ -450,8 +454,18 @@
         function parseVocaboli(csv) {
             vocaboli = [];
             csv.trim().split('\n').forEach(line => {
+                // Gestisce il formato: Italiano, Inglese, Giapponese, Romaji, Tag
+                // Separa per virgola
                 const parts = line.split(',');
-                if (parts.length >= 4) vocaboli.push({ ita: parts[0].trim(), eng: parts[1].trim(), jpn: parts[2].trim(), rom: parts[3].trim(), tag: parts[4] ? parts[4].trim() : 'Generale' });
+                if (parts.length >= 4) {
+                    vocaboli.push({
+                        ita: parts[0].trim(),
+                        eng: parts[1].trim(),
+                        jpn: parts[2].trim(),
+                        rom: parts[3].trim(),
+                        tag: parts[4] ? parts[4].trim() : 'Generale'
+                    });
+                }
             });
             localStorage.setItem(KEY_V, JSON.stringify(vocaboli));
         }
@@ -459,8 +473,16 @@
         function parseFrasi(csv) {
             frasi = [];
             csv.trim().split('\n').forEach(line => {
+                // Gestisce il formato: Italiano, Romaji, Giapponese, Tag
                 const parts = line.split(',');
-                if (parts.length >= 3) frasi.push({ ita: parts[0].trim(), rom: parts[1].trim(), jpn: parts[2].trim(), tag: parts[3] ? parts[3].trim() : 'Generale' });
+                if (parts.length >= 3) {
+                    frasi.push({
+                        ita: parts[0].trim(),
+                        rom: parts[1].trim(),
+                        jpn: parts[2].trim(),
+                        tag: parts[3] ? parts[3].trim() : 'Generale'
+                    });
+                }
             });
             localStorage.setItem(KEY_F, JSON.stringify(frasi));
         }
