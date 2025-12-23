@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v7.2 (Fix Import)</title>
+    <title>Giapponese SRS v7.3 (Stable)</title>
     <style>
         /* --- STILE GENERALE --- */
         body {
@@ -38,7 +38,7 @@
 
         /* --- UI ELEMENTI --- */
         .input-box {
-            width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd;
+            width: 100%; padding: 12px; font-size: 1.2rem; border: 2px solid #ddd;
             border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; text-align: center;
         }
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; }
@@ -49,7 +49,7 @@
         /* --- QUIZ --- */
         #prompt-container { text-align: center; margin: 20px 0; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
         #prompt-label { font-size: 0.8rem; font-weight: bold; color: #999; text-transform: uppercase; margin-bottom: 5px; }
-        #prompt-principale { font-size: 2.2rem; margin: 5px 0; color: #333; }
+        #prompt-principale { font-size: 2.5rem; margin: 5px 0; color: #333; }
         #prompt-secondario { font-size: 1.1rem; color: #666; font-style: italic; }
         #risultato-controllo { text-align: center; font-weight: bold; min-height: 30px; margin: 10px 0; }
         .corretto { color: #34c759; } .sbagliato { color: #ff3b30; }
@@ -85,7 +85,7 @@
     <h1>Set di Studio Giapponese</h1>
 
     <nav id="main-nav">
-        <button class="nav-btn active" onclick="showTab('quiz'); setQuizMode('vocaboli')">Quiz Vocaboli</button>
+        <button class="nav-btn active" onclick="showTab('quiz')">Quiz Vocaboli</button>
         <button class="nav-btn" onclick="showTab('ascolto')">🎧 Ascolto</button>
         <button class="nav-btn" onclick="showTab('hiragana')">Hiragana</button>
         <button class="nav-btn" onclick="showTab('katakana')">Katakana</button>
@@ -99,7 +99,7 @@
                 <div id="punteggio-container" style="text-align:center; color:#888; margin-bottom:10px;">Sessione pronta</div>
                 
                 <div id="filtro-wrapper">
-                    <select id="filtro-categoria" class="input-box" style="font-size:1rem;" onchange="nuovaSessione()">
+                    <select id="filtro-categoria" class="input-box" style="font-size:1rem;" onchange="avviaNuovaSessione()">
                         <option value="TUTTI">Tutte le Categorie</option>
                     </select>
                 </div>
@@ -115,8 +115,8 @@
                     
                     <div id="risultato-controllo"></div>
 
-                    <button id="btn-controlla" class="btn btn-blue" onclick="controlla()">Controlla</button>
-                    <button id="btn-prossima" class="btn btn-green hidden" onclick="prossima()">Prossima</button>
+                    <button id="btn-controlla" class="btn btn-blue" onclick="controllaRisposta()">Controlla</button>
+                    <button id="btn-prossima" class="btn btn-green hidden" onclick="prossimaCarta()">Prossima</button>
                 </div>
                 
                 <div id="no-data-msg" class="hidden" style="text-align:center; padding:20px; color:#666;">
@@ -180,55 +180,24 @@
                 <div class="kana-config">
                     <h3 style="margin-top:0; font-size:1rem; color:#555;">Quiz Alfabeto</h3>
                     <div class="config-grid" id="h-config-grid"></div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-blue" style="font-size:0.8rem; padding:8px;" onclick="toggleAllKana('hiragana', true)">Seleziona Tutto</button>
+                        <button class="btn btn-blue" style="font-size:0.8rem; padding:8px;" onclick="toggleAllKana('hiragana', false)">Deseleziona</button>
+                    </div>
                     <button class="btn btn-green" onclick="avviaQuizKana('hiragana')">🏋️ AVVIA QUIZ HIRAGANA</button>
                 </div>
 
                 <h4>Suoni Base (Gojūon)</h4>
                 <div class="table-wrap">
-                    <table class="kana-table">
-                        <tr><th>-</th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                        <tr><th>-</th><td><span class="kc">あ</span><span class="kr">a</span></td><td><span class="kc">い</span><span class="kr">i</span></td><td><span class="kc">う</span><span class="kr">u</span></td><td><span class="kc">え</span><span class="kr">e</span></td><td><span class="kc">お</span><span class="kr">o</span></td></tr>
-                        <tr><th>K</th><td><span class="kc">か</span><span class="kr">ka</span></td><td><span class="kc">き</span><span class="kr">ki</span></td><td><span class="kc">く</span><span class="kr">ku</span></td><td><span class="kc">け</span><span class="kr">ke</span></td><td><span class="kc">こ</span><span class="kr">ko</span></td></tr>
-                        <tr><th>S</th><td><span class="kc">さ</span><span class="kr">sa</span></td><td><span class="kc">し</span><span class="kr">shi</span></td><td><span class="kc">す</span><span class="kr">su</span></td><td><span class="kc">せ</span><span class="kr">se</span></td><td><span class="kc">そ</span><span class="kr">so</span></td></tr>
-                        <tr><th>T</th><td><span class="kc">た</span><span class="kr">ta</span></td><td><span class="kc">ち</span><span class="kr">chi</span></td><td><span class="kc">つ</span><span class="kr">tsu</span></td><td><span class="kc">て</span><span class="kr">te</span></td><td><span class="kc">と</span><span class="kr">to</span></td></tr>
-                        <tr><th>N</th><td><span class="kc">な</span><span class="kr">na</span></td><td><span class="kc">に</span><span class="kr">ni</span></td><td><span class="kc">ぬ</span><span class="kr">nu</span></td><td><span class="kc">ね</span><span class="kr">ne</span></td><td><span class="kc">の</span><span class="kr">no</span></td></tr>
-                        <tr><th>H</th><td><span class="kc">は</span><span class="kr">ha</span></td><td><span class="kc">ひ</span><span class="kr">hi</span></td><td><span class="kc">ふ</span><span class="kr">fu</span></td><td><span class="kc">へ</span><span class="kr">he</span></td><td><span class="kc">ほ</span><span class="kr">ho</span></td></tr>
-                        <tr><th>M</th><td><span class="kc">ま</span><span class="kr">ma</span></td><td><span class="kc">み</span><span class="kr">mi</span></td><td><span class="kc">む</span><span class="kr">mu</span></td><td><span class="kc">め</span><span class="kr">me</span></td><td><span class="kc">も</span><span class="kr">mo</span></td></tr>
-                        <tr><th>Y</th><td><span class="kc">や</span><span class="kr">ya</span></td><td></td><td><span class="kc">ゆ</span><span class="kr">yu</span></td><td></td><td><span class="kc">よ</span><span class="kr">yo</span></td></tr>
-                        <tr><th>R</th><td><span class="kc">ら</span><span class="kr">ra</span></td><td><span class="kc">り</span><span class="kr">ri</span></td><td><span class="kc">る</span><span class="kr">ru</span></td><td><span class="kc">れ</span><span class="kr">re</span></td><td><span class="kc">ろ</span><span class="kr">ro</span></td></tr>
-                        <tr><th>W</th><td><span class="kc">わ</span><span class="kr">wa</span></td><td></td><td></td><td></td><td><span class="kc">を</span><span class="kr">wo</span></td></tr>
-                        <tr><th>N</th><td><span class="kc">ん</span><span class="kr">n</span></td><td></td><td></td><td></td><td></td></tr>
-                    </table>
+                    <table class="kana-table" id="h-table-base"></table>
                 </div>
-
                 <h4>Suoni Impuri (Dakuten)</h4>
                 <div class="table-wrap">
-                    <table class="kana-table">
-                         <tr><th>-</th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                         <tr><th>G</th><td><span class="kc">が</span><span class="kr">ga</span></td><td><span class="kc">ぎ</span><span class="kr">gi</span></td><td><span class="kc">ぐ</span><span class="kr">gu</span></td><td><span class="kc">げ</span><span class="kr">ge</span></td><td><span class="kc">ご</span><span class="kr">go</span></td></tr>
-                         <tr><th>Z</th><td><span class="kc">ざ</span><span class="kr">za</span></td><td><span class="kc">じ</span><span class="kr">ji</span></td><td><span class="kc">ず</span><span class="kr">zu</span></td><td><span class="kc">ぜ</span><span class="kr">ze</span></td><td><span class="kc">ぞ</span><span class="kr">zo</span></td></tr>
-                         <tr><th>D</th><td><span class="kc">だ</span><span class="kr">da</span></td><td><span class="kc">ぢ</span><span class="kr">ji</span></td><td><span class="kc">づ</span><span class="kr">zu</span></td><td><span class="kc">で</span><span class="kr">de</span></td><td><span class="kc">ど</span><span class="kr">do</span></td></tr>
-                         <tr><th>B</th><td><span class="kc">ば</span><span class="kr">ba</span></td><td><span class="kc">び</span><span class="kr">bi</span></td><td><span class="kc">ぶ</span><span class="kr">bu</span></td><td><span class="kc">べ</span><span class="kr">be</span></td><td><span class="kc">ぼ</span><span class="kr">bo</span></td></tr>
-                         <tr><th>P</th><td><span class="kc">ぱ</span><span class="kr">pa</span></td><td><span class="kc">ぴ</span><span class="kr">pi</span></td><td><span class="kc">ぷ</span><span class="kr">pu</span></td><td><span class="kc">ぺ</span><span class="kr">pe</span></td><td><span class="kc">ぽ</span><span class="kr">po</span></td></tr>
-                    </table>
+                    <table class="kana-table" id="h-table-daku"></table>
                 </div>
-
                 <h4>Suoni Contratti (Yoon)</h4>
                 <div class="table-wrap">
-                    <table class="kana-table">
-                         <tr><th>-</th><th>YA</th><th>YU</th><th>YO</th></tr>
-                         <tr><th>K</th><td><span class="kc">きゃ</span><span class="kr">kya</span></td><td><span class="kc">きゅ</span><span class="kr">kyu</span></td><td><span class="kc">きょ</span><span class="kr">kyo</span></td></tr>
-                         <tr><th>S</th><td><span class="kc">しゃ</span><span class="kr">sha</span></td><td><span class="kc">しゅ</span><span class="kr">shu</span></td><td><span class="kc">しょ</span><span class="kr">sho</span></td></tr>
-                         <tr><th>C</th><td><span class="kc">ちゃ</span><span class="kr">cha</span></td><td><span class="kc">ちゅ</span><span class="kr">chu</span></td><td><span class="kc">ちょ</span><span class="kr">cho</span></td></tr>
-                         <tr><th>N</th><td><span class="kc">にゃ</span><span class="kr">nya</span></td><td><span class="kc">にゅ</span><span class="kr">nyu</span></td><td><span class="kc">にょ</span><span class="kr">nyo</span></td></tr>
-                         <tr><th>H</th><td><span class="kc">ひゃ</span><span class="kr">hya</span></td><td><span class="kc">ひゅ</span><span class="kr">hyu</span></td><td><span class="kc">ひょ</span><span class="kr">hyo</span></td></tr>
-                         <tr><th>M</th><td><span class="kc">みゃ</span><span class="kr">mya</span></td><td><span class="kc">ミュ</span><span class="kr">myu</span></td><td><span class="kc">みょ</span><span class="kr">myo</span></td></tr>
-                         <tr><th>R</th><td><span class="kc">りゃ</span><span class="kr">rya</span></td><td><span class="kc">リュ</span><span class="kr">ryu</span></td><td><span class="kc">リョ</span><span class="kr">ryo</span></td></tr>
-                         <tr><th>G</th><td><span class="kc">ぎゃ</span><span class="kr">gya</span></td><td><span class="kc">ギュ</span><span class="kr">gyu</span></td><td><span class="kc">ギョ</span><span class="kr">gyo</span></td></tr>
-                         <tr><th>J</th><td><span class="kc">じゃ</span><span class="kr">ja</span></td><td><span class="kc">ジュ</span><span class="kr">ju</span></td><td><span class="kc">ジョ</span><span class="kr">jo</span></td></tr>
-                         <tr><th>B</th><td><span class="kc">ビャ</span><span class="kr">bya</span></td><td><span class="kc">ビュ</span><span class="kr">byu</span></td><td><span class="kc">ビョ</span><span class="kr">byo</span></td></tr>
-                         <tr><th>P</th><td><span class="kc">ピャ</span><span class="kr">pya</span></td><td><span class="kc">ピュ</span><span class="kr">pyu</span></td><td><span class="kc">ピョ</span><span class="kr">pyo</span></td></tr>
-                    </table>
+                    <table class="kana-table" id="h-table-yoon"></table>
                 </div>
             </div>
         </div>
@@ -240,55 +209,24 @@
                 <div class="kana-config">
                     <h3 style="margin-top:0; font-size:1rem; color:#555;">Quiz Alfabeto</h3>
                     <div class="config-grid" id="k-config-grid"></div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-blue" style="font-size:0.8rem; padding:8px;" onclick="toggleAllKana('katakana', true)">Seleziona Tutto</button>
+                        <button class="btn btn-blue" style="font-size:0.8rem; padding:8px;" onclick="toggleAllKana('katakana', false)">Deseleziona</button>
+                    </div>
                     <button class="btn btn-green" onclick="avviaQuizKana('katakana')">🏋️ AVVIA QUIZ KATAKANA</button>
                 </div>
 
                 <h4>Suoni Base (Gojūon)</h4>
                 <div class="table-wrap">
-                    <table class="kana-table">
-                        <tr><th>-</th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                        <tr><th>-</th><td><span class="kc">ア</span><span class="kr">a</span></td><td><span class="kc">イ</span><span class="kr">i</span></td><td><span class="kc">ウ</span><span class="kr">u</span></td><td><span class="kc">エ</span><span class="kr">e</span></td><td><span class="kc">オ</span><span class="kr">o</span></td></tr>
-                        <tr><th>K</th><td><span class="kc">カ</span><span class="kr">ka</span></td><td><span class="kc">キ</span><span class="kr">ki</span></td><td><span class="kc">ク</span><span class="kr">ku</span></td><td><span class="kc">ケ</span><span class="kr">ke</span></td><td><span class="kc">コ</span><span class="kr">ko</span></td></tr>
-                        <tr><th>S</th><td><span class="kc">サ</span><span class="kr">sa</span></td><td><span class="kc">シ</span><span class="kr">shi</span></td><td><span class="kc">ス</span><span class="kr">su</span></td><td><span class="kc">セ</span><span class="kr">se</span></td><td><span class="kc">ソ</span><span class="kr">so</span></td></tr>
-                        <tr><th>T</th><td><span class="kc">タ</span><span class="kr">ta</span></td><td><span class="kc">チ</span><span class="kr">chi</span></td><td><span class="kc">ツ</span><span class="kr">tsu</span></td><td><span class="kc">テ</span><span class="kr">te</span></td><td><span class="kc">ト</span><span class="kr">to</span></td></tr>
-                        <tr><th>N</th><td><span class="kc">ナ</span><span class="kr">na</span></td><td><span class="kc">ニ</span><span class="kr">ni</span></td><td><span class="kc">ヌ</span><span class="kr">nu</span></td><td><span class="kc">ネ</span><span class="kr">ne</span></td><td><span class="kc">ノ</span><span class="kr">no</span></td></tr>
-                        <tr><th>H</th><td><span class="kc">ハ</span><span class="kr">ha</span></td><td><span class="kc">ヒ</span><span class="kr">hi</span></td><td><span class="kc">フ</span><span class="kr">fu</span></td><td><span class="kc">ヘ</span><span class="kr">he</span></td><td><span class="kc">ホ</span><span class="kr">ho</span></td></tr>
-                        <tr><th>M</th><td><span class="kc">マ</span><span class="kr">ma</span></td><td><span class="kc">ミ</span><span class="kr">mi</span></td><td><span class="kc">ム</span><span class="kr">mu</span></td><td><span class="kc">メ</span><span class="kr">me</span></td><td><span class="kc">モ</span><span class="kr">mo</span></td></tr>
-                        <tr><th>Y</th><td><span class="kc">ヤ</span><span class="kr">ya</span></td><td></td><td><span class="kc">ユ</span><span class="kr">yu</span></td><td></td><td><span class="kc">ヨ</span><span class="kr">yo</span></td></tr>
-                        <tr><th>R</th><td><span class="kc">ラ</span><span class="kr">ra</span></td><td><span class="kc">リ</span><span class="kr">ri</span></td><td><span class="kc">ル</span><span class="kr">ru</span></td><td><span class="kc">レ</span><span class="kr">re</span></td><td><span class="kc">ロ</span><span class="kr">ro</span></td></tr>
-                        <tr><th>W</th><td><span class="kc">ワ</span><span class="kr">wa</span></td><td></td><td></td><td></td><td><span class="kc">ヲ</span><span class="kr">wo</span></td></tr>
-                        <tr><th>N</th><td><span class="kc">ン</span><span class="kr">n</span></td><td></td><td></td><td></td><td></td></tr>
-                    </table>
+                    <table class="kana-table" id="k-table-base"></table>
                 </div>
-
                 <h4>Suoni Impuri (Dakuten)</h4>
                 <div class="table-wrap">
-                    <table class="kana-table">
-                         <tr><th>-</th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>
-                         <tr><th>G</th><td><span class="kc">ガ</span><span class="kr">ga</span></td><td><span class="kc">ギ</span><span class="kr">gi</span></td><td><span class="kc">グ</span><span class="kr">gu</span></td><td><span class="kc">ゲ</span><span class="kr">ge</span></td><td><span class="kc">ゴ</span><span class="kr">go</span></td></tr>
-                         <tr><th>Z</th><td><span class="kc">ザ</span><span class="kr">za</span></td><td><span class="kc">ジ</span><span class="kr">ji</span></td><td><span class="kc">ズ</span><span class="kr">zu</span></td><td><span class="kc">ゼ</span><span class="kr">ze</span></td><td><span class="kc">ゾ</span><span class="kr">zo</span></td></tr>
-                         <tr><th>D</th><td><span class="kc">ダ</span><span class="kr">da</span></td><td><span class="kc">ヂ</span><span class="kr">ji</span></td><td><span class="kc">ヅ</span><span class="kr">zu</span></td><td><span class="kc">デ</span><span class="kr">de</span></td><td><span class="kc">ド</span><span class="kr">do</span></td></tr>
-                         <tr><th>B</th><td><span class="kc">バ</span><span class="kr">ba</span></td><td><span class="kc">ビ</span><span class="kr">bi</span></td><td><span class="kc">ブ</span><span class="kr">bu</span></td><td><span class="kc">ベ</span><span class="kr">be</span></td><td><span class="kc">ボ</span><span class="kr">bo</span></td></tr>
-                         <tr><th>P</th><td><span class="kc">パ</span><span class="kr">pa</span></td><td><span class="kc">ピ</span><span class="kr">pi</span></td><td><span class="kc">プ</span><span class="kr">pu</span></td><td><span class="kc">ペ</span><span class="kr">pe</span></td><td><span class="kc">ポ</span><span class="kr">po</span></td></tr>
-                    </table>
+                    <table class="kana-table" id="k-table-daku"></table>
                 </div>
-
                 <h4>Suoni Contratti (Yoon)</h4>
                 <div class="table-wrap">
-                    <table class="kana-table">
-                         <tr><th>-</th><th>YA</th><th>YU</th><th>YO</th></tr>
-                         <tr><th>K</th><td><span class="kc">キャ</span><span class="kr">kya</span></td><td><span class="kc">キュ</span><span class="kr">kyu</span></td><td><span class="kc">キョ</span><span class="kr">kyo</span></td></tr>
-                         <tr><th>S</th><td><span class="kc">シャ</span><span class="kr">sha</span></td><td><span class="kc">シュ</span><span class="kr">shu</span></td><td><span class="kc">ショ</span><span class="kr">sho</span></td></tr>
-                         <tr><th>C</th><td><span class="kc">チャ</span><span class="kr">cha</span></td><td><span class="kc">チュ</span><span class="kr">chu</span></td><td><span class="kc">チョ</span><span class="kr">cho</span></td></tr>
-                         <tr><th>N</th><td><span class="kc">ニャ</span><span class="kr">nya</span></td><td><span class="kc">ニュ</span><span class="kr">nyu</span></td><td><span class="kc">ニョ</span><span class="kr">nyo</span></td></tr>
-                         <tr><th>H</th><td><span class="kc">ヒャ</span><span class="kr">hya</span></td><td><span class="kc">ヒュ</span><span class="kr">hyu</span></td><td><span class="kc">ヒョ</span><span class="kr">hyo</span></td></tr>
-                         <tr><th>M</th><td><span class="kc">ミャ</span><span class="kr">mya</span></td><td><span class="kc">ミュ</span><span class="kr">myu</span></td><td><span class="kc">ミョ</span><span class="kr">myo</span></td></tr>
-                         <tr><th>R</th><td><span class="kc">リャ</span><span class="kr">rya</span></td><td><span class="kc">リュ</span><span class="kr">ryu</span></td><td><span class="kc">リョ</span><span class="kr">ryo</span></td></tr>
-                         <tr><th>G</th><td><span class="kc">ギャ</span><span class="kr">gya</span></td><td><span class="kc">ギュ</span><span class="kr">gyu</span></td><td><span class="kc">ギョ</span><span class="kr">gyo</span></td></tr>
-                         <tr><th>J</th><td><span class="kc">ジャ</span><span class="kr">ja</span></td><td><span class="kc">ジュ</span><span class="kr">ju</span></td><td><span class="kc">ジョ</span><span class="kr">jo</span></td></tr>
-                         <tr><th>B</th><td><span class="kc">ビャ</span><span class="kr">bya</span></td><td><span class="kc">ビュ</span><span class="kr">byu</span></td><td><span class="kc">ビョ</span><span class="kr">byo</span></td></tr>
-                         <tr><th>P</th><td><span class="kc">ピャ</span><span class="kr">pya</span></td><td><span class="kc">ピュ</span><span class="kr">pyu</span></td><td><span class="kc">ピョ</span><span class="kr">pyo</span></td></tr>
-                    </table>
+                    <table class="kana-table" id="k-table-yoon"></table>
                 </div>
             </div>
         </div>
@@ -296,7 +234,96 @@
     </div>
 
     <script>
-        // --- DEFINIZIONE FUNZIONI GLOBALI (PRIMA DI TUTTO) ---
+        // --- VARIABILI GLOBALI ---
+        let vocaboli = [];
+        let frasi = [];
+        let sessione = [];
+        let cartaCorrente = null;
+        let punteggio = { ok: 0, err: 0 };
+        let modalitaQuiz = 'vocaboli'; 
+
+        const KEY_V = 'srs_vocab_v73'; // Chiave nuova per evitare conflitti
+        const KEY_F = 'srs_frasi_v73';
+
+        // --- DATASETS KANA ---
+        const KANA_ROWS = {
+            'Vocali (A-O)': [0, 5], 'Riga K': [5, 10], 'Riga S': [10, 15], 'Riga T': [15, 20], 'Riga N': [20, 25],
+            'Riga H': [25, 30], 'Riga M': [30, 35], 'Riga Y': [35, 38], 'Riga R': [38, 43], 'Riga W/N': [43, 46],
+            'Dakuten (G, Z, D, B)': [46, 66], 'Handakuten (P)': [66, 71], 'Yoon (Kya...)': [71, 104]
+        };
+
+        const HIRAGANA_DATA = [
+            {k:'あ',r:'a'}, {k:'い',r:'i'}, {k:'う',r:'u'}, {k:'え',r:'e'}, {k:'お',r:'o'},
+            {k:'か',r:'ka'}, {k:'き',r:'ki'}, {k:'く',r:'ku'}, {k:'け',r:'ke'}, {k:'こ',r:'ko'},
+            {k:'さ',r:'sa'}, {k:'し',r:'shi'}, {k:'す',r:'su'}, {k:'せ',r:'se'}, {k:'そ',r:'so'},
+            {k:'た',r:'ta'}, {k:'ち',r:'chi'}, {k:'つ',r:'tsu'}, {k:'て',r:'te'}, {k:'と',r:'to'},
+            {k:'な',r:'na'}, {k:'に',r:'ni'}, {k:'ぬ',r:'nu'}, {k:'ね',r:'ne'}, {k:'の',r:'no'},
+            {k:'は',r:'ha'}, {k:'ひ',r:'hi'}, {k:'ふ',r:'fu'}, {k:'へ',r:'he'}, {k:'ほ',r:'ho'},
+            {k:'ま',r:'ma'}, {k:'み',r:'mi'}, {k:'む',r:'mu'}, {k:'め',r:'me'}, {k:'も',r:'mo'},
+            {k:'や',r:'ya'}, {k:'ゆ',r:'yu'}, {k:'よ',r:'yo'},
+            {k:'ら',r:'ra'}, {k:'り',r:'ri'}, {k:'る',r:'ru'}, {k:'れ',r:'re'}, {k:'ろ',r:'ro'},
+            {k:'わ',r:'wa'}, {k:'を',r:'wo'}, {k:'ん',r:'n'},
+            {k:'が',r:'ga'}, {k:'ぎ',r:'gi'}, {k:'ぐ',r:'gu'}, {k:'げ',r:'ge'}, {k:'ご',r:'go'},
+            {k:'ざ',r:'za'}, {k:'じ',r:'ji'}, {k:'ず',r:'zu'}, {k:'ぜ',r:'ze'}, {k:'ぞ',r:'zo'},
+            {k:'だ',r:'da'}, {k:'ぢ',r:'ji'}, {k:'づ',r:'zu'}, {k:'で',r:'de'}, {k:'ど',r:'do'},
+            {k:'ば',r:'ba'}, {k:'び',r:'bi'}, {k:'ぶ',r:'bu'}, {k:'べ',r:'be'}, {k:'ぼ',r:'bo'},
+            {k:'ぱ',r:'pa'}, {k:'ぴ',r:'pi'}, {k:'ぷ',r:'pu'}, {k:'ぺ',r:'pe'}, {k:'ぽ',r:'po'},
+            {k:'きゃ',r:'kya'}, {k:'きゅ',r:'kyu'}, {k:'きょ',r:'kyo'}, {k:'しゃ',r:'sha'}, {k:'しゅ',r:'shu'}, {k:'しょ',r:'sho'},
+            {k:'ちゃ',r:'cha'}, {k:'ちゅ',r:'chu'}, {k:'ちょ',r:'cho'}, {k:'にゃ',r:'nya'}, {k:'にゅ',r:'nyu'}, {k:'にょ',r:'nyo'},
+            {k:'ひゃ',r:'hya'}, {k:'ひゅ',r:'hyu'}, {k:'ひょ',r:'hyo'}, {k:'みゃ',r:'mya'}, {k:'みゅ',r:'myu'}, {k:'みょ',r:'myo'},
+            {k:'りゃ',r:'rya'}, {k:'りゅ',r:'ryu'}, {k:'りょ',r:'ryo'}, {k:'ぎゃ',r:'gya'}, {k:'ぎゅ',r:'gyu'}, {k:'ぎょ',r:'gyo'},
+            {k:'じゃ',r:'ja'}, {k:'じゅ',r:'ju'}, {k:'じょ',r:'jo'}, {k:'びゃ',r:'bya'}, {k:'びゅ',r:'byu'}, {k:'びょ',r:'byo'},
+            {k:'ぴゃ',r:'pya'}, {k:'ぴゅ',r:'pyu'}, {k:'ぴょ',r:'pyo'}
+        ];
+
+        const KATAKANA_DATA = [
+            {k:'ア',r:'a'}, {k:'イ',r:'i'}, {k:'ウ',r:'u'}, {k:'エ',r:'e'}, {k:'オ',r:'o'},
+            {k:'カ',r:'ka'}, {k:'キ',r:'ki'}, {k:'ク',r:'ku'}, {k:'ケ',r:'ke'}, {k:'コ',r:'ko'},
+            {k:'サ',r:'sa'}, {k:'シ',r:'shi'}, {k:'ス',r:'su'}, {k:'セ',r:'se'}, {k:'ソ',r:'so'},
+            {k:'タ',r:'ta'}, {k:'チ',r:'chi'}, {k:'ツ',r:'tsu'}, {k:'テ',r:'te'}, {k:'ト',r:'to'},
+            {k:'ナ',r:'na'}, {k:'ニ',r:'ni'}, {k:'ヌ',r:'nu'}, {k:'ネ',r:'ne'}, {k:'ノ',r:'no'},
+            {k:'ハ',r:'ha'}, {k:'ヒ',r:'hi'}, {k:'フ',r:'fu'}, {k:'ヘ',r:'he'}, {k:'ホ',r:'ho'},
+            {k:'マ',r:'ma'}, {k:'ミ',r:'mi'}, {k:'ム',r:'mu'}, {k:'メ',r:'me'}, {k:'モ',r:'mo'},
+            {k:'ヤ',r:'ya'}, {k:'ユ',r:'yu'}, {k:'ヨ',r:'yo'},
+            {k:'ラ',r:'ra'}, {k:'リ',r:'ri'}, {k:'ル',r:'ru'}, {k:'レ',r:'re'}, {k:'ロ',r:'ro'},
+            {k:'ワ',r:'wa'}, {k:'ヲ',r:'wo'}, {k:'ン',r:'n'},
+            {k:'ガ',r:'ga'}, {k:'ギ',r:'gi'}, {k:'グ',r:'gu'}, {k:'ゲ',r:'ge'}, {k:'ゴ',r:'go'},
+            {k:'ザ',r:'za'}, {k:'ジ',r:'ji'}, {k:'ズ',r:'zu'}, {k:'ゼ',r:'ze'}, {k:'ゾ',r:'zo'},
+            {k:'ダ',r:'da'}, {k:'ヂ',r:'ji'}, {k:'ヅ',r:'zu'}, {k:'デ',r:'de'}, {k:'ド',r:'do'},
+            {k:'バ',r:'ba'}, {k:'ビ',r:'bi'}, {k:'ブ',r:'bu'}, {k:'ベ',r:'be'}, {k:'ボ',r:'bo'},
+            {k:'パ',r:'pa'}, {k:'ピ',r:'pi'}, {k:'プ',r:'pu'}, {k:'ペ',r:'pe'}, {k:'ポ',r:'po'},
+            {k:'キャ',r:'kya'}, {k:'キュ',r:'kyu'}, {k:'キョ',r:'kyo'}, {k:'シャ',r:'sha'}, {k:'シュ',r:'shu'}, {k:'ショ',r:'sho'},
+            {k:'チャ',r:'cha'}, {k:'チュ',r:'chu'}, {k:'チョ',r:'cho'}, {k:'ニャ',r:'nya'}, {k:'ニュ',r:'nyu'}, {k:'ニョ',r:'nyo'},
+            {k:'ヒャ',r:'hya'}, {k:'ヒュ',r:'hyu'}, {k:'ヒョ',r:'hyo'}, {k:'ミャ',r:'mya'}, {k:'ミュ',r:'myu'}, {k:'ミョ',r:'myo'},
+            {k:'リャ',r:'rya'}, {k:'リュ',r:'ryu'}, {k:'リョ',r:'ryo'}, {k:'ギャ',r:'gya'}, {k:'ギュ',r:'gyu'}, {k:'ギョ',r:'gyo'},
+            {k:'ジャ',r:'ja'}, {k:'ジュ',r:'ju'}, {k:'ジョ',r:'jo'}, {k:'ビャ',r:'bya'}, {k:'ビュ',r:'byu'}, {k:'ビョ',r:'byo'},
+            {k:'ピャ',r:'pya'}, {k:'ピュ',r:'pyu'}, {k:'ピョ',r:'pyo'}
+        ];
+
+        // --- FUNZIONI ---
+        window.onload = function() {
+            try {
+                caricaDati();
+                generaConfigPanel('h');
+                generaConfigPanel('k');
+                generaTabelleFisse('h', HIRAGANA_DATA);
+                generaTabelleFisse('k', KATAKANA_DATA);
+                aggiornaUI();
+
+                // Listener Invio
+                document.getElementById('input-risposta').addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        if (!document.getElementById('btn-controlla').classList.contains('hidden')) controllaRisposta();
+                        else prossimaCarta();
+                    }
+                });
+            } catch(e) {
+                console.error("Errore avvio:", e);
+                alert("Si è verificato un errore. Eseguo un reset.");
+                localStorage.clear();
+                location.reload();
+            }
+        };
 
         function showTab(id) {
             document.querySelectorAll('.modulo-content').forEach(d => d.classList.remove('active-module'));
@@ -305,28 +332,12 @@
             event.target.classList.add('active');
         }
 
-        function setQuizMode(mode) {
-            modalitaQuiz = mode;
-            const wrapper = document.getElementById('filtro-wrapper');
-            if (mode === 'vocaboli') {
-                wrapper.classList.remove('hidden');
-                nuovaSessione(); 
-            } else {
-                wrapper.classList.add('hidden');
-            }
-        }
-
-        // --- GESTIONE DATI ---
+        // --- DATI ---
         function caricaDati() {
-            try {
-                const v = localStorage.getItem(KEY_V);
-                const f = localStorage.getItem(KEY_F);
-                if (v) vocaboli = JSON.parse(v);
-                if (f) frasi = JSON.parse(f);
-            } catch (e) {
-                console.error("Errore caricamento dati:", e);
-                localStorage.clear(); // Reset emergenza
-            }
+            const v = localStorage.getItem(KEY_V);
+            const f = localStorage.getItem(KEY_F);
+            if (v) vocaboli = JSON.parse(v);
+            if (f) frasi = JSON.parse(f);
         }
 
         function aggiornaUI() {
@@ -335,77 +346,209 @@
             popolaFiltroCategorie();
             popolaFiltroFrasi();
             renderFrasi();
-            if(modalitaQuiz === 'vocaboli') nuovaSessione();
+            if(modalitaQuiz === 'vocaboli') avviaNuovaSessione();
         }
 
+        function cancellaTutto() {
+            if(!confirm("Sicuro?")) return;
+            localStorage.clear();
+            location.reload();
+        }
+
+        // --- IMPORT CSV ---
         function scaricaDaGithub(tipo) {
-            const urlInput = document.getElementById(tipo === 'vocaboli' ? 'url-vocaboli' : 'url-frasi');
-            const url = urlInput.value.trim();
-            if (!url) { alert("Inserisci un link valido!"); return; }
-            fetch(url).then(r => r.text()).then(t => {
-                if (tipo === 'vocaboli') parseVocaboli(t); else parseFrasi(t);
-                alert("Fatto!"); aggiornaUI();
-            }).catch(e => alert("Errore: " + e));
+            const url = document.getElementById(tipo === 'vocaboli' ? 'url-vocaboli' : 'url-frasi').value.trim();
+            if (!url) { alert("Inserisci link!"); return; }
+            fetch(url).then(r => r.text()).then(t => processaImport(t, tipo)).catch(e => alert("Errore download: " + e));
         }
 
         function importaFileLocale(input, tipo) {
             const file = input.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
-                if (tipo === 'vocaboli') parseVocaboli(e.target.result); else parseFrasi(e.target.result);
-                alert("Fatto!"); aggiornaUI();
-            };
+            reader.onload = function(e) { processaImport(e.target.result, tipo); };
             reader.readAsText(file);
         }
 
-        function parseVocaboli(csv) {
-            // Formato: Ita, Eng, Jpn, Rom, Tag
-            vocaboli = [];
-            const lines = csv.split(/\r?\n/); // Gestione sicura ritorni a capo
-            lines.forEach(line => {
-                if(!line.trim()) return;
-                const parts = line.split(',');
-                if (parts.length >= 4) {
-                    vocaboli.push({
-                        ita: parts[0].trim(),
-                        eng: parts[1].trim(),
-                        jpn: parts[2].trim(),
-                        rom: parts[3].trim(),
-                        tag: parts[4] ? parts[4].trim() : 'Generale'
-                    });
+        function processaImport(csvText, tipo) {
+            const lines = csvText.split(/\r?\n/);
+            let count = 0;
+            
+            if (tipo === 'vocaboli') {
+                vocaboli = []; // Reset
+                lines.forEach(line => {
+                    const p = line.split(',');
+                    if (p.length >= 4) {
+                        vocaboli.push({ ita: p[0].trim(), eng: p[1].trim(), jpn: p[2].trim(), rom: p[3].trim(), tag: p[4]?p[4].trim():'Generale' });
+                        count++;
+                    }
+                });
+                localStorage.setItem(KEY_V, JSON.stringify(vocaboli));
+            } else {
+                frasi = []; // Reset
+                lines.forEach(line => {
+                    const p = line.split(',');
+                    if (p.length >= 3) {
+                        frasi.push({ ita: p[0].trim(), rom: p[1].trim(), jpn: p[2].trim(), tag: p[3]?p[3].trim():'Generale' });
+                        count++;
+                    }
+                });
+                localStorage.setItem(KEY_F, JSON.stringify(frasi));
+            }
+            alert("Importati " + count + " elementi!");
+            aggiornaUI();
+        }
+
+        // --- QUIZ LOGIC ---
+        function popolaFiltroCategorie() {
+            const sel = document.getElementById('filtro-categoria');
+            sel.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
+            const tags = new Set(vocaboli.map(v => v.tag));
+            tags.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
+        }
+
+        function setQuizMode(mode) {
+            modalitaQuiz = mode;
+            const wrap = document.getElementById('filtro-wrapper');
+            if(mode === 'vocaboli') {
+                wrap.classList.remove('hidden');
+                avviaNuovaSessione();
+            } else {
+                wrap.classList.add('hidden');
+            }
+        }
+
+        function avviaNuovaSessione() {
+            setQuizMode('vocaboli');
+            const cat = document.getElementById('filtro-categoria').value;
+            const pool = (cat === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === cat);
+            
+            if (pool.length === 0) {
+                document.getElementById('quiz-box').style.display = 'none';
+                document.getElementById('no-data-msg').classList.remove('hidden');
+                return;
+            }
+            
+            document.getElementById('quiz-box').style.display = 'block';
+            document.getElementById('no-data-msg').classList.add('hidden');
+            
+            sessione = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+            punteggio = { ok: 0, err: 0 };
+            mostraCarta();
+        }
+
+        function mostraCarta() {
+            if (sessione.length === 0) {
+                document.getElementById('prompt-principale').innerText = "Sessione Finita!";
+                document.getElementById('prompt-secondario').innerText = "";
+                document.getElementById('input-risposta').style.display = 'none';
+                document.getElementById('btn-controlla').style.display = 'none';
+                document.getElementById('btn-prossima').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('punteggio-container').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
+            cartaCorrente = sessione.pop();
+            const inp = document.getElementById('input-risposta');
+            inp.style.display = 'block'; inp.disabled = false; inp.value = ''; inp.focus();
+            
+            document.getElementById('btn-controlla').classList.remove('hidden');
+            document.getElementById('btn-controlla').style.display = 'block';
+            document.getElementById('btn-prossima').classList.add('hidden');
+            document.getElementById('risultato-controllo').innerText = '';
+
+            if (modalitaQuiz === 'vocaboli') {
+                const mode = Math.random() > 0.5 ? 'JtoI' : 'ItoJ';
+                cartaCorrente.mode = mode;
+                if (mode === 'JtoI') {
+                    document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO";
+                    document.getElementById('prompt-principale').innerHTML = `${cartaCorrente.jpn} <span style="font-size:1rem; cursor:pointer">🔊</span>`;
+                    document.getElementById('prompt-secondario').innerText = cartaCorrente.rom;
+                    document.getElementById('prompt-principale').onclick = () => parla(cartaCorrente.jpn);
+                } else {
+                    document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)";
+                    document.getElementById('prompt-principale').innerText = cartaCorrente.ita;
+                    document.getElementById('prompt-secondario').innerText = cartaCorrente.eng;
                 }
-            });
-            localStorage.setItem(KEY_V, JSON.stringify(vocaboli));
+            } else {
+                document.getElementById('q-label').innerText = "SCRIVI IL ROMAJI";
+                document.getElementById('prompt-principale').innerText = cartaCorrente.jpn;
+                document.getElementById('prompt-secondario').innerText = "";
+            }
         }
 
-        function parseFrasi(csv) {
-            // Formato: Ita, Rom, Jpn, Tag
-            frasi = [];
-            const lines = csv.split(/\r?\n/);
-            lines.forEach(line => {
-                if(!line.trim()) return;
-                const parts = line.split(',');
-                if (parts.length >= 3) {
-                    frasi.push({
-                        ita: parts[0].trim(),
-                        rom: parts[1].trim(),
-                        jpn: parts[2].trim(),
-                        tag: parts[3] ? parts[3].trim() : 'Generale'
-                    });
+        function controllaRisposta() {
+            const user = document.getElementById('input-risposta').value.trim().toLowerCase();
+            let ok = false;
+            let ans = "";
+
+            if (modalitaQuiz === 'vocaboli') {
+                if (cartaCorrente.mode === 'JtoI') {
+                    if (user === cartaCorrente.ita.toLowerCase() || user === cartaCorrente.eng.toLowerCase()) ok = true;
+                    ans = cartaCorrente.ita;
+                } else {
+                    if (user === cartaCorrente.rom.toLowerCase() || user === cartaCorrente.jpn) ok = true;
+                    ans = `${cartaCorrente.rom} (${cartaCorrente.jpn})`;
                 }
+            } else {
+                if (user === cartaCorrente.ita.toLowerCase()) ok = true;
+                ans = cartaCorrente.ita;
+            }
+
+            const res = document.getElementById('risultato-controllo');
+            if (ok) {
+                res.innerHTML = '<span class="corretto">Esatto!</span>';
+                punteggio.ok++;
+                if (modalitaQuiz === 'vocaboli' && cartaCorrente.mode === 'JtoI') parla(cartaCorrente.jpn);
+            } else {
+                res.innerHTML = `<span class="sbagliato">Sbagliato. Era: ${ans}</span>`;
+                punteggio.err++;
+            }
+            document.getElementById('input-risposta').disabled = true;
+            document.getElementById('btn-controlla').classList.add('hidden');
+            document.getElementById('btn-prossima').classList.remove('hidden');
+            document.getElementById('btn-prossima').focus();
+        }
+
+        function prossimaCarta() { mostraCarta(); }
+
+        // --- ASCOLTO ---
+        function popolaFiltroFrasi() {
+            const sel = document.getElementById('filtro-frasi');
+            sel.innerHTML = '<option value="TUTTI">Tutte le Frasi</option>';
+            const tags = new Set(frasi.map(f => f.tag));
+            tags.forEach(t => sel.innerHTML += `<option value="${t}">${t}</option>`);
+        }
+
+        function renderFrasi() {
+            const list = document.getElementById('lista-frasi');
+            const cat = document.getElementById('filtro-frasi').value;
+            const spoiler = document.getElementById('spoiler-check').checked;
+            
+            list.innerHTML = '';
+            const items = (cat === 'TUTTI') ? frasi : frasi.filter(f => f.tag === cat);
+            
+            if (items.length === 0) {
+                document.getElementById('no-frasi-msg').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('no-frasi-msg').classList.add('hidden');
+
+            items.forEach(f => {
+                const d = document.createElement('div');
+                d.className = `frase-entry ${spoiler ? 'spoiler' : ''}`;
+                d.innerHTML = `
+                    <button class="play-btn" onclick="parla('${f.jpn.replace(/'/g, "\\'")}')">▶</button>
+                    <div class="frase-text">
+                        <span class="frase-jpn">${f.jpn}</span>
+                        <span style="font-size:0.8rem; color:#888;">${f.rom}</span>
+                        <span class="frase-ita" onclick="this.parentElement.parentElement.classList.remove('spoiler')">${f.ita}</span>
+                    </div>`;
+                list.appendChild(d);
             });
-            localStorage.setItem(KEY_F, JSON.stringify(frasi));
         }
 
-        function cancellaTutto() {
-            if(!confirm("Sicuro?")) return;
-            vocaboli = []; frasi = [];
-            localStorage.removeItem(KEY_V); localStorage.removeItem(KEY_F);
-            location.reload();
-        }
-
-        // --- KANA CONFIG ---
+        // --- KANA ---
         function generaConfigPanel(prefix) {
             const container = document.getElementById(prefix + '-config-grid');
             if(!container) return;
@@ -431,252 +574,55 @@
                 pool = pool.concat(dataset.slice(range[0], range[1]));
             });
 
-            if (pool.length === 0) { alert("Seleziona almeno una riga!"); return; }
+            if (pool.length === 0) { alert("Seleziona righe!"); return; }
 
             showTab('quiz');
-            modalitaQuiz = type; 
+            modalitaQuiz = type;
             document.getElementById('filtro-wrapper').classList.add('hidden');
-            
-            sessione = pool.sort(() => 0.5 - Math.random()).map(k => ({
-                ita: k.r, jpn: k.k, type: 'kana'
-            }));
+            sessione = pool.sort(() => 0.5 - Math.random()).map(k => ({ ita: k.r, jpn: k.k, type: 'kana' }));
             punteggio = { ok: 0, err: 0 };
             mostraCarta();
         }
 
-        // --- QUIZ LOGIC ---
-        function popolaFiltroCategorie() {
-            const sel = document.getElementById('filtro-categoria');
-            const tags = new Set(vocaboli.map(v => v.tag));
-            sel.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
-            Array.from(tags).sort().forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
-        }
-
-        function nuovaSessione() {
-            setQuizMode('vocaboli');
-            const cat = document.getElementById('filtro-categoria').value;
-            const pool = (cat === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === cat);
-            const msg = document.getElementById('no-data-msg');
-            const box = document.getElementById('quiz-box');
-
-            if (pool.length === 0) { box.style.display = 'none'; msg.classList.remove('hidden'); return; }
-            box.style.display = 'block'; msg.classList.add('hidden');
+        function generaTabelleFisse(prefix, data) {
+            // Semplificazione: rigenera statico per evitare bug visivi
+            let html = '<tr><th>-</th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>';
+            for(let i=0; i<46; i+=5) {
+               html += '<tr><th>-</th>'; 
+               for(let j=0; j<5; j++) {
+                   if(data[i+j] && data[i+j].k) html += `<td><span class="kc">${data[i+j].k}</span><span class="kr">${data[i+j].r}</span></td>`;
+                   else html += '<td></td>';
+               }
+               html += '</tr>';
+            }
+            document.getElementById(prefix + '-table-base').innerHTML = html;
             
-            sessione = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
-            punteggio = { ok: 0, err: 0 };
-            mostraCarta();
-        }
-
-        function mostraCarta() {
-            if (sessione.length === 0) {
-                document.getElementById('prompt-principale').innerText = "Fine Sessione!";
-                document.getElementById('prompt-secondario').innerText = "";
-                document.getElementById('input-risposta').style.display = 'none';
-                document.getElementById('btn-controlla').style.display = 'none';
-                document.getElementById('btn-prossima').classList.add('hidden');
-                return;
+            html = '<tr><th>-</th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>';
+            for(let i=46; i<71; i+=5) {
+               html += '<tr><th>-</th>'; 
+               for(let j=0; j<5; j++) {
+                   if(data[i+j]) html += `<td><span class="kc">${data[i+j].k}</span><span class="kr">${data[i+j].r}</span></td>`;
+               }
+               html += '</tr>';
             }
+            document.getElementById(prefix + '-table-daku').innerHTML = html;
             
-            document.getElementById('punteggio-container').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err} | Rimasti: ${sessione.length}`;
-            cartaCorrente = sessione.pop();
-            const input = document.getElementById('input-risposta');
-            input.value = ''; input.disabled = false; input.style.display = 'block'; input.focus();
-            document.getElementById('btn-controlla').classList.remove('hidden');
-            document.getElementById('btn-controlla').style.display = 'block';
-            document.getElementById('btn-prossima').classList.add('hidden');
-            document.getElementById('risultato-controllo').innerText = '';
-
-            if (modalitaQuiz === 'vocaboli') {
-                const mode = Math.random() > 0.5 ? 'JtoI' : 'ItoJ';
-                cartaCorrente.quizMode = mode;
-                if (mode === 'JtoI') {
-                    document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO";
-                    document.getElementById('prompt-principale').innerHTML = `${cartaCorrente.jpn} <span style="font-size:1rem; cursor:pointer" onclick="parla('${cartaCorrente.jpn}')">🔊</span>`;
-                    document.getElementById('prompt-secondario').innerText = cartaCorrente.rom;
-                } else {
-                    document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)";
-                    document.getElementById('prompt-principale').innerText = cartaCorrente.ita;
-                    document.getElementById('prompt-secondario').innerText = cartaCorrente.eng;
-                }
-            } else {
-                document.getElementById('q-label').innerText = "SCRIVI IL ROMAJI";
-                document.getElementById('prompt-principale').innerText = cartaCorrente.jpn;
-                document.getElementById('prompt-secondario').innerText = "";
+             html = '<tr><th>-</th><th>YA</th><th>YU</th><th>YO</th></tr>';
+            for(let i=71; i<data.length; i+=3) {
+               html += '<tr><th>-</th>'; 
+               for(let j=0; j<3; j++) {
+                   if(data[i+j]) html += `<td><span class="kc">${data[i+j].k}</span><span class="kr">${data[i+j].r}</span></td>`;
+               }
+               html += '</tr>';
             }
+            document.getElementById(prefix + '-table-yoon').innerHTML = html;
         }
 
-        function controlla() {
-            const user = document.getElementById('input-risposta').value.trim().toLowerCase();
-            let ok = false; let ans = "";
-
-            if (modalitaQuiz === 'vocaboli') {
-                if (cartaCorrente.quizMode === 'JtoI') {
-                    if (user === cartaCorrente.ita.toLowerCase() || user === cartaCorrente.eng.toLowerCase()) ok = true;
-                    ans = cartaCorrente.ita;
-                } else {
-                    if (user === cartaCorrente.rom.toLowerCase() || user === cartaCorrente.jpn) ok = true;
-                    ans = `${cartaCorrente.rom} (${cartaCorrente.jpn})`;
-                }
-            } else {
-                if (user === cartaCorrente.ita.toLowerCase()) ok = true;
-                ans = cartaCorrente.ita;
-            }
-
-            const res = document.getElementById('risultato-controllo');
-            if (ok) {
-                res.innerHTML = '<span class="corretto">Esatto!</span>';
-                punteggio.ok++;
-                if(modalitaQuiz === 'vocaboli' && cartaCorrente.quizMode === 'JtoI') parla(cartaCorrente.jpn);
-            } else {
-                res.innerHTML = `<span class="sbagliato">Sbagliato. Era: ${ans}</span>`;
-                punteggio.err++;
-            }
-            document.getElementById('input-risposta').disabled = true;
-            document.getElementById('btn-controlla').classList.add('hidden');
-            document.getElementById('btn-prossima').classList.remove('hidden');
-            document.getElementById('btn-prossima').focus();
-        }
-
-        function prossima() { mostraCarta(); }
-
-        // --- ASCOLTO ---
-        function popolaFiltroFrasi() {
-            const sel = document.getElementById('filtro-frasi');
-            const tags = new Set(frasi.map(f => f.tag));
-            sel.innerHTML = '<option value="TUTTI">Tutte le Frasi</option>';
-            Array.from(tags).sort().forEach(t => { sel.innerHTML += `<option value="${t}">${t}</option>`; });
-        }
-
-        function renderFrasi() {
-            const cat = document.getElementById('filtro-frasi').value;
-            const spoiler = document.getElementById('spoiler-check').checked;
-            const list = document.getElementById('lista-frasi');
-            const msg = document.getElementById('no-frasi-msg');
-            list.innerHTML = '';
-
-            const items = (cat === 'TUTTI') ? frasi : frasi.filter(f => f.tag === cat);
-            if (items.length === 0) { msg.classList.remove('hidden'); return; }
-            msg.classList.add('hidden');
-
-            items.forEach(f => {
-                const d = document.createElement('div');
-                d.className = `frase-entry ${spoiler ? 'spoiler' : ''}`;
-                d.innerHTML = `
-                    <button class="play-btn" onclick="parla('${f.jpn.replace(/'/g, "\\'")}')">▶</button>
-                    <div class="frase-text">
-                        <span class="frase-jpn">${f.jpn}</span>
-                        <span style="font-size:0.8rem; color:#888;">${f.rom}</span>
-                        <span class="frase-ita" onclick="this.parentElement.parentElement.classList.remove('spoiler')">${f.ita}</span>
-                    </div>
-                `;
-                list.appendChild(d);
-            });
-        }
-
-        // --- UTILS ---
         function parla(text) {
             const u = new SpeechSynthesisUtterance(text);
             u.lang = 'ja-JP';
             window.speechSynthesis.speak(u);
         }
-
-        // --- DATASETS KANA ---
-        const HIRAGANA_DATA = [
-            // BASE (0-45)
-            {k:'あ',r:'a'}, {k:'い',r:'i'}, {k:'う',r:'u'}, {k:'え',r:'e'}, {k:'お',r:'o'},
-            {k:'か',r:'ka'}, {k:'き',r:'ki'}, {k:'く',r:'ku'}, {k:'け',r:'ke'}, {k:'こ',r:'ko'},
-            {k:'さ',r:'sa'}, {k:'し',r:'shi'}, {k:'す',r:'su'}, {k:'せ',r:'se'}, {k:'そ',r:'so'},
-            {k:'た',r:'ta'}, {k:'ち',r:'chi'}, {k:'つ',r:'tsu'}, {k:'て',r:'te'}, {k:'と',r:'to'},
-            {k:'な',r:'na'}, {k:'に',r:'ni'}, {k:'ぬ',r:'nu'}, {k:'ね',r:'ne'}, {k:'の',r:'no'},
-            {k:'は',r:'ha'}, {k:'ひ',r:'hi'}, {k:'ふ',r:'fu'}, {k:'へ',r:'he'}, {k:'ほ',r:'ho'},
-            {k:'ま',r:'ma'}, {k:'み',r:'mi'}, {k:'む',r:'mu'}, {k:'め',r:'me'}, {k:'も',r:'mo'},
-            {k:'や',r:'ya'}, {k:'ゆ',r:'yu'}, {k:'よ',r:'yo'},
-            {k:'ら',r:'ra'}, {k:'り',r:'ri'}, {k:'る',r:'ru'}, {k:'れ',r:'re'}, {k:'ろ',r:'ro'},
-            {k:'わ',r:'wa'}, {k:'を',r:'wo'}, {k:'ん',r:'n'},
-            // DAKUTEN (46-70)
-            {k:'が',r:'ga'}, {k:'ぎ',r:'gi'}, {k:'ぐ',r:'gu'}, {k:'げ',r:'ge'}, {k:'ご',r:'go'},
-            {k:'ざ',r:'za'}, {k:'じ',r:'ji'}, {k:'ず',r:'zu'}, {k:'ぜ',r:'ze'}, {k:'ぞ',r:'zo'},
-            {k:'だ',r:'da'}, {k:'ぢ',r:'ji'}, {k:'づ',r:'zu'}, {k:'で',r:'de'}, {k:'ど',r:'do'},
-            {k:'ば',r:'ba'}, {k:'び',r:'bi'}, {k:'ぶ',r:'bu'}, {k:'べ',r:'be'}, {k:'ぼ',r:'bo'},
-            {k:'ぱ',r:'pa'}, {k:'ぴ',r:'pi'}, {k:'ぷ',r:'pu'}, {k:'ぺ',r:'pe'}, {k:'ぽ',r:'po'},
-            // YOON (71+)
-            {k:'きゃ',r:'kya'}, {k:'きゅ',r:'kyu'}, {k:'きょ',r:'kyo'}, {k:'しゃ',r:'sha'}, {k:'しゅ',r:'shu'}, {k:'しょ',r:'sho'},
-            {k:'ちゃ',r:'cha'}, {k:'ちゅ',r:'chu'}, {k:'ちょ',r:'cho'}, {k:'にゃ',r:'nya'}, {k:'にゅ',r:'nyu'}, {k:'にょ',r:'nyo'},
-            {k:'ひゃ',r:'hya'}, {k:'ひゅ',r:'hyu'}, {k:'ひょ',r:'hyo'}, {k:'みゃ',r:'mya'}, {k:'みゅ',r:'myu'}, {k:'みょ',r:'myo'},
-            {k:'りゃ',r:'rya'}, {k:'りゅ',r:'ryu'}, {k:'りょ',r:'ryo'}, {k:'ぎゃ',r:'gya'}, {k:'ぎゅ',r:'gyu'}, {k:'ぎょ',r:'gyo'},
-            {k:'じゃ',r:'ja'}, {k:'じゅ',r:'ju'}, {k:'じょ',r:'jo'}, {k:'びゃ',r:'bya'}, {k:'びゅ',r:'byu'}, {k:'びょ',r:'byo'},
-            {k:'ぴゃ',r:'pya'}, {k:'ぴゅ',r:'pyu'}, {k:'ぴょ',r:'pyo'}
-        ];
-
-        const KATAKANA_DATA = [
-            // BASE
-            {k:'ア',r:'a'}, {k:'イ',r:'i'}, {k:'ウ',r:'u'}, {k:'エ',r:'e'}, {k:'オ',r:'o'},
-            {k:'カ',r:'ka'}, {k:'キ',r:'ki'}, {k:'ク',r:'ku'}, {k:'ケ',r:'ke'}, {k:'コ',r:'ko'},
-            {k:'サ',r:'sa'}, {k:'シ',r:'shi'}, {k:'ス',r:'su'}, {k:'セ',r:'se'}, {k:'ソ',r:'so'},
-            {k:'タ',r:'ta'}, {k:'チ',r:'chi'}, {k:'ツ',r:'tsu'}, {k:'テ',r:'te'}, {k:'ト',r:'to'},
-            {k:'ナ',r:'na'}, {k:'ニ',r:'ni'}, {k:'ヌ',r:'nu'}, {k:'ネ',r:'ne'}, {k:'ノ',r:'no'},
-            {k:'ハ',r:'ha'}, {k:'ヒ',r:'hi'}, {k:'フ',r:'fu'}, {k:'ヘ',r:'he'}, {k:'ホ',r:'ho'},
-            {k:'マ',r:'ma'}, {k:'ミ',r:'mi'}, {k:'ム',r:'mu'}, {k:'メ',r:'me'}, {k:'モ',r:'mo'},
-            {k:'ヤ',r:'ya'}, {k:'ユ',r:'yu'}, {k:'ヨ',r:'yo'},
-            {k:'ラ',r:'ra'}, {k:'リ',r:'ri'}, {k:'ル',r:'ru'}, {k:'レ',r:'re'}, {k:'ロ',r:'ro'},
-            {k:'ワ',r:'wa'}, {k:'ヲ',r:'wo'}, {k:'ン',r:'n'},
-            // DAKUTEN
-            {k:'ガ',r:'ga'}, {k:'ギ',r:'gi'}, {k:'グ',r:'gu'}, {k:'ゲ',r:'ge'}, {k:'ゴ',r:'go'},
-            {k:'ザ',r:'za'}, {k:'ジ',r:'ji'}, {k:'ズ',r:'zu'}, {k:'ゼ',r:'ze'}, {k:'ゾ',r:'zo'},
-            {k:'ダ',r:'da'}, {k:'ヂ',r:'ji'}, {k:'ヅ',r:'zu'}, {k:'デ',r:'de'}, {k:'ド',r:'do'},
-            {k:'バ',r:'ba'}, {k:'ビ',r:'bi'}, {k:'ブ',r:'bu'}, {k:'ベ',r:'be'}, {k:'ボ',r:'bo'},
-            {k:'パ',r:'pa'}, {k:'ピ',r:'pi'}, {k:'プ',r:'pu'}, {k:'ペ',r:'pe'}, {k:'ポ',r:'po'},
-            // YOON
-            {k:'キャ',r:'kya'}, {k:'キュ',r:'kyu'}, {k:'キョ',r:'kyo'}, {k:'シャ',r:'sha'}, {k:'シュ',r:'shu'}, {k:'ショ',r:'sho'},
-            {k:'チャ',r:'cha'}, {k:'チュ',r:'chu'}, {k:'チョ',r:'cho'}, {k:'ニャ',r:'nya'}, {k:'ニュ',r:'nyu'}, {k:'ニョ',r:'nyo'},
-            {k:'ヒャ',r:'hya'}, {k:'ヒュ',r:'hyu'}, {k:'ヒョ',r:'hyo'}, {k:'ミャ',r:'mya'}, {k:'ミュ',r:'myu'}, {k:'ミョ',r:'myo'},
-            {k:'リャ',r:'rya'}, {k:'リュ',r:'ryu'}, {k:'リョ',r:'ryo'}, {k:'ギャ',r:'gya'}, {k:'ギュ',r:'gyu'}, {k:'ギョ',r:'gyo'},
-            {k:'ジャ',r:'ja'}, {k:'ジュ',r:'ju'}, {k:'ジョ',r:'jo'}, {k:'ビャ',r:'bya'}, {k:'ビュ',r:'byu'}, {k:'ビョ',r:'byo'},
-            {k:'ピャ',r:'pya'}, {k:'ピュ',r:'pyu'}, {k:'ピョ',r:'pyo'}
-        ];
-
-        const KANA_ROWS = {
-            'Vocali (A-O)': [0, 5],
-            'Riga K': [5, 10],
-            'Riga S': [10, 15],
-            'Riga T': [15, 20],
-            'Riga N': [20, 25],
-            'Riga H': [25, 30],
-            'Riga M': [30, 35],
-            'Riga Y': [35, 38],
-            'Riga R': [38, 43],
-            'Riga W/N': [43, 46],
-            'Dakuten (G, Z, D, B)': [46, 66],
-            'Handakuten (P)': [66, 71],
-            'Yoon (Kya, Sha...)': [71, 104]
-        };
-
-        // --- VARIABILI GLOBALI ---
-        let vocaboli = [];
-        let frasi = [];
-        let sessione = [];
-        let cartaCorrente = null;
-        let punteggio = { ok: 0, err: 0 };
-        let modalitaQuiz = 'vocaboli'; // 'vocaboli', 'hiragana', 'katakana'
-
-        const KEY_V = 'srs_vocab_v7';
-        const KEY_F = 'srs_frasi_v7';
-
-        // --- AVVIO ---
-        window.onload = function() {
-            caricaDati();
-            generaConfigPanel('h');
-            generaConfigPanel('k');
-            aggiornaUI();
-
-            // Listener Invio
-            document.getElementById('input-risposta').addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    if (!document.getElementById('btn-controlla').classList.contains('hidden')) controlla();
-                    else prossima();
-                }
-            });
-        };
     </script>
 </body>
 </html>
