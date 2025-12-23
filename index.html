@@ -3,115 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v6.1 (Clean)</title>
+    <title>Giapponese SRS v6.6 (Full Kana)</title>
     <style>
         /* --- STILE GENERALE --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f2f2f7;
-            color: #333;
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            background-color: #f2f2f7; color: #333; margin: 0; padding: 15px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
         h1 { color: #1c1c1e; margin-bottom: 20px; text-align: center; font-size: 1.5rem; }
-        h2 { font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        h2 { font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; color: #007aff; }
+        h4 { margin-top: 20px; margin-bottom: 10px; color: #555; border-left: 4px solid #34c759; padding-left: 8px; }
         .container { width: 100%; max-width: 600px; margin-bottom: 50px; }
         
         .card {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
+            background: #ffffff; padding: 20px; border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px;
         }
 
-        /* --- MENU DI NAVIGAZIONE --- */
+        /* --- MENU --- */
         #main-nav {
-            display: flex;
-            gap: 5px;
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 5px;
+            display: flex; gap: 5px; width: 100%; max-width: 600px; margin-bottom: 20px;
+            overflow-x: auto; padding-bottom: 5px;
         }
         .nav-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            background-color: #e5e5ea;
-            color: #007aff;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: 0.2s;
-            font-size: 0.9rem;
-            text-align: center;
+            flex: 1; padding: 10px; border: none; border-radius: 8px;
+            background-color: #e5e5ea; color: #007aff; font-weight: 600;
+            cursor: pointer; white-space: nowrap; transition: 0.2s; text-align: center; font-size: 0.9rem;
         }
-        .nav-btn.active {
-            background-color: #007aff;
-            color: white;
-            box-shadow: 0 2px 8px rgba(0,122,255,0.4);
-        }
+        .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 2px 8px rgba(0,122,255,0.4); }
 
-        /* --- CONTENUTO MODULI --- */
         .modulo-content { display: none; }
         .active-module { display: block; }
 
-        /* --- STILI QUIZ --- */
-        #punteggio-container { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 10px; }
-        #prompt-container { text-align: center; margin: 20px 0; min-height: 80px; }
-        #prompt-principale { font-size: 2rem; margin: 5px 0; color: #333; }
-        #prompt-secondario { font-size: 1.1rem; color: #666; font-style: italic; }
-        
+        /* --- UI ELEMENTI --- */
         .input-box {
-            width: 100%; padding: 12px; font-size: 1.1rem;
-            border: 2px solid #ddd; border-radius: 8px;
-            box-sizing: border-box; text-align: center; margin-bottom: 10px;
+            width: 100%; padding: 12px; font-size: 1.2rem; border: 2px solid #ddd;
+            border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; text-align: center;
         }
-        
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; }
         .btn-blue { background-color: #007aff; }
         .btn-green { background-color: #34c759; }
         .btn-red { background-color: #ff3b30; }
-        .btn-orange { background-color: #ff9500; }
         
+        /* --- QUIZ --- */
+        #prompt-container { text-align: center; margin: 20px 0; min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
+        #prompt-label { font-size: 0.8rem; font-weight: bold; color: #999; text-transform: uppercase; margin-bottom: 5px; }
+        #prompt-principale { font-size: 2.5rem; margin: 5px 0; color: #333; }
+        #prompt-secondario { font-size: 1.1rem; color: #666; font-style: italic; }
         #risultato-controllo { text-align: center; font-weight: bold; min-height: 30px; margin: 10px 0; }
         .corretto { color: #34c759; } .sbagliato { color: #ff3b30; }
 
-        /* --- STILI ASCOLTO --- */
-        .frase-entry {
-            display: flex;
-            align-items: center;
-            background: #f9f9f9;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
-            gap: 12px;
-        }
-        .play-btn {
-            width: 44px; height: 44px; border-radius: 50%;
-            background: #34c759; color: white; border: none;
-            font-size: 1.2rem; cursor: pointer; flex-shrink: 0;
-            display: flex; justify-content: center; align-items: center;
-        }
+        /* --- ASCOLTO --- */
+        .frase-entry { display: flex; align-items: center; background: #f9f9f9; border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-bottom: 10px; gap: 12px; }
+        .play-btn { width: 44px; height: 44px; border-radius: 50%; background: #34c759; color: white; border: none; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
         .frase-text { flex-grow: 1; }
         .frase-jpn { font-weight: bold; font-size: 1.1rem; display: block; }
         .frase-ita { color: #007aff; font-size: 0.95rem; display: block; cursor: pointer; }
         .spoiler .frase-ita { background: #ddd; color: transparent; border-radius: 4px; }
         .spoiler .frase-ita:hover { background: transparent; color: #007aff; }
 
-        /* --- STILI GESTIONE --- */
-        .upload-area { border: 2px dashed #ccc; padding: 20px; text-align: center; margin-bottom: 15px; border-radius: 8px; background: #fafafa; }
-        .upload-label { display: block; font-weight: bold; margin-bottom: 10px; color: #555; }
+        /* --- KANA CONFIG & TABLES --- */
+        .kana-config { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eee; }
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; text-align: left; }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
         
-        /* --- STILI TABELLE KANA --- */
         .table-wrap { overflow-x: auto; margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px; }
         .kana-table { width: 100%; border-collapse: collapse; min-width: 320px; text-align: center; }
         .kana-table th { background: #f2f2f7; padding: 8px; color: #666; font-size: 0.9rem; }
@@ -119,7 +75,8 @@
         .kc { font-size: 1.4rem; font-weight: bold; display: block; color: #333; }
         .kr { font-size: 0.75rem; color: #999; display: block; }
 
-        /* --- UTILS --- */
+        /* --- GESTIONE --- */
+        .import-section { border: 2px dashed #ccc; padding: 15px; border-radius: 8px; margin-bottom: 20px; background: #fafafa; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -128,7 +85,7 @@
     <h1>Set di Studio Giapponese</h1>
 
     <nav id="main-nav">
-        <button class="nav-btn active" onclick="showTab('quiz')">Quiz</button>
+        <button class="nav-btn active" onclick="showTab('quiz'); setQuizMode('vocaboli')">Quiz Vocaboli</button>
         <button class="nav-btn" onclick="showTab('ascolto')">🎧 Ascolto</button>
         <button class="nav-btn" onclick="showTab('hiragana')">Hiragana</button>
         <button class="nav-btn" onclick="showTab('katakana')">Katakana</button>
@@ -139,15 +96,17 @@
 
         <div id="tab-quiz" class="modulo-content active-module">
             <div class="card">
-                <div id="punteggio-container">Sessione pronta</div>
+                <div id="punteggio-container" style="text-align:center; color:#888; margin-bottom:10px;">Sessione pronta</div>
                 
-                <select id="filtro-categoria" class="input-box" onchange="nuovaSessione()">
-                    <option value="TUTTI">Tutte le Categorie</option>
-                </select>
+                <div id="filtro-wrapper">
+                    <select id="filtro-categoria" class="input-box" style="font-size:1rem;" onchange="nuovaSessione()">
+                        <option value="TUTTI">Tutte le Categorie</option>
+                    </select>
+                </div>
 
                 <div id="quiz-box">
                     <div id="prompt-container">
-                        <div id="q-label" style="font-size:0.8rem; font-weight:bold; color:#aaa;"></div>
+                        <div id="q-label"></div>
                         <div id="prompt-principale"></div>
                         <div id="prompt-secondario"></div>
                     </div>
@@ -159,8 +118,9 @@
                     <button id="btn-controlla" class="btn btn-blue" onclick="controlla()">Controlla</button>
                     <button id="btn-prossima" class="btn btn-green hidden" onclick="prossima()">Prossima</button>
                 </div>
+                
                 <div id="no-data-msg" class="hidden" style="text-align:center; padding:20px; color:#666;">
-                    Nessun vocabolo caricato.<br>Vai su "Gestione" per caricare i dati.
+                    Nessun dato caricato.
                 </div>
             </div>
         </div>
@@ -168,7 +128,7 @@
         <div id="tab-ascolto" class="modulo-content">
             <div class="card">
                 <h2>Ascolto Frasi</h2>
-                <select id="filtro-frasi" class="input-box" onchange="renderFrasi()">
+                <select id="filtro-frasi" class="input-box" style="font-size:1rem;" onchange="renderFrasi()">
                     <option value="TUTTI">Tutte le Frasi</option>
                 </select>
                 <div style="text-align: center; margin-bottom: 15px;">
@@ -176,25 +136,7 @@
                 </div>
                 <div id="lista-frasi"></div>
                 <div id="no-frasi-msg" class="hidden" style="text-align:center; padding:20px; color:#666;">
-                    Nessuna frase caricata.<br>Vai su "Gestione" per caricare i dati.
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-hiragana" class="modulo-content">
-            <div class="card">
-                <h2>Hiragana</h2>
-                <div class="table-wrap">
-                    <table class="kana-table" id="h-table-base"></table>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-katakana" class="modulo-content">
-            <div class="card">
-                <h2>Katakana</h2>
-                <div class="table-wrap">
-                    <table class="kana-table" id="k-table-base"></table>
+                    Nessuna frase caricata.
                 </div>
             </div>
         </div>
@@ -203,37 +145,152 @@
             <div class="card">
                 <h2>Gestione Dati</h2>
                 
-                <div class="upload-area">
-                    <span class="upload-label">1. Carica CSV Vocaboli</span>
-                    <input type="file" id="file-vocaboli" accept=".csv" onchange="importaCSV(this, 'vocaboli')">
-                    <p style="font-size:0.8rem; color:#888;">Formato: Italiano,Inglese,Giapponese,Romaji,Tag</p>
+                <div class="import-section">
+                    <h3>1. Vocaboli</h3>
+                    <div style="display:flex; gap:5px; margin-bottom:10px;">
+                        <input type="text" id="url-vocaboli" class="input-box" style="margin:0; font-size:0.9rem;" placeholder="Link RAW GitHub...">
+                        <button class="btn btn-blue" style="width:auto; margin:0;" onclick="scaricaDaGithub('vocaboli')">Scarica</button>
+                    </div>
+                    <input type="file" accept=".csv" onchange="importaFileLocale(this, 'vocaboli')">
                 </div>
 
-                <div class="upload-area">
-                    <span class="upload-label">2. Carica CSV Frasi</span>
-                    <input type="file" id="file-frasi" accept=".csv" onchange="importaCSV(this, 'frasi')">
-                    <p style="font-size:0.8rem; color:#888;">Formato: Italiano,Romaji,Giapponese,Tag</p>
+                <div class="import-section">
+                    <h3>2. Frasi</h3>
+                    <div style="display:flex; gap:5px; margin-bottom:10px;">
+                        <input type="text" id="url-frasi" class="input-box" style="margin:0; font-size:0.9rem;" placeholder="Link RAW GitHub...">
+                        <button class="btn btn-blue" style="width:auto; margin:0;" onclick="scaricaDaGithub('frasi')">Scarica</button>
+                    </div>
+                    <input type="file" accept=".csv" onchange="importaFileLocale(this, 'frasi')">
                 </div>
 
-                <div style="margin-top:20px; text-align:center;">
-                    <p>Totale Vocaboli: <span id="count-vocab">0</span></p>
-                    <p>Totale Frasi: <span id="count-frasi">0</span></p>
+                <div style="text-align:center; border-top:1px solid #eee; padding-top:15px;">
+                    <p>Vocaboli: <b id="count-vocab">0</b> | Frasi: <b id="count-frasi">0</b></p>
                     <button class="btn btn-red" onclick="cancellaTutto()">🗑 CANCELLA TUTTO</button>
                 </div>
             </div>
-            
+        </div>
+
+        <div id="tab-hiragana" class="modulo-content">
             <div class="card">
-                <h3>Lista Vocaboli Attuali</h3>
-                <div id="lista-container"></div>
+                <h2>Hiragana</h2>
+                
+                <div class="kana-config">
+                    <h3 style="margin-top:0; font-size:1rem; color:#555;">Configura Quiz</h3>
+                    <div class="config-grid" id="h-config-grid"></div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-blue" style="font-size:0.8rem; padding:8px;" onclick="toggleAllKana('hiragana', true)">Tutto</button>
+                        <button class="btn btn-blue" style="font-size:0.8rem; padding:8px;" onclick="toggleAllKana('hiragana', false)">Nulla</button>
+                    </div>
+                    <button class="btn btn-green" onclick="avviaQuizKana('hiragana')">🏋️ AVVIA QUIZ HIRAGANA</button>
+                </div>
+
+                <h4>Suoni Base (Gojūon)</h4>
+                <div class="table-wrap"><table class="kana-table" id="h-table-base"></table></div>
+                <h4>Suoni Impuri (Dakuten)</h4>
+                <div class="table-wrap"><table class="kana-table" id="h-table-daku"></table></div>
+                <h4>Suoni Contratti (Yoon)</h4>
+                <div class="table-wrap"><table class="kana-table" id="h-table-yoon"></table></div>
+            </div>
+        </div>
+
+        <div id="tab-katakana" class="modulo-content">
+            <div class="card">
+                <h2>Katakana</h2>
+                
+                <div class="kana-config">
+                    <h3 style="margin-top:0; font-size:1rem; color:#555;">Configura Quiz</h3>
+                    <div class="config-grid" id="k-config-grid"></div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-blue" style="font-size:0.8rem; padding:8px;" onclick="toggleAllKana('katakana', true)">Tutto</button>
+                        <button class="btn btn-blue" style="font-size:0.8rem; padding:8px;" onclick="toggleAllKana('katakana', false)">Nulla</button>
+                    </div>
+                    <button class="btn btn-green" onclick="avviaQuizKana('katakana')">🏋️ AVVIA QUIZ KATAKANA</button>
+                </div>
+
+                <h4>Suoni Base (Gojūon)</h4>
+                <div class="table-wrap"><table class="kana-table" id="k-table-base"></table></div>
+                <h4>Suoni Impuri (Dakuten)</h4>
+                <div class="table-wrap"><table class="kana-table" id="k-table-daku"></table></div>
+                <h4>Suoni Contratti (Yoon)</h4>
+                <div class="table-wrap"><table class="kana-table" id="k-table-yoon"></table></div>
             </div>
         </div>
 
     </div>
 
     <script>
-        // --- COSTANTI VUOTE (Clean Code) ---
-        const RAW_VOCABOLI = ``;
-        const RAW_FRASI = ``;
+        // --- DATASETS KANA COMPLETI ---
+        // Ogni elemento: [Char, Romaji]
+        // Base: 46 (0-45) | Dakuten: 25 (46-70) | Yoon: 33 (71-103)
+        const HIRAGANA_DATA = [
+            // BASE (0-45)
+            {k:'あ',r:'a'}, {k:'い',r:'i'}, {k:'う',r:'u'}, {k:'え',r:'e'}, {k:'お',r:'o'},
+            {k:'か',r:'ka'}, {k:'き',r:'ki'}, {k:'く',r:'ku'}, {k:'け',r:'ke'}, {k:'こ',r:'ko'},
+            {k:'さ',r:'sa'}, {k:'し',r:'shi'}, {k:'す',r:'su'}, {k:'せ',r:'se'}, {k:'そ',r:'so'},
+            {k:'た',r:'ta'}, {k:'ち',r:'chi'}, {k:'つ',r:'tsu'}, {k:'て',r:'te'}, {k:'と',r:'to'},
+            {k:'な',r:'na'}, {k:'に',r:'ni'}, {k:'ぬ',r:'nu'}, {k:'ね',r:'ne'}, {k:'の',r:'no'},
+            {k:'は',r:'ha'}, {k:'ひ',r:'hi'}, {k:'ふ',r:'fu'}, {k:'へ',r:'he'}, {k:'ほ',r:'ho'},
+            {k:'ま',r:'ma'}, {k:'み',r:'mi'}, {k:'む',r:'mu'}, {k:'め',r:'me'}, {k:'も',r:'mo'},
+            {k:'や',r:'ya'}, {k:'ゆ',r:'yu'}, {k:'よ',r:'yo'},
+            {k:'ら',r:'ra'}, {k:'り',r:'ri'}, {k:'る',r:'ru'}, {k:'れ',r:'re'}, {k:'ろ',r:'ro'},
+            {k:'わ',r:'wa'}, {k:'を',r:'wo'}, {k:'ん',r:'n'},
+            // DAKUTEN/HANDAKUTEN (46-70)
+            {k:'が',r:'ga'}, {k:'ぎ',r:'gi'}, {k:'ぐ',r:'gu'}, {k:'げ',r:'ge'}, {k:'ご',r:'go'},
+            {k:'ざ',r:'za'}, {k:'じ',r:'ji'}, {k:'ず',r:'zu'}, {k:'ぜ',r:'ze'}, {k:'ぞ',r:'zo'},
+            {k:'だ',r:'da'}, {k:'ぢ',r:'ji'}, {k:'づ',r:'zu'}, {k:'で',r:'de'}, {k:'ど',r:'do'},
+            {k:'ば',r:'ba'}, {k:'び',r:'bi'}, {k:'ぶ',r:'bu'}, {k:'べ',r:'be'}, {k:'ぼ',r:'bo'},
+            {k:'ぱ',r:'pa'}, {k:'ぴ',r:'pi'}, {k:'ぷ',r:'pu'}, {k:'ぺ',r:'pe'}, {k:'ぽ',r:'po'},
+            // YOON (71+)
+            {k:'きゃ',r:'kya'}, {k:'きゅ',r:'kyu'}, {k:'きょ',r:'kyo'}, {k:'しゃ',r:'sha'}, {k:'しゅ',r:'shu'}, {k:'しょ',r:'sho'},
+            {k:'ちゃ',r:'cha'}, {k:'ちゅ',r:'chu'}, {k:'ちょ',r:'cho'}, {k:'にゃ',r:'nya'}, {k:'にゅ',r:'nyu'}, {k:'にょ',r:'nyo'},
+            {k:'ひゃ',r:'hya'}, {k:'ひゅ',r:'hyu'}, {k:'ひょ',r:'hyo'}, {k:'みゃ',r:'mya'}, {k:'みゅ',r:'myu'}, {k:'みょ',r:'myo'},
+            {k:'りゃ',r:'rya'}, {k:'りゅ',r:'ryu'}, {k:'りょ',r:'ryo'}, {k:'ぎゃ',r:'gya'}, {k:'ぎゅ',r:'gyu'}, {k:'ぎょ',r:'gyo'},
+            {k:'じゃ',r:'ja'}, {k:'じゅ',r:'ju'}, {k:'じょ',r:'jo'}, {k:'びゃ',r:'bya'}, {k:'びゅ',r:'byu'}, {k:'びょ',r:'byo'},
+            {k:'ぴゃ',r:'pya'}, {k:'ぴゅ',r:'pyu'}, {k:'ぴょ',r:'pyo'}
+        ];
+
+        const KATAKANA_DATA = [
+            // BASE
+            {k:'ア',r:'a'}, {k:'イ',r:'i'}, {k:'ウ',r:'u'}, {k:'エ',r:'e'}, {k:'オ',r:'o'},
+            {k:'カ',r:'ka'}, {k:'キ',r:'ki'}, {k:'ク',r:'ku'}, {k:'ケ',r:'ke'}, {k:'コ',r:'ko'},
+            {k:'サ',r:'sa'}, {k:'シ',r:'shi'}, {k:'ス',r:'su'}, {k:'セ',r:'se'}, {k:'ソ',r:'so'},
+            {k:'タ',r:'ta'}, {k:'チ',r:'chi'}, {k:'ツ',r:'tsu'}, {k:'テ',r:'te'}, {k:'ト',r:'to'},
+            {k:'ナ',r:'na'}, {k:'ニ',r:'ni'}, {k:'ヌ',r:'nu'}, {k:'ネ',r:'ne'}, {k:'ノ',r:'no'},
+            {k:'ハ',r:'ha'}, {k:'ヒ',r:'hi'}, {k:'フ',r:'fu'}, {k:'ヘ',r:'he'}, {k:'ホ',r:'ho'},
+            {k:'マ',r:'ma'}, {k:'ミ',r:'mi'}, {k:'ム',r:'mu'}, {k:'メ',r:'me'}, {k:'モ',r:'mo'},
+            {k:'ヤ',r:'ya'}, {k:'ユ',r:'yu'}, {k:'ヨ',r:'yo'},
+            {k:'ラ',r:'ra'}, {k:'リ',r:'ri'}, {k:'ル',r:'ru'}, {k:'レ',r:'re'}, {k:'ロ',r:'ro'},
+            {k:'ワ',r:'wa'}, {k:'ヲ',r:'wo'}, {k:'ン',r:'n'},
+            // DAKUTEN
+            {k:'ガ',r:'ga'}, {k:'ギ',r:'gi'}, {k:'グ',r:'gu'}, {k:'ゲ',r:'ge'}, {k:'ゴ',r:'go'},
+            {k:'ザ',r:'za'}, {k:'ジ',r:'ji'}, {k:'ズ',r:'zu'}, {k:'ゼ',r:'ze'}, {k:'ゾ',r:'zo'},
+            {k:'ダ',r:'da'}, {k:'ヂ',r:'ji'}, {k:'ヅ',r:'zu'}, {k:'デ',r:'de'}, {k:'ド',r:'do'},
+            {k:'バ',r:'ba'}, {k:'ビ',r:'bi'}, {k:'ブ',r:'bu'}, {k:'ベ',r:'be'}, {k:'ボ',r:'bo'},
+            {k:'パ',r:'pa'}, {k:'ピ',r:'pi'}, {k:'プ',r:'pu'}, {k:'ペ',r:'pe'}, {k:'ポ',r:'po'},
+            // YOON
+            {k:'キャ',r:'kya'}, {k:'キュ',r:'kyu'}, {k:'キョ',r:'kyo'}, {k:'シャ',r:'sha'}, {k:'シュ',r:'shu'}, {k:'ショ',r:'sho'},
+            {k:'チャ',r:'cha'}, {k:'チュ',r:'chu'}, {k:'チョ',r:'cho'}, {k:'ニャ',r:'nya'}, {k:'ニュ',r:'nyu'}, {k:'ニョ',r:'nyo'},
+            {k:'ヒャ',r:'hya'}, {k:'ヒュ',r:'hyu'}, {k:'ヒョ',r:'hyo'}, {k:'ミャ',r:'mya'}, {k:'ミュ',r:'myu'}, {k:'ミョ',r:'myo'},
+            {k:'リャ',r:'rya'}, {k:'リュ',r:'ryu'}, {k:'リョ',r:'ryo'}, {k:'ギャ',r:'gya'}, {k:'ギュ',r:'gyu'}, {k:'ギョ',r:'gyo'},
+            {k:'ジャ',r:'ja'}, {k:'ジュ',r:'ju'}, {k:'ジョ',r:'jo'}, {k:'ビャ',r:'bya'}, {k:'ビュ',r:'byu'}, {k:'ビョ',r:'byo'},
+            {k:'ピャ',r:'pya'}, {k:'ピュ',r:'pyu'}, {k:'ピョ',r:'pyo'}
+        ];
+
+        const KANA_ROWS = {
+            'Vocali (A-O)': [0, 5],
+            'Riga K': [5, 10],
+            'Riga S': [10, 15],
+            'Riga T': [15, 20],
+            'Riga N': [20, 25],
+            'Riga H': [25, 30],
+            'Riga M': [30, 35],
+            'Riga Y': [35, 38],
+            'Riga R': [38, 43],
+            'Riga W/N': [43, 46],
+            'Dakuten (G, Z, D, B)': [46, 66],
+            'Handakuten (P)': [66, 71],
+            'Yoon (Kya, Sha...)': [71, 104]
+        };
 
         // --- VARIABILI GLOBALI ---
         let vocaboli = [];
@@ -241,17 +298,30 @@
         let sessione = [];
         let cartaCorrente = null;
         let punteggio = { ok: 0, err: 0 };
-        const KEY_V = 'srs_vocab_clean';
-        const KEY_F = 'srs_frasi_clean';
+        let modalitaQuiz = 'vocaboli'; // 'vocaboli', 'hiragana', 'katakana'
+
+        const KEY_V = 'srs_vocab_v6';
+        const KEY_F = 'srs_frasi_v6';
 
         // --- AVVIO ---
         window.onload = function() {
             caricaDati();
-            generaTabelleKana();
-            renderListaVocaboli();
-            renderFrasi();
-            nuovaSessione();
-            aggiornaContatori();
+            
+            // Genera tutto
+            generaTabelleKana('h', HIRAGANA_DATA);
+            generaTabelleKana('k', KATAKANA_DATA);
+            generaConfigPanel('h');
+            generaConfigPanel('k');
+            
+            aggiornaUI();
+
+            // Listener Invio
+            document.getElementById('input-risposta').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    if (!document.getElementById('btn-controlla').classList.contains('hidden')) controlla();
+                    else prossima();
+                }
+            });
         };
 
         function showTab(id) {
@@ -261,108 +331,143 @@
             event.target.classList.add('active');
         }
 
+        function setQuizMode(mode) {
+            modalitaQuiz = mode;
+            // Se torno a vocaboli, riabilita il filtro
+            const wrapper = document.getElementById('filtro-wrapper');
+            if (mode === 'vocaboli') {
+                wrapper.classList.remove('hidden');
+                nuovaSessione(); // Resetta per vocaboli
+            } else {
+                wrapper.classList.add('hidden');
+                // Il quiz parte da "avviaQuizKana", non qui
+            }
+        }
+
         // --- GESTIONE DATI ---
         function caricaDati() {
             const v = localStorage.getItem(KEY_V);
             const f = localStorage.getItem(KEY_F);
-            
             if (v) vocaboli = JSON.parse(v);
             if (f) frasi = JSON.parse(f);
-
-            popolaFiltroCategorie();
-            popolaFiltroFrasi();
         }
 
-        function importaCSV(input, tipo) {
-            const file = input.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                const lines = text.trim().split('\n');
-                let count = 0;
-
-                lines.forEach(line => {
-                    const parts = line.split(','); // Attenzione alle virgole nel testo!
-                    if (tipo === 'vocaboli') {
-                        // Formato: Ita,Eng,Jpn,Rom,Tag
-                        if(parts.length >= 4) {
-                            vocaboli.push({ 
-                                ita: parts[0].trim(), 
-                                eng: parts[1].trim(), 
-                                jpn: parts[2].trim(), 
-                                rom: parts[3].trim(), 
-                                tag: parts[4] ? parts[4].trim() : 'Generale' 
-                            });
-                            count++;
-                        }
-                    } else if (tipo === 'frasi') {
-                        // Formato: Ita,Rom,Jpn,Tag (Okkio ordine!)
-                        // Standard usato in precedenza: Ita, Rom, Jpn, Tag
-                        // Se usi il formato del V4.0 era: Ita, Rom, Jpn, Tag
-                        if(parts.length >= 3) {
-                            frasi.push({ 
-                                ita: parts[0].trim(), 
-                                rom: parts[1].trim(), 
-                                jpn: parts[2].trim(), 
-                                tag: parts[3] ? parts[3].trim() : 'Generale' 
-                            });
-                            count++;
-                        }
-                    }
-                });
-
-                if (tipo === 'vocaboli') localStorage.setItem(KEY_V, JSON.stringify(vocaboli));
-                else localStorage.setItem(KEY_F, JSON.stringify(frasi));
-
-                alert(`Caricati ${count} elementi!`);
-                location.reload(); // Ricarica per aggiornare tutto
-            };
-            reader.readAsText(file);
-        }
-
-        function cancellaTutto() {
-            if(!confirm("Vuoi cancellare TUTTI i dati? L'app sarà vuota.")) return;
-            vocaboli = [];
-            frasi = [];
-            localStorage.setItem(KEY_V, JSON.stringify(vocaboli));
-            localStorage.setItem(KEY_F, JSON.stringify(frasi));
-            location.reload();
-        }
-        
-        function aggiornaContatori() {
+        function aggiornaUI() {
             document.getElementById('count-vocab').innerText = vocaboli.length;
             document.getElementById('count-frasi').innerText = frasi.length;
+            popolaFiltroCategorie();
+            popolaFiltroFrasi();
+            renderFrasi();
+            if(modalitaQuiz === 'vocaboli') nuovaSessione();
         }
 
-        // --- LOGICA QUIZ ---
-        function popolaFiltroCategorie() {
-            const sel = document.getElementById('filtro-categoria');
-            const tags = new Set(vocaboli.map(v => v.tag));
-            sel.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
-            Array.from(tags).sort().forEach(t => {
-                sel.innerHTML += `<option value="${t}">${t}</option>`;
+        // --- KANA LOGIC ---
+        function generaConfigPanel(prefix) {
+            const container = document.getElementById(prefix + '-config-grid');
+            container.innerHTML = '';
+            for (const [label, range] of Object.entries(KANA_ROWS)) {
+                container.innerHTML += `
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="${label}" checked> ${label}
+                    </label>
+                `;
+            }
+        }
+
+        function toggleAllKana(type, status) {
+            const prefix = (type === 'hiragana') ? 'h' : 'k';
+            document.querySelectorAll(`#${prefix}-config-grid input`).forEach(cb => cb.checked = status);
+        }
+
+        function avviaQuizKana(type) {
+            const prefix = (type === 'hiragana') ? 'h' : 'k';
+            const dataset = (type === 'hiragana') ? HIRAGANA_DATA : KATAKANA_DATA;
+            const checkboxes = document.querySelectorAll(`#${prefix}-config-grid input:checked`);
+            
+            let pool = [];
+            checkboxes.forEach(cb => {
+                const range = KANA_ROWS[cb.value];
+                pool = pool.concat(dataset.slice(range[0], range[1]));
             });
+
+            if (pool.length === 0) { alert("Seleziona almeno una riga!"); return; }
+
+            // Switch to Quiz Tab
+            showTab('quiz');
+            document.querySelector('.nav-btn.active').classList.remove('active'); // hack visivo
+
+            // Setup Session
+            modalitaQuiz = type; // 'hiragana' o 'katakana'
+            document.getElementById('filtro-wrapper').classList.add('hidden');
+            
+            // Convert to Standard Card Format
+            sessione = pool.sort(() => 0.5 - Math.random()).map(k => ({
+                ita: k.r, // Romaji è la risposta
+                jpn: k.k, // Kana è la domanda
+                type: 'kana'
+            }));
+            
+            punteggio = { ok: 0, err: 0 };
+            mostraCarta();
         }
 
+        function generaTabelleKana(prefix, data) {
+            // Base
+            let html = '<tr><th>-</th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>';
+            for(let i=0; i<46; i+=5) {
+                html += '<tr><th>' + getRowHeader(i) + '</th>';
+                for(let j=0; j<5; j++) {
+                     // Check if valid char (some indices empty in data)
+                     if(i+j < 46) {
+                        const cell = data[i+j];
+                        if(cell.k) html += `<td><span class="kc">${cell.k}</span><span class="kr">${cell.r}</span></td>`;
+                        else html += '<td></td>';
+                     }
+                }
+                html += '</tr>';
+            }
+            document.getElementById(prefix + '-table-base').innerHTML = html;
+
+            // Dakuten (46-70 -> 25 chars -> 5 rows)
+            html = '<tr><th></th><th>A</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>';
+            for(let i=46; i<71; i+=5) {
+                html += '<tr><th>'+ getDakuHeader(i) +'</th>';
+                for(let j=0; j<5; j++) html += `<td><span class="kc">${data[i+j].k}</span><span class="kr">${data[i+j].r}</span></td>`;
+                html += '</tr>';
+            }
+            document.getElementById(prefix + '-table-daku').innerHTML = html;
+
+            // Yoon (71+) - 3 cols
+            html = '<tr><th></th><th>YA</th><th>YU</th><th>YO</th></tr>';
+            for(let i=71; i<data.length; i+=3) {
+                html += '<tr><th>'+ getYoonHeader(i) +'</th>';
+                for(let j=0; j<3; j++) if(data[i+j]) html += `<td><span class="kc">${data[i+j].k}</span><span class="kr">${data[i+j].r}</span></td>`;
+                html += '</tr>';
+            }
+            document.getElementById(prefix + '-table-yoon').innerHTML = html;
+        }
+        
+        function getRowHeader(i) { const h=['-','K','S','T','N','H','M','Y','R','W','N']; return h[Math.floor(i/5)] || ''; }
+        function getDakuHeader(i) { const h=['G','Z','D','B','P']; return h[Math.floor((i-46)/5)] || ''; }
+        function getYoonHeader(i) { const h=['K','S','C','N','H','M','R','G','J','B','P']; return h[Math.floor((i-71)/3)] || ''; }
+
+        // --- LOGICA QUIZ UNIFICATA ---
         function nuovaSessione() {
+            setQuizMode('vocaboli'); // Reset to vocab mode if triggered manually
             const cat = document.getElementById('filtro-categoria').value;
             const pool = (cat === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === cat);
             
-            const box = document.getElementById('quiz-box');
             const msg = document.getElementById('no-data-msg');
+            const box = document.getElementById('quiz-box');
 
             if (pool.length === 0) {
                 box.style.display = 'none';
                 msg.classList.remove('hidden');
                 return;
             }
-            
             box.style.display = 'block';
             msg.classList.add('hidden');
             
-            // Mescola e prendi 10
             sessione = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
             punteggio = { ok: 0, err: 0 };
             mostraCarta();
@@ -370,70 +475,89 @@
 
         function mostraCarta() {
             if (sessione.length === 0) {
-                document.getElementById('prompt-principale').innerText = "Fine Sessione!";
+                document.getElementById('prompt-principale').innerText = "Sessione Finita!";
                 document.getElementById('prompt-secondario').innerText = "";
                 document.getElementById('input-risposta').style.display = 'none';
                 document.getElementById('btn-controlla').style.display = 'none';
+                document.getElementById('btn-prossima').classList.add('hidden');
                 return;
             }
             
-            aggiornaPunteggio();
+            document.getElementById('punteggio-container').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err} | Rimasti: ${sessione.length}`;
+            
             cartaCorrente = sessione.pop();
-            const mode = Math.random() > 0.5 ? 'JtoI' : 'ItoJ';
-            cartaCorrente.mode = mode;
-
-            document.getElementById('input-risposta').value = '';
-            document.getElementById('input-risposta').disabled = false;
-            document.getElementById('input-risposta').style.display = 'block';
-            document.getElementById('input-risposta').focus();
+            const input = document.getElementById('input-risposta');
+            
+            input.value = '';
+            input.disabled = false;
+            input.style.display = 'block';
+            input.focus();
+            
+            document.getElementById('btn-controlla').classList.remove('hidden');
             document.getElementById('btn-controlla').style.display = 'block';
             document.getElementById('btn-prossima').classList.add('hidden');
             document.getElementById('risultato-controllo').innerText = '';
 
-            if (mode === 'JtoI') {
-                document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO";
-                document.getElementById('prompt-principale').innerHTML = `${cartaCorrente.jpn} <span style="font-size:1rem; cursor:pointer" onclick="parla('${cartaCorrente.jpn}')">🔊</span>`;
-                document.getElementById('prompt-secondario').innerText = cartaCorrente.rom;
-            } else {
-                document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)";
-                document.getElementById('prompt-principale').innerText = cartaCorrente.ita;
-                document.getElementById('prompt-secondario').innerText = cartaCorrente.eng;
+            // Setup UI based on Mode
+            if (modalitaQuiz === 'vocaboli') {
+                const mode = Math.random() > 0.5 ? 'JtoI' : 'ItoJ';
+                cartaCorrente.quizMode = mode; // Save specific question direction
+                
+                if (mode === 'JtoI') {
+                    document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO";
+                    document.getElementById('prompt-principale').innerHTML = `${cartaCorrente.jpn} <span style="font-size:1rem; cursor:pointer" onclick="parla('${cartaCorrente.jpn}')">🔊</span>`;
+                    document.getElementById('prompt-secondario').innerText = cartaCorrente.rom;
+                } else {
+                    document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)";
+                    document.getElementById('prompt-principale').innerText = cartaCorrente.ita;
+                    document.getElementById('prompt-secondario').innerText = cartaCorrente.eng;
+                }
+            } 
+            else { // Kana Mode
+                document.getElementById('q-label').innerText = "SCRIVI IL ROMAJI";
+                document.getElementById('prompt-principale').innerText = cartaCorrente.jpn; // Shows Kana
+                document.getElementById('prompt-secondario').innerText = "";
             }
         }
 
         function controlla() {
             const user = document.getElementById('input-risposta').value.trim().toLowerCase();
             let ok = false;
+            let answerText = "";
 
-            if (cartaCorrente.mode === 'JtoI') {
-                if (user === cartaCorrente.ita.toLowerCase() || user === cartaCorrente.eng.toLowerCase()) ok = true;
+            if (modalitaQuiz === 'vocaboli') {
+                if (cartaCorrente.quizMode === 'JtoI') {
+                    // Accept ITA or ENG
+                    if (user === cartaCorrente.ita.toLowerCase() || user === cartaCorrente.eng.toLowerCase()) ok = true;
+                    answerText = cartaCorrente.ita;
+                } else {
+                    // Accept ROM or JPN
+                    if (user === cartaCorrente.rom.toLowerCase() || user === cartaCorrente.jpn) ok = true;
+                    answerText = `${cartaCorrente.rom} (${cartaCorrente.jpn})`;
+                }
             } else {
-                if (user === cartaCorrente.rom.toLowerCase() || user === cartaCorrente.jpn) ok = true;
+                // Kana Mode: Check Romaji
+                if (user === cartaCorrente.ita.toLowerCase()) ok = true; // .ita holds Romaji in kana session map
+                answerText = cartaCorrente.ita;
             }
 
             const res = document.getElementById('risultato-controllo');
             if (ok) {
                 res.innerHTML = '<span class="corretto">Esatto!</span>';
                 punteggio.ok++;
-                parla(cartaCorrente.jpn);
+                if(modalitaQuiz === 'vocaboli' && cartaCorrente.quizMode === 'JtoI') parla(cartaCorrente.jpn);
             } else {
-                res.innerHTML = `<span class="sbagliato">Sbagliato. Era: ${cartaCorrente.rom} / ${cartaCorrente.jpn}</span>`;
+                res.innerHTML = `<span class="sbagliato">Sbagliato. Era: ${answerText}</span>`;
                 punteggio.err++;
             }
 
             document.getElementById('input-risposta').disabled = true;
-            document.getElementById('btn-controlla').style.display = 'none';
+            document.getElementById('btn-controlla').classList.add('hidden');
             document.getElementById('btn-prossima').classList.remove('hidden');
             document.getElementById('btn-prossima').focus();
         }
 
-        function prossima() {
-            mostraCarta();
-        }
-
-        function aggiornaPunteggio() {
-            document.getElementById('punteggio-container').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err} | Rimasti: ${sessione.length}`;
-        }
+        function prossima() { mostraCarta(); }
 
         // --- ASCOLTO ---
         function popolaFiltroFrasi() {
@@ -455,8 +579,7 @@
             const items = (cat === 'TUTTI') ? frasi : frasi.filter(f => f.tag === cat);
 
             if (items.length === 0) { 
-                msg.classList.remove('hidden');
-                return; 
+                msg.classList.remove('hidden'); return; 
             }
             msg.classList.add('hidden');
 
@@ -475,87 +598,55 @@
             });
         }
 
-        // --- TABELLE KANA FISSE ---
-        function generaTabelleKana() {
-            const hBase = [
-                ['あ','a'],['い','i'],['う','u'],['え','e'],['お','o'],
-                ['か','ka'],['き','ki'],['く','ku'],['け','ke'],['こ','ko'],
-                ['さ','sa'],['し','shi'],['す','su'],['せ','se'],['そ','so'],
-                ['た','ta'],['ち','chi'],['つ','tsu'],['て','te'],['と','to'],
-                ['な','na'],['に','ni'],['ぬ','nu'],['ね','ne'],['の','no'],
-                ['は','ha'],['ひ','hi'],['ふ','fu'],['へ','he'],['ほ','ho'],
-                ['ま','ma'],['み','mi'],['む','mu'],['め','me'],['も','mo'],
-                ['や','ya'],['',''],['ゆ','yu'],['',''],['よ','yo'],
-                ['ら','ra'],['り','ri'],['る','ru'],['れ','re'],['ろ','ro'],
-                ['わ','wa'],['',''],['',''],['',''],['を','wo'],
-                ['ん','n'],['',''],['',''],['',''],['','']
-            ];
-            riempiTabella('h-table-base', hBase);
-
-            const kBase = [
-                ['ア','a'],['イ','i'],['ウ','u'],['エ','e'],['オ','o'],
-                ['カ','ka'],['キ','ki'],['ク','ku'],['ケ','ke'],['コ','ko'],
-                ['サ','sa'],['シ','shi'],['ス','su'],['セ','se'],['ソ','so'],
-                ['タ','ta'],['チ','chi'],['ツ','tsu'],['テ','te'],['ト','to'],
-                ['ナ','na'],['ニ','ni'],['ヌ','nu'],['ネ','ne'],['ノ','no'],
-                ['ハ','ha'],['ヒ','hi'],['フ','fu'],['ヘ','he'],['ホ','ho'],
-                ['マ','ma'],['ミ','mi'],['ム','mu'],['メ','me'],['モ','mo'],
-                ['ヤ','ya'],['',''],['ユ','yu'],['',''],['ヨ','yo'],
-                ['ラ','ra'],['リ','ri'],['ル','ru'],['レ','re'],['ロ','ro'],
-                ['ワ','wa'],['',''],['',''],['',''],['ヲ','wo'],
-                ['ン','n'],['',''],['',''],['',''],['','']
-            ];
-            riempiTabella('k-table-base', kBase);
-        }
-
-        function riempiTabella(id, data) {
-            const t = document.getElementById(id);
-            let html = '<tr><th>-</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>'; // Header semplificato per layout
-            // Nota: Per semplicità nel codice Clean, uso una griglia standard 5col
-            // Ma per il layout classico (A I U E O verticale vs orizzontale) il rendering qui è una griglia lineare
-            // Per replicare l'immagine esatta servirebbe HTML statico, qui lo genero dinamico per brevità ma corretto
-            
-            html = ''; // Reset
-            // Genero righe da 5
-            for(let i=0; i<data.length; i+=5) {
-                html += '<tr>';
-                for(let j=0; j<5; j++) {
-                    if(data[i+j] && data[i+j][0]) {
-                        html += `<td><span class="kc">${data[i+j][0]}</span><span class="kr">${data[i+j][1]}</span></td>`;
-                    } else {
-                        html += '<td></td>';
-                    }
-                }
-                html += '</tr>';
-            }
-            t.innerHTML = html;
-        }
-
-        // --- LISTA ---
-        function renderListaVocaboli() {
-            const div = document.getElementById('lista-container');
-            div.innerHTML = '';
-            
-            if(vocaboli.length === 0) {
-                div.innerHTML = '<p style="text-align:center; color:#888;">Lista vuota.</p>';
-                return;
-            }
-
-            vocaboli.forEach(v => {
-                div.innerHTML += `
-                    <div style="border-bottom:1px solid #eee; padding:10px; display:flex; justify-content:space-between;">
-                        <div><b>${v.ita}</b><br><small>${v.tag}</small></div>
-                        <div style="text-align:right;"><span style="color:#007aff; font-weight:bold;">${v.jpn}</span><br><small>${v.rom}</small></div>
-                    </div>
-                `;
-            });
-        }
-
-        // --- UTILS ---
+        // --- UTILS & IMPORT ---
         function parla(text) {
             const u = new SpeechSynthesisUtterance(text);
             u.lang = 'ja-JP';
             window.speechSynthesis.speak(u);
+        }
+
+        function scaricaDaGithub(tipo) {
+            const urlInput = document.getElementById(tipo === 'vocaboli' ? 'url-vocaboli' : 'url-frasi');
+            const url = urlInput.value.trim();
+            if (!url) { alert("Inserisci un link valido!"); return; }
+            fetch(url).then(r => r.text()).then(t => {
+                if (tipo === 'vocaboli') parseVocaboli(t); else parseFrasi(t);
+                alert("Fatto!"); aggiornaUI();
+            }).catch(e => alert("Errore download: " + e));
+        }
+
+        function importaFileLocale(input, tipo) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (tipo === 'vocaboli') parseVocaboli(e.target.result); else parseFrasi(e.target.result);
+                alert("Fatto!"); aggiornaUI();
+            };
+            reader.readAsText(file);
+        }
+
+        function parseVocaboli(csv) {
+            vocaboli = [];
+            csv.trim().split('\n').forEach(line => {
+                const parts = line.split(',');
+                if (parts.length >= 4) vocaboli.push({ ita: parts[0].trim(), eng: parts[1].trim(), jpn: parts[2].trim(), rom: parts[3].trim(), tag: parts[4] ? parts[4].trim() : 'Generale' });
+            });
+            localStorage.setItem(KEY_V, JSON.stringify(vocaboli));
+        }
+
+        function parseFrasi(csv) {
+            frasi = [];
+            csv.trim().split('\n').forEach(line => {
+                const parts = line.split(',');
+                if (parts.length >= 3) frasi.push({ ita: parts[0].trim(), rom: parts[1].trim(), jpn: parts[2].trim(), tag: parts[3] ? parts[3].trim() : 'Generale' });
+            });
+            localStorage.setItem(KEY_F, JSON.stringify(frasi));
+        }
+
+        function cancellaTutto() {
+            if(!confirm("Sicuro?")) return;
+            localStorage.clear(); location.reload();
         }
     </script>
 </body>
