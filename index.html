@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giapponese SRS v6.1 (Clean)</title>
+    <style>
+        /* --- STILE GENERALE --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f2f2f7;
+            color: #333;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 { color: #1c1c1e; margin-bottom: 20px; text-align: center; font-size: 1.5rem; }
+        h2 { font-size: 1.2rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        .container { width: 100%; max-width: 600px; margin-bottom: 50px; }
+        
+        .card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        /* --- MENU DI NAVIGAZIONE --- */
+        #main-nav {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #e5e5ea;
+            color: #007aff;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .nav-btn.active {
+            background-color: #007aff;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,122,255,0.4);
+        }
+
+        /* --- CONTENUTO MODULI --- */
+        .modulo-content { display: none; }
+        .active-module { display: block; }
+
+        /* --- STILI QUIZ --- */
+        #punteggio-container { text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 10px; }
+        #prompt-container { text-align: center; margin: 20px 0; min-height: 80px; }
+        #prompt-principale { font-size: 2rem; margin: 5px 0; color: #333; }
+        #prompt-secondario { font-size: 1.1rem; color: #666; font-style: italic; }
+        
+        .input-box {
+            width: 100%; padding: 12px; font-size: 1.1rem;
+            border: 2px solid #ddd; border-radius: 8px;
+            box-sizing: border-box; text-align: center; margin-bottom: 10px;
+        }
+        
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; }
+        .btn-blue { background-color: #007aff; }
+        .btn-green { background-color: #34c759; }
+        .btn-red { background-color: #ff3b30; }
+        .btn-orange { background-color: #ff9500; }
+        
+        #risultato-controllo { text-align: center; font-weight: bold; min-height: 30px; margin: 10px 0; }
+        .corretto { color: #34c759; } .sbagliato { color: #ff3b30; }
+
+        /* --- STILI ASCOLTO --- */
+        .frase-entry {
+            display: flex;
+            align-items: center;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            gap: 12px;
+        }
+        .play-btn {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: #34c759; color: white; border: none;
+            font-size: 1.2rem; cursor: pointer; flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .frase-text { flex-grow: 1; }
+        .frase-jpn { font-weight: bold; font-size: 1.1rem; display: block; }
+        .frase-ita { color: #007aff; font-size: 0.95rem; display: block; cursor: pointer; }
+        .spoiler .frase-ita { background: #ddd; color: transparent; border-radius: 4px; }
+        .spoiler .frase-ita:hover { background: transparent; color: #007aff; }
+
+        /* --- STILI GESTIONE --- */
+        .upload-area { border: 2px dashed #ccc; padding: 20px; text-align: center; margin-bottom: 15px; border-radius: 8px; background: #fafafa; }
+        .upload-label { display: block; font-weight: bold; margin-bottom: 10px; color: #555; }
+        
+        /* --- STILI TABELLE KANA --- */
+        .table-wrap { overflow-x: auto; margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px; }
+        .kana-table { width: 100%; border-collapse: collapse; min-width: 320px; text-align: center; }
+        .kana-table th { background: #f2f2f7; padding: 8px; color: #666; font-size: 0.9rem; }
+        .kana-table td { border: 1px solid #ddd; padding: 8px; vertical-align: middle; }
+        .kc { font-size: 1.4rem; font-weight: bold; display: block; color: #333; }
+        .kr { font-size: 0.75rem; color: #999; display: block; }
+
+        /* --- UTILS --- */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <h1>Set di Studio Giapponese</h1>
+
+    <nav id="main-nav">
+        <button class="nav-btn active" onclick="showTab('quiz')">Quiz</button>
+        <button class="nav-btn" onclick="showTab('ascolto')">🎧 Ascolto</button>
+        <button class="nav-btn" onclick="showTab('hiragana')">Hiragana</button>
+        <button class="nav-btn" onclick="showTab('katakana')">Katakana</button>
+        <button class="nav-btn" onclick="showTab('gestione')">⚙️ Gestione</button>
+    </nav>
+
+    <div class="container">
+
+        <div id="tab-quiz" class="modulo-content active-module">
+            <div class="card">
+                <div id="punteggio-container">Sessione pronta</div>
+                
+                <select id="filtro-categoria" class="input-box" onchange="nuovaSessione()">
+                    <option value="TUTTI">Tutte le Categorie</option>
+                </select>
+
+                <div id="quiz-box">
+                    <div id="prompt-container">
+                        <div id="q-label" style="font-size:0.8rem; font-weight:bold; color:#aaa;"></div>
+                        <div id="prompt-principale"></div>
+                        <div id="prompt-secondario"></div>
+                    </div>
+
+                    <input type="text" id="input-risposta" class="input-box" placeholder="Risposta..." autocomplete="off">
+                    
+                    <div id="risultato-controllo"></div>
+
+                    <button id="btn-controlla" class="btn btn-blue" onclick="controlla()">Controlla</button>
+                    <button id="btn-prossima" class="btn btn-green hidden" onclick="prossima()">Prossima</button>
+                </div>
+                <div id="no-data-msg" class="hidden" style="text-align:center; padding:20px; color:#666;">
+                    Nessun vocabolo caricato.<br>Vai su "Gestione" per caricare i dati.
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-ascolto" class="modulo-content">
+            <div class="card">
+                <h2>Ascolto Frasi</h2>
+                <select id="filtro-frasi" class="input-box" onchange="renderFrasi()">
+                    <option value="TUTTI">Tutte le Frasi</option>
+                </select>
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <label><input type="checkbox" id="spoiler-check" onchange="renderFrasi()"> Nascondi Italiano</label>
+                </div>
+                <div id="lista-frasi"></div>
+                <div id="no-frasi-msg" class="hidden" style="text-align:center; padding:20px; color:#666;">
+                    Nessuna frase caricata.<br>Vai su "Gestione" per caricare i dati.
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-hiragana" class="modulo-content">
+            <div class="card">
+                <h2>Hiragana</h2>
+                <div class="table-wrap">
+                    <table class="kana-table" id="h-table-base"></table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-katakana" class="modulo-content">
+            <div class="card">
+                <h2>Katakana</h2>
+                <div class="table-wrap">
+                    <table class="kana-table" id="k-table-base"></table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-gestione" class="modulo-content">
+            <div class="card">
+                <h2>Gestione Dati</h2>
+                
+                <div class="upload-area">
+                    <span class="upload-label">1. Carica CSV Vocaboli</span>
+                    <input type="file" id="file-vocaboli" accept=".csv" onchange="importaCSV(this, 'vocaboli')">
+                    <p style="font-size:0.8rem; color:#888;">Formato: Italiano,Inglese,Giapponese,Romaji,Tag</p>
+                </div>
+
+                <div class="upload-area">
+                    <span class="upload-label">2. Carica CSV Frasi</span>
+                    <input type="file" id="file-frasi" accept=".csv" onchange="importaCSV(this, 'frasi')">
+                    <p style="font-size:0.8rem; color:#888;">Formato: Italiano,Romaji,Giapponese,Tag</p>
+                </div>
+
+                <div style="margin-top:20px; text-align:center;">
+                    <p>Totale Vocaboli: <span id="count-vocab">0</span></p>
+                    <p>Totale Frasi: <span id="count-frasi">0</span></p>
+                    <button class="btn btn-red" onclick="cancellaTutto()">🗑 CANCELLA TUTTO</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Lista Vocaboli Attuali</h3>
+                <div id="lista-container"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- COSTANTI VUOTE (Clean Code) ---
+        const RAW_VOCABOLI = ``;
+        const RAW_FRASI = ``;
+
+        // --- VARIABILI GLOBALI ---
+        let vocaboli = [];
+        let frasi = [];
+        let sessione = [];
+        let cartaCorrente = null;
+        let punteggio = { ok: 0, err: 0 };
+        const KEY_V = 'srs_vocab_clean';
+        const KEY_F = 'srs_frasi_clean';
+
+        // --- AVVIO ---
+        window.onload = function() {
+            caricaDati();
+            generaTabelleKana();
+            renderListaVocaboli();
+            renderFrasi();
+            nuovaSessione();
+            aggiornaContatori();
+        };
+
+        function showTab(id) {
+            document.querySelectorAll('.modulo-content').forEach(d => d.classList.remove('active-module'));
+            document.getElementById('tab-' + id).classList.add('active-module');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // --- GESTIONE DATI ---
+        function caricaDati() {
+            const v = localStorage.getItem(KEY_V);
+            const f = localStorage.getItem(KEY_F);
+            
+            if (v) vocaboli = JSON.parse(v);
+            if (f) frasi = JSON.parse(f);
+
+            popolaFiltroCategorie();
+            popolaFiltroFrasi();
+        }
+
+        function importaCSV(input, tipo) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.trim().split('\n');
+                let count = 0;
+
+                lines.forEach(line => {
+                    const parts = line.split(','); // Attenzione alle virgole nel testo!
+                    if (tipo === 'vocaboli') {
+                        // Formato: Ita,Eng,Jpn,Rom,Tag
+                        if(parts.length >= 4) {
+                            vocaboli.push({ 
+                                ita: parts[0].trim(), 
+                                eng: parts[1].trim(), 
+                                jpn: parts[2].trim(), 
+                                rom: parts[3].trim(), 
+                                tag: parts[4] ? parts[4].trim() : 'Generale' 
+                            });
+                            count++;
+                        }
+                    } else if (tipo === 'frasi') {
+                        // Formato: Ita,Rom,Jpn,Tag (Okkio ordine!)
+                        // Standard usato in precedenza: Ita, Rom, Jpn, Tag
+                        // Se usi il formato del V4.0 era: Ita, Rom, Jpn, Tag
+                        if(parts.length >= 3) {
+                            frasi.push({ 
+                                ita: parts[0].trim(), 
+                                rom: parts[1].trim(), 
+                                jpn: parts[2].trim(), 
+                                tag: parts[3] ? parts[3].trim() : 'Generale' 
+                            });
+                            count++;
+                        }
+                    }
+                });
+
+                if (tipo === 'vocaboli') localStorage.setItem(KEY_V, JSON.stringify(vocaboli));
+                else localStorage.setItem(KEY_F, JSON.stringify(frasi));
+
+                alert(`Caricati ${count} elementi!`);
+                location.reload(); // Ricarica per aggiornare tutto
+            };
+            reader.readAsText(file);
+        }
+
+        function cancellaTutto() {
+            if(!confirm("Vuoi cancellare TUTTI i dati? L'app sarà vuota.")) return;
+            vocaboli = [];
+            frasi = [];
+            localStorage.setItem(KEY_V, JSON.stringify(vocaboli));
+            localStorage.setItem(KEY_F, JSON.stringify(frasi));
+            location.reload();
+        }
+        
+        function aggiornaContatori() {
+            document.getElementById('count-vocab').innerText = vocaboli.length;
+            document.getElementById('count-frasi').innerText = frasi.length;
+        }
+
+        // --- LOGICA QUIZ ---
+        function popolaFiltroCategorie() {
+            const sel = document.getElementById('filtro-categoria');
+            const tags = new Set(vocaboli.map(v => v.tag));
+            sel.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
+            Array.from(tags).sort().forEach(t => {
+                sel.innerHTML += `<option value="${t}">${t}</option>`;
+            });
+        }
+
+        function nuovaSessione() {
+            const cat = document.getElementById('filtro-categoria').value;
+            const pool = (cat === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === cat);
+            
+            const box = document.getElementById('quiz-box');
+            const msg = document.getElementById('no-data-msg');
+
+            if (pool.length === 0) {
+                box.style.display = 'none';
+                msg.classList.remove('hidden');
+                return;
+            }
+            
+            box.style.display = 'block';
+            msg.classList.add('hidden');
+            
+            // Mescola e prendi 10
+            sessione = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+            punteggio = { ok: 0, err: 0 };
+            mostraCarta();
+        }
+
+        function mostraCarta() {
+            if (sessione.length === 0) {
+                document.getElementById('prompt-principale').innerText = "Fine Sessione!";
+                document.getElementById('prompt-secondario').innerText = "";
+                document.getElementById('input-risposta').style.display = 'none';
+                document.getElementById('btn-controlla').style.display = 'none';
+                return;
+            }
+            
+            aggiornaPunteggio();
+            cartaCorrente = sessione.pop();
+            const mode = Math.random() > 0.5 ? 'JtoI' : 'ItoJ';
+            cartaCorrente.mode = mode;
+
+            document.getElementById('input-risposta').value = '';
+            document.getElementById('input-risposta').disabled = false;
+            document.getElementById('input-risposta').style.display = 'block';
+            document.getElementById('input-risposta').focus();
+            document.getElementById('btn-controlla').style.display = 'block';
+            document.getElementById('btn-prossima').classList.add('hidden');
+            document.getElementById('risultato-controllo').innerText = '';
+
+            if (mode === 'JtoI') {
+                document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO";
+                document.getElementById('prompt-principale').innerHTML = `${cartaCorrente.jpn} <span style="font-size:1rem; cursor:pointer" onclick="parla('${cartaCorrente.jpn}')">🔊</span>`;
+                document.getElementById('prompt-secondario').innerText = cartaCorrente.rom;
+            } else {
+                document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)";
+                document.getElementById('prompt-principale').innerText = cartaCorrente.ita;
+                document.getElementById('prompt-secondario').innerText = cartaCorrente.eng;
+            }
+        }
+
+        function controlla() {
+            const user = document.getElementById('input-risposta').value.trim().toLowerCase();
+            let ok = false;
+
+            if (cartaCorrente.mode === 'JtoI') {
+                if (user === cartaCorrente.ita.toLowerCase() || user === cartaCorrente.eng.toLowerCase()) ok = true;
+            } else {
+                if (user === cartaCorrente.rom.toLowerCase() || user === cartaCorrente.jpn) ok = true;
+            }
+
+            const res = document.getElementById('risultato-controllo');
+            if (ok) {
+                res.innerHTML = '<span class="corretto">Esatto!</span>';
+                punteggio.ok++;
+                parla(cartaCorrente.jpn);
+            } else {
+                res.innerHTML = `<span class="sbagliato">Sbagliato. Era: ${cartaCorrente.rom} / ${cartaCorrente.jpn}</span>`;
+                punteggio.err++;
+            }
+
+            document.getElementById('input-risposta').disabled = true;
+            document.getElementById('btn-controlla').style.display = 'none';
+            document.getElementById('btn-prossima').classList.remove('hidden');
+            document.getElementById('btn-prossima').focus();
+        }
+
+        function prossima() {
+            mostraCarta();
+        }
+
+        function aggiornaPunteggio() {
+            document.getElementById('punteggio-container').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err} | Rimasti: ${sessione.length}`;
+        }
+
+        // --- ASCOLTO ---
+        function popolaFiltroFrasi() {
+            const sel = document.getElementById('filtro-frasi');
+            const tags = new Set(frasi.map(f => f.tag));
+            sel.innerHTML = '<option value="TUTTI">Tutte le Frasi</option>';
+            Array.from(tags).sort().forEach(t => {
+                sel.innerHTML += `<option value="${t}">${t}</option>`;
+            });
+        }
+
+        function renderFrasi() {
+            const cat = document.getElementById('filtro-frasi').value;
+            const spoiler = document.getElementById('spoiler-check').checked;
+            const list = document.getElementById('lista-frasi');
+            const msg = document.getElementById('no-frasi-msg');
+            list.innerHTML = '';
+
+            const items = (cat === 'TUTTI') ? frasi : frasi.filter(f => f.tag === cat);
+
+            if (items.length === 0) { 
+                msg.classList.remove('hidden');
+                return; 
+            }
+            msg.classList.add('hidden');
+
+            items.forEach(f => {
+                const d = document.createElement('div');
+                d.className = `frase-entry ${spoiler ? 'spoiler' : ''}`;
+                d.innerHTML = `
+                    <button class="play-btn" onclick="parla('${f.jpn.replace(/'/g, "\\'")}')">▶</button>
+                    <div class="frase-text">
+                        <span class="frase-jpn">${f.jpn}</span>
+                        <span style="font-size:0.8rem; color:#888;">${f.rom}</span>
+                        <span class="frase-ita" onclick="this.parentElement.parentElement.classList.remove('spoiler')">${f.ita}</span>
+                    </div>
+                `;
+                list.appendChild(d);
+            });
+        }
+
+        // --- TABELLE KANA FISSE ---
+        function generaTabelleKana() {
+            const hBase = [
+                ['あ','a'],['い','i'],['う','u'],['え','e'],['お','o'],
+                ['か','ka'],['き','ki'],['く','ku'],['け','ke'],['こ','ko'],
+                ['さ','sa'],['し','shi'],['す','su'],['せ','se'],['そ','so'],
+                ['た','ta'],['ち','chi'],['つ','tsu'],['て','te'],['と','to'],
+                ['な','na'],['に','ni'],['ぬ','nu'],['ね','ne'],['の','no'],
+                ['は','ha'],['ひ','hi'],['ふ','fu'],['へ','he'],['ほ','ho'],
+                ['ま','ma'],['み','mi'],['む','mu'],['め','me'],['も','mo'],
+                ['や','ya'],['',''],['ゆ','yu'],['',''],['よ','yo'],
+                ['ら','ra'],['り','ri'],['る','ru'],['れ','re'],['ろ','ro'],
+                ['わ','wa'],['',''],['',''],['',''],['を','wo'],
+                ['ん','n'],['',''],['',''],['',''],['','']
+            ];
+            riempiTabella('h-table-base', hBase);
+
+            const kBase = [
+                ['ア','a'],['イ','i'],['ウ','u'],['エ','e'],['オ','o'],
+                ['カ','ka'],['キ','ki'],['ク','ku'],['ケ','ke'],['コ','ko'],
+                ['サ','sa'],['シ','shi'],['ス','su'],['セ','se'],['ソ','so'],
+                ['タ','ta'],['チ','chi'],['ツ','tsu'],['テ','te'],['ト','to'],
+                ['ナ','na'],['ニ','ni'],['ヌ','nu'],['ネ','ne'],['ノ','no'],
+                ['ハ','ha'],['ヒ','hi'],['フ','fu'],['ヘ','he'],['ホ','ho'],
+                ['マ','ma'],['ミ','mi'],['ム','mu'],['メ','me'],['モ','mo'],
+                ['ヤ','ya'],['',''],['ユ','yu'],['',''],['ヨ','yo'],
+                ['ラ','ra'],['リ','ri'],['ル','ru'],['レ','re'],['ロ','ro'],
+                ['ワ','wa'],['',''],['',''],['',''],['ヲ','wo'],
+                ['ン','n'],['',''],['',''],['',''],['','']
+            ];
+            riempiTabella('k-table-base', kBase);
+        }
+
+        function riempiTabella(id, data) {
+            const t = document.getElementById(id);
+            let html = '<tr><th>-</th><th>I</th><th>U</th><th>E</th><th>O</th></tr>'; // Header semplificato per layout
+            // Nota: Per semplicità nel codice Clean, uso una griglia standard 5col
+            // Ma per il layout classico (A I U E O verticale vs orizzontale) il rendering qui è una griglia lineare
+            // Per replicare l'immagine esatta servirebbe HTML statico, qui lo genero dinamico per brevità ma corretto
+            
+            html = ''; // Reset
+            // Genero righe da 5
+            for(let i=0; i<data.length; i+=5) {
+                html += '<tr>';
+                for(let j=0; j<5; j++) {
+                    if(data[i+j] && data[i+j][0]) {
+                        html += `<td><span class="kc">${data[i+j][0]}</span><span class="kr">${data[i+j][1]}</span></td>`;
+                    } else {
+                        html += '<td></td>';
+                    }
+                }
+                html += '</tr>';
+            }
+            t.innerHTML = html;
+        }
+
+        // --- LISTA ---
+        function renderListaVocaboli() {
+            const div = document.getElementById('lista-container');
+            div.innerHTML = '';
+            
+            if(vocaboli.length === 0) {
+                div.innerHTML = '<p style="text-align:center; color:#888;">Lista vuota.</p>';
+                return;
+            }
+
+            vocaboli.forEach(v => {
+                div.innerHTML += `
+                    <div style="border-bottom:1px solid #eee; padding:10px; display:flex; justify-content:space-between;">
+                        <div><b>${v.ita}</b><br><small>${v.tag}</small></div>
+                        <div style="text-align:right;"><span style="color:#007aff; font-weight:bold;">${v.jpn}</span><br><small>${v.rom}</small></div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- UTILS ---
+        function parla(text) {
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'ja-JP';
+            window.speechSynthesis.speak(u);
+        }
+    </script>
+</body>
+</html>
