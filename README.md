@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set di Studio Giapponese SRS v4.0 (Ascolto)</title>
+    <title>Set di Studio Giapponese SRS v4.1 (Sezione Ascolto)</title>
     <style>
         /* --- Stile Generale --- */
         body {
@@ -83,7 +83,7 @@
         .vocab-tag { font-size: 0.7rem; background: #eee; padding: 2px 6px; border-radius: 4px; color: #666; margin-left: 5px; }
         .delete-vocab-btn { background: #ff3b30; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; margin-left: 10px; }
 
-        /* --- SEZIONE ASCOLTO --- */
+        /* --- STILE SPECIFICO PER ASCOLTO --- */
         .frase-entry { 
             display: flex; 
             align-items: flex-start; 
@@ -106,6 +106,7 @@
             flex-shrink: 0;
             display: flex; justify-content: center; align-items: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
         }
         .play-btn:active { transform: scale(0.95); }
         .frase-text { flex-grow: 1; }
@@ -113,13 +114,14 @@
         .frase-romaji { font-size: 0.9rem; color: #777; margin-bottom: 4px; display: block; }
         .frase-ita { font-size: 1rem; color: #007aff; font-weight: 500; display: block; }
         .frase-tag { font-size: 0.7rem; background: #ddd; color: #444; padding: 2px 6px; border-radius: 4px; float: right; }
-        .spoiler-active .frase-ita { background: #e0e0e0; color: transparent; border-radius: 4px; cursor: pointer; }
-        .spoiler-active .frase-ita:hover { color: #007aff; }
+        
+        .spoiler-active .frase-ita { background: #e0e0e0; color: transparent; border-radius: 4px; cursor: pointer; user-select: none;}
+        .spoiler-active .frase-ita:hover { color: #007aff; background: transparent; }
 
         /* Configurazione Kana */
         .kana-config-panel { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .checkbox-label { display: flex; align-items: center; gap: 8px; background: white; padding: 8px; border: 1px solid #eee; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; background: white; padding: 8px; border: 1px solid #eee; border-radius: 6px; cursor: pointer; font-size: 0.9rem; justify-content: center;}
     </style>
 </head>
 <body>
@@ -128,7 +130,7 @@
 
     <nav id="main-nav">
         <button class="nav-btn" data-modulo="quiz">Quiz Vocaboli</button>
-        <button class="nav-btn" data-modulo="ascolto">🎧 Ascolto</button>
+        <button class="nav-btn" data-modulo="ascolto" style="border: 2px solid #34c759;">🎧 Ascolto</button>
         <button class="nav-btn" data-modulo="hiragana">Hiragana</button>
         <button class="nav-btn" data-modulo="katakana">Katakana</button>
         <button class="nav-btn" data-modulo="vocaboli">Lista Vocaboli</button>
@@ -170,18 +172,11 @@
             <div class="card-ui" id="form-container">
                 <h2>Gestione Dati</h2>
                 <div class="sezione-gestione">
-                    <h3>Aggiornamento Online</h3>
-                    <label>Link al file .csv su GitHub:</label>
-                    <input type="text" id="csv-url-input" placeholder="https://raw.githubusercontent.com/..." value="">
-                    <button id="update-url-btn" class="btn" style="background:#007aff;">Aggiorna da Link</button>
-                    <p id="messaggio-update" class="messaggio-feedback"></p>
+                    <button id="reset-dati-btn" class="btn" style="background-color: #34c759; margin-bottom:10px;">🔄 Ripristina Dati Vocaboli</button>
+                    <button id="svuota-tutto-btn" class="btn" style="background-color: #d92c23;">CANCELLA E RIPRISTINA TUTTO</button>
                 </div>
                 <div class="sezione-gestione">
-                    <h3>Importa/Aggiungi</h3>
-                    <label id="import-label" for="import-csv-file" style="cursor:pointer; background:#eee; padding:10px; text-align:center; border-radius:6px; margin-bottom:15px; display:block;">📂 Importa CSV Locale</label>
-                    <input type="file" id="import-csv-file" accept=".csv" style="display:none;">
-                    
-                    <h3 style="margin-top:20px;">Aggiungi Parola Singola</h3>
+                    <h3>Aggiungi Parola Singola</h3>
                     <form id="form-aggiungi">
                         <label>Italiano: <input type="text" id="input-ita" required></label>
                         <label>Inglese: <input type="text" id="input-eng" required></label>
@@ -191,9 +186,6 @@
                         <button type="submit" class="btn">Salva Parola</button>
                     </form>
                 </div>
-                <div class="sezione-gestione">
-                    <button id="svuota-tutto-btn" class="btn" style="background-color: #d92c23;">CANCELLA E RIPRISTINA TUTTO</button>
-                </div>
             </div>
         </div> 
 
@@ -201,14 +193,14 @@
             <div class="card-ui">
                 <h2>Ascolto Frasi</h2>
                 <div class="filtro-container">
-                    <label style="margin-bottom:5px;">Filtra per Categoria:</label>
+                    <label style="margin-bottom:5px; display:block; font-weight:bold;">Filtra per Categoria:</label>
                     <select id="filtro-frasi" onchange="mostraListaFrasi()">
                         <option value="TUTTI">🎧 TUTTE LE FRASI</option>
                     </select>
                 </div>
                 <div style="margin-bottom: 15px; text-align: center;">
-                    <label class="checkbox-label" style="justify-content: center;">
-                        <input type="checkbox" id="spoiler-mode" onchange="mostraListaFrasi()"> Nascondi traduzione Italiana
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="spoiler-mode" onchange="mostraListaFrasi()"> Nascondi traduzione Italiana (Test Ascolto)
                     </label>
                 </div>
                 <div id="lista-frasi-container"></div>
