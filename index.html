@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v13.0 (Feedback Visivo)</title>
+    <title>Giapponese SRS v14.0 (Feedback Fix)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -28,20 +28,18 @@
         /* --- UI INPUT & FEEDBACK --- */
         .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; transition: all 0.3s; }
         
-        /* CLASSI PER IL FEEDBACK VISIVO */
-        .correct-bg { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724 !important; }
-        .wrong-bg { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24 !important; }
+        /* FEEDBACK VISIVO */
+        .feedback-box { text-align: center; font-weight: bold; font-size: 1.1rem; padding: 15px; border-radius: 12px; margin: 15px 0; border: 2px solid transparent; }
         
-        .feedback-msg { font-weight: bold; margin-top: 10px; font-size: 1.1rem; min-height: 24px; text-align: center; }
-        .text-ok { color: #28a745; }
-        .text-err { color: #dc3545; }
+        .fb-corretto { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .fb-sbagliato { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
 
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; transition: 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-blue { background-color: #007aff; } 
         .btn-green { background-color: #28a745; } 
-        .btn-red { background-color: #dc3545; }
         .btn-orange { background-color: #fd7e14; }
+        .btn-red { background-color: #dc3545; }
 
         /* --- QUIZ LAYOUT --- */
         #prompt-principale { font-size: 2.4rem; margin: 15px 0; text-align: center; font-weight: 500; }
@@ -95,7 +93,7 @@
                     
                     <input type="text" id="input-risposta" class="input-box" placeholder="Scrivi qui..." autocomplete="off">
                     
-                    <div id="feedback-area" class="feedback-msg"></div>
+                    <div id="feedback" class="feedback-box hidden"></div>
 
                     <div style="margin-top:15px;">
                         <button id="btn-check" class="btn btn-blue" onclick="controlla()">Controlla</button>
@@ -200,8 +198,8 @@
         // --- AVVIO E SYNC ---
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v13')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v13'));
-                if(localStorage.getItem('srs_frasi_v13')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v13'));
+                if(localStorage.getItem('srs_vocab_v14')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v14'));
+                if(localStorage.getItem('srs_frasi_v14')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v14'));
             } catch(e) { localStorage.clear(); }
 
             aggiornaConta();
@@ -280,7 +278,7 @@
         function avviaRipasso() {
             sessione = [...errori]; 
             errori = []; 
-            mode = mode; 
+            // Mantieni modalità corrente (vocab o kana)
             document.getElementById('end-session-box').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
             prossima();
@@ -291,13 +289,16 @@
                 // FINE SESSIONE
                 document.getElementById('quiz-area').classList.add('hidden');
                 document.getElementById('end-session-box').classList.remove('hidden');
-                document.getElementById('end-msg').innerText = errori.length > 0 ? "Sessione Conclusa" : "Perfetto!";
-                document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} corretti, ${punteggio.err} errori.`;
+                
+                let msg = "Sessione Perfetta!";
+                if(errori.length > 0) msg = "Sessione Conclusa";
+                document.getElementById('end-msg').innerText = msg;
+                document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
                 
                 const btnRip = document.getElementById('btn-ripasso');
                 if(errori.length > 0) {
                     btnRip.classList.remove('hidden');
-                    btnRip.innerText = `Ripassa ${errori.length} Errori`;
+                    btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`;
                 } else {
                     btnRip.classList.add('hidden');
                 }
@@ -305,19 +306,17 @@
             }
 
             card = sessione.pop();
-            
-            // RESET UI
             const input = document.getElementById('input-risposta');
-            const feedback = document.getElementById('feedback-area');
-            input.value = ''; 
-            input.disabled = false; 
-            input.classList.remove('hidden', 'correct-bg', 'wrong-bg'); 
-            input.focus();
+            const feed = document.getElementById('feedback');
             
-            feedback.innerHTML = '';
+            input.value = ''; input.disabled = false; input.classList.remove('hidden'); input.focus();
             
             document.getElementById('btn-check').classList.remove('hidden');
             document.getElementById('btn-next').classList.add('hidden');
+            
+            // RESET GRAFICA
+            feed.classList.add('hidden');
+            feed.classList.remove('fb-corretto', 'fb-sbagliato');
             
             document.getElementById('punteggio').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
 
@@ -342,35 +341,41 @@
 
         function controlla() {
             const input = document.getElementById('input-risposta');
-            const feedback = document.getElementById('feedback-area');
+            const feed = document.getElementById('feedback');
             const user = input.value.trim().toLowerCase();
             let ok = false; 
             let ans = "";
 
-            // Logica controllo
+            // LOGICA CONTROLLO
             if(mode === 'vocab') {
                 if(card.dir === 'j2i') {
+                    // Accetta italiano o inglese (se presente)
                     if(user == card.ita.toLowerCase() || (card.eng && user == card.eng.toLowerCase())) ok = true;
                     ans = card.ita;
                 } else {
+                    // Accetta romaji o giapponese
                     if(user == card.rom.toLowerCase() || user == card.jpn) ok = true;
                     ans = `${card.rom} (${card.jpn})`;
                 }
             } else {
+                // Kana
                 if(user == card.r) ok = true;
                 ans = card.r;
             }
+
+            // APPLICA RISULTATO
+            feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
             
             if(ok) {
                 punteggio.ok++;
-                input.classList.add('correct-bg');
-                feedback.innerHTML = '<span class="text-ok">Esatto!</span>';
+                feed.classList.add('fb-corretto');
+                feed.innerHTML = "✅ Esatto!";
                 if(mode==='vocab' && card.dir==='j2i') parla(card.jpn);
             } else {
                 punteggio.err++;
-                errori.push(card); // Salva per ripasso
-                input.classList.add('wrong-bg');
-                feedback.innerHTML = `<span class="text-err">Sbagliato! Era: <b>${ans}</b></span>`;
+                errori.push(card); // SALVA ERRORE
+                feed.classList.add('fb-sbagliato');
+                feed.innerHTML = `❌ Sbagliato! Era: ${ans}`;
             }
 
             input.disabled = true;
@@ -416,6 +421,7 @@
             document.getElementById('end-session-box').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
             document.getElementById('msg-no-data').classList.add('hidden');
+            
             errori = []; 
             punteggio = {ok:0, err:0};
             prossima();
@@ -438,7 +444,7 @@
                         count++;
                     }
                 });
-                localStorage.setItem('srs_vocab_v13', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v14', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
@@ -452,7 +458,7 @@
                         count++;
                     }
                 });
-                localStorage.setItem('srs_frasi_v13', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v14', JSON.stringify(frasi));
             }
             if(reload) { alert("Caricati: " + count); location.reload(); }
         }
