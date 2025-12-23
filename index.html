@@ -3,44 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v8.0 (Safe)</title>
+    <title>Giapponese SRS v9.0 (Layout Chat)</title>
     <style>
         /* --- STILE GENERALE --- */
-        body { font-family: -apple-system, sans-serif; background-color: #f2f2f7; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         h1 { color: #1c1c1e; margin-bottom: 20px; text-align: center; }
         .container { width: 100%; max-width: 600px; margin-bottom: 50px; }
-        .card { background: #ffffff; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .card { background: #ffffff; padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .hidden { display: none !important; }
 
         /* --- MENU --- */
-        #main-nav { display: flex; gap: 5px; width: 100%; max-width: 600px; margin-bottom: 20px; overflow-x: auto; }
-        .nav-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background-color: #e5e5ea; color: #007aff; font-weight: 600; cursor: pointer; white-space: nowrap; }
-        .nav-btn.active { background-color: #007aff; color: white; }
+        #main-nav { display: flex; gap: 8px; width: 100%; max-width: 600px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .nav-btn { flex: 1; padding: 12px; border: none; border-radius: 25px; background-color: #fff; color: #555; font-weight: 600; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
+        .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 8px rgba(0,122,255,0.3); }
 
         /* --- UI --- */
-        .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; text-align: center; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; }
+        .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; transition: 0.1s; }
+        .btn:active { transform: scale(0.98); }
         .btn-blue { background-color: #007aff; } .btn-green { background-color: #34c759; } .btn-red { background-color: #ff3b30; }
 
         /* --- QUIZ --- */
-        #prompt-principale { font-size: 2.2rem; margin: 10px 0; text-align: center; }
-        #prompt-secondario { font-size: 1.1rem; color: #666; font-style: italic; text-align: center; }
-        #risultato-controllo { text-align: center; font-weight: bold; min-height: 30px; margin: 10px 0; }
+        #prompt-principale { font-size: 2.4rem; margin: 15px 0; text-align: center; font-weight: 500; }
+        #prompt-secondario { font-size: 1.1rem; color: #666; text-align: center; margin-bottom: 20px; }
+        #risultato-controllo { text-align: center; font-weight: bold; min-height: 30px; margin: 10px 0; font-size: 1.2rem; }
         .corretto { color: #34c759; } .sbagliato { color: #ff3b30; }
 
-        /* --- ASCOLTO --- */
-        .frase-entry { display: flex; align-items: center; background: #f9f9f9; border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-bottom: 10px; gap: 12px; }
-        .play-btn { width: 40px; height: 40px; border-radius: 50%; background: #34c759; color: white; border: none; cursor: pointer; flex-shrink: 0; }
-        .spoiler .frase-ita { background: #ddd; color: transparent; border-radius: 4px; }
-        .spoiler .frase-ita:hover { background: transparent; color: #007aff; }
+        /* --- ASCOLTO (NUOVO LAYOUT CHAT) --- */
+        .frase-entry { 
+            display: flex; 
+            align-items: flex-start; 
+            background: #ffffff; 
+            border-bottom: 1px solid #eee; 
+            padding: 15px 10px; 
+            gap: 15px; 
+        }
+        .frase-entry:last-child { border-bottom: none; }
+        
+        .play-btn { 
+            width: 48px; height: 48px; border-radius: 50%; 
+            background: #007aff; color: white; border: none; 
+            font-size: 1.2rem; cursor: pointer; flex-shrink: 0; 
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 4px 6px rgba(0,122,255,0.2);
+        }
+        
+        .frase-text { flex-grow: 1; }
+        
+        .frase-jpn { 
+            font-weight: bold; font-size: 1.25rem; 
+            display: block; color: #333; margin-bottom: 4px; line-height: 1.4;
+        }
+        .frase-rom { 
+            font-size: 0.9rem; color: #888; display: block; margin-bottom: 6px; 
+        }
+        .frase-ita { 
+            color: #007aff; font-size: 1rem; font-weight: 500; 
+            display: block; cursor: pointer; background: #f0f8ff; 
+            padding: 5px 8px; border-radius: 6px; display: inline-block;
+        }
+        
+        /* Spoiler mode */
+        .spoiler .frase-ita { background: #e0e0e0; color: transparent; }
+        .spoiler .frase-ita:hover { background: #f0f8ff; color: #007aff; }
 
         /* --- KANA --- */
         .kana-table { width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; }
-        .kana-table th { background: #f2f2f7; padding: 5px; font-size: 0.8rem; }
-        .kana-table td { border: 1px solid #ddd; padding: 5px; }
-        .kc { font-size: 1.2rem; font-weight: bold; display: block; }
-        .kr { font-size: 0.7rem; color: #888; }
-        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .kana-table th { background: #f2f2f7; padding: 8px; font-size: 0.9rem; color: #666; }
+        .kana-table td { border: 1px solid #eee; padding: 8px; font-size: 1.1rem; }
+        .kc { font-weight: bold; display: block; color: #222; }
+        .kr { font-size: 0.75rem; color: #999; }
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .checkbox-label { background: white; padding: 8px; border-radius: 8px; border: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
@@ -59,11 +93,11 @@
 
         <div id="tab-quiz" class="modulo-content">
             <div class="card">
-                <div style="text-align:center; margin-bottom:10px; color:#888;" id="punteggio">Pronto</div>
+                <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio">Pronto</div>
                 <select id="filtro-cat" class="input-box" onchange="nuovaSessione()"><option value="TUTTI">Tutte le Categorie</option></select>
                 
                 <div id="quiz-area">
-                    <div style="text-align:center; color:#aaa; font-size:0.8rem;" id="q-label">DOMANDA</div>
+                    <div style="text-align:center; color:#aaa; font-size:0.85rem; font-weight:bold; letter-spacing:1px;" id="q-label">DOMANDA</div>
                     <div id="prompt-principale">...</div>
                     <div id="prompt-secondario">...</div>
                     <input type="text" id="input-risposta" class="input-box" placeholder="Scrivi qui..." autocomplete="off">
@@ -71,16 +105,23 @@
                     <button id="btn-check" class="btn btn-blue" onclick="controlla()">Controlla</button>
                     <button id="btn-next" class="btn btn-green hidden" onclick="prossima()">Prossima</button>
                 </div>
-                <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">Nessun vocabolo. Vai in Gestione.</div>
+                <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">Nessun vocabolo caricato.<br>Vai in "Gestione".</div>
             </div>
         </div>
 
         <div id="tab-ascolto" class="modulo-content hidden">
             <div class="card">
-                <h2>Ascolto Frasi</h2>
-                <label style="display:block; text-align:center; margin-bottom:10px;">
-                    <input type="checkbox" id="spoiler-check" onchange="renderFrasi()"> Nascondi Italiano
-                </label>
+                <h2 style="text-align:center; margin-bottom:20px;">Dialoghi & Frasi</h2>
+                <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <select id="filtro-frasi" class="input-box" style="margin:0;" onchange="renderFrasi()">
+                        <option value="TUTTI">Tutti i Dialoghi</option>
+                    </select>
+                </div>
+                <div style="text-align:center; margin-bottom:15px;">
+                    <label style="cursor:pointer; color:#555;">
+                        <input type="checkbox" id="spoiler-check" onchange="renderFrasi()"> Nascondi Italiano
+                    </label>
+                </div>
                 <div id="lista-frasi"></div>
             </div>
         </div>
@@ -89,24 +130,30 @@
             <div class="card">
                 <h2>Gestione Dati</h2>
                 
-                <div style="border:1px dashed #ccc; padding:15px; margin-bottom:15px; border-radius:8px;">
-                    <h3>Importa Vocaboli (CSV)</h3>
+                <div style="border:2px dashed #ddd; padding:20px; margin-bottom:20px; border-radius:12px; background:#fafafa;">
+                    <h3 style="margin-top:0;">1. Carica Vocaboli</h3>
+                    <p style="font-size:0.8rem; color:#666;">Formato: Ita | Eng | Jpn | Rom | Tag</p>
                     <input type="text" id="url-vocab" class="input-box" placeholder="Link RAW GitHub...">
                     <button class="btn btn-blue" onclick="scarica('vocab')">Scarica da GitHub</button>
-                    <p style="text-align:center; margin:5px;">oppure</p>
-                    <input type="file" onchange="leggiFile(this, 'vocab')">
+                    <div style="margin-top:10px; text-align:center;">
+                        <span style="font-size:0.9rem;">oppure File Locale:</span>
+                        <input type="file" onchange="leggiFile(this, 'vocab')" style="margin-top:5px;">
+                    </div>
                 </div>
 
-                <div style="border:1px dashed #ccc; padding:15px; margin-bottom:15px; border-radius:8px;">
-                    <h3>Importa Frasi (CSV)</h3>
+                <div style="border:2px dashed #ddd; padding:20px; margin-bottom:20px; border-radius:12px; background:#fafafa;">
+                    <h3 style="margin-top:0;">2. Carica Dialoghi/Frasi</h3>
+                    <p style="font-size:0.8rem; color:#666;">Formato: Ita | Rom | Jpn | Tag</p>
                     <input type="text" id="url-frasi" class="input-box" placeholder="Link RAW GitHub...">
                     <button class="btn btn-blue" onclick="scarica('frasi')">Scarica da GitHub</button>
-                    <p style="text-align:center; margin:5px;">oppure</p>
-                    <input type="file" onchange="leggiFile(this, 'frasi')">
+                    <div style="margin-top:10px; text-align:center;">
+                        <span style="font-size:0.9rem;">oppure File Locale:</span>
+                        <input type="file" onchange="leggiFile(this, 'frasi')" style="margin-top:5px;">
+                    </div>
                 </div>
 
-                <div style="text-align:center;">
-                    <p>Vocaboli: <b id="count-v">0</b> | Frasi: <b id="count-f">0</b></p>
+                <div style="text-align:center; padding-top:10px; border-top:1px solid #eee;">
+                    <p>Vocaboli: <b id="count-v">0</b> | Dialoghi: <b id="count-f">0</b></p>
                     <button class="btn btn-red" onclick="resetTotale()">CANCELLA TUTTO</button>
                 </div>
             </div>
@@ -115,32 +162,16 @@
         <div id="tab-hiragana" class="modulo-content hidden">
             <div class="card">
                 <h2>Hiragana</h2>
-                <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:15px;">
+                <div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;">
                     <div class="config-grid" id="h-config"></div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn btn-blue" style="font-size:0.8rem; padding:5px;" onclick="toggleKana('h', true)">Tutto</button>
-                        <button class="btn btn-blue" style="font-size:0.8rem; padding:5px;" onclick="toggleKana('h', false)">Nulla</button>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', true)">Tutto</button>
+                        <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', false)">Nulla</button>
                     </div>
                     <button class="btn btn-green" onclick="startKanaQuiz('h')">AVVIA QUIZ</button>
                 </div>
                 <div style="overflow-x:auto;">
-                    <table class="kana-table">
-                        <tr><th>-</th><th>K</th><th>S</th><th>T</th><th>N</th><th>H</th><th>M</th><th>Y</th><th>R</th><th>W</th><th>N</th></tr>
-                        <tr><td><span class="kc">あ</span></td><td><span class="kc">か</span></td><td><span class="kc">さ</span></td><td><span class="kc">た</span></td><td><span class="kc">な</span></td><td><span class="kc">は</span></td><td><span class="kc">ま</span></td><td><span class="kc">や</span></td><td><span class="kc">ら</span></td><td><span class="kc">わ</span></td><td><span class="kc">ん</span></td></tr>
-                        <tr><td><span class="kc">い</span></td><td><span class="kc">き</span></td><td><span class="kc">し</span></td><td><span class="kc">ち</span></td><td><span class="kc">に</span></td><td><span class="kc">ひ</span></td><td><span class="kc">み</span></td><td></td><td><span class="kc">り</span></td><td></td><td></td></tr>
-                        <tr><td><span class="kc">う</span></td><td><span class="kc">く</span></td><td><span class="kc">す</span></td><td><span class="kc">つ</span></td><td><span class="kc">ぬ</span></td><td><span class="kc">ふ</span></td><td><span class="kc">む</span></td><td><span class="kc">ゆ</span></td><td><span class="kc">る</span></td><td></td><td></td></tr>
-                        <tr><td><span class="kc">え</span></td><td><span class="kc">け</span></td><td><span class="kc">せ</span></td><td><span class="kc">て</span></td><td><span class="kc">ね</span></td><td><span class="kc">へ</span></td><td><span class="kc">め</span></td><td></td><td><span class="kc">れ</span></td><td></td><td></td></tr>
-                        <tr><td><span class="kc">お</span></td><td><span class="kc">こ</span></td><td><span class="kc">そ</span></td><td><span class="kc">と</span></td><td><span class="kc">の</span></td><td><span class="kc">ほ</span></td><td><span class="kc">も</span></td><td><span class="kc">よ</span></td><td><span class="kc">ろ</span></td><td><span class="kc">を</span></td><td></td></tr>
-                    </table>
-                    <h4 style="text-align:center;">Dakuten</h4>
-                    <table class="kana-table">
-                        <tr><th>G</th><th>Z</th><th>D</th><th>B</th><th>P</th></tr>
-                        <tr><td><span class="kc">が</span></td><td><span class="kc">ざ</span></td><td><span class="kc">だ</span></td><td><span class="kc">ば</span></td><td><span class="kc">ぱ</span></td></tr>
-                        <tr><td><span class="kc">ぎ</span></td><td><span class="kc">じ</span></td><td><span class="kc">ぢ</span></td><td><span class="kc">び</span></td><td><span class="kc">ぴ</span></td></tr>
-                        <tr><td><span class="kc">ぐ</span></td><td><span class="kc">ず</span></td><td><span class="kc">づ</span></td><td><span class="kc">ぶ</span></td><td><span class="kc">ぷ</span></td></tr>
-                        <tr><td><span class="kc">げ</span></td><td><span class="kc">ぜ</span></td><td><span class="kc">で</span></td><td><span class="kc">べ</span></td><td><span class="kc">ぺ</span></td></tr>
-                        <tr><td><span class="kc">ご</span></td><td><span class="kc">ぞ</span></td><td><span class="kc">ど</span></td><td><span class="kc">ぼ</span></td><td><span class="kc">ぽ</span></td></tr>
-                    </table>
+                    <table class="kana-table" id="h-table"></table>
                 </div>
             </div>
         </div>
@@ -148,32 +179,16 @@
         <div id="tab-katakana" class="modulo-content hidden">
             <div class="card">
                 <h2>Katakana</h2>
-                <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:15px;">
+                <div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;">
                     <div class="config-grid" id="k-config"></div>
-                    <div style="display:flex; gap:5px;">
-                        <button class="btn btn-blue" style="font-size:0.8rem; padding:5px;" onclick="toggleKana('k', true)">Tutto</button>
-                        <button class="btn btn-blue" style="font-size:0.8rem; padding:5px;" onclick="toggleKana('k', false)">Nulla</button>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', true)">Tutto</button>
+                        <button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', false)">Nulla</button>
                     </div>
                     <button class="btn btn-green" onclick="startKanaQuiz('k')">AVVIA QUIZ</button>
                 </div>
                 <div style="overflow-x:auto;">
-                    <table class="kana-table">
-                        <tr><th>-</th><th>K</th><th>S</th><th>T</th><th>N</th><th>H</th><th>M</th><th>Y</th><th>R</th><th>W</th><th>N</th></tr>
-                        <tr><td><span class="kc">ア</span></td><td><span class="kc">カ</span></td><td><span class="kc">サ</span></td><td><span class="kc">タ</span></td><td><span class="kc">ナ</span></td><td><span class="kc">ハ</span></td><td><span class="kc">マ</span></td><td><span class="kc">ヤ</span></td><td><span class="kc">ラ</span></td><td><span class="kc">ワ</span></td><td><span class="kc">ン</span></td></tr>
-                        <tr><td><span class="kc">イ</span></td><td><span class="kc">キ</span></td><td><span class="kc">シ</span></td><td><span class="kc">チ</span></td><td><span class="kc">ニ</span></td><td><span class="kc">ヒ</span></td><td><span class="kc">ミ</span></td><td></td><td><span class="kc">リ</span></td><td></td><td></td></tr>
-                        <tr><td><span class="kc">ウ</span></td><td><span class="kc">ク</span></td><td><span class="kc">ス</span></td><td><span class="kc">ツ</span></td><td><span class="kc">ヌ</span></td><td><span class="kc">フ</span></td><td><span class="kc">ム</span></td><td><span class="kc">ユ</span></td><td><span class="kc">ル</span></td><td></td><td></td></tr>
-                        <tr><td><span class="kc">エ</span></td><td><span class="kc">ケ</span></td><td><span class="kc">セ</span></td><td><span class="kc">テ</span></td><td><span class="kc">ネ</span></td><td><span class="kc">ヘ</span></td><td><span class="kc">メ</span></td><td></td><td><span class="kc">レ</span></td><td></td><td></td></tr>
-                        <tr><td><span class="kc">オ</span></td><td><span class="kc">コ</span></td><td><span class="kc">ソ</span></td><td><span class="kc">ト</span></td><td><span class="kc">ノ</span></td><td><span class="kc">ホ</span></td><td><span class="kc">モ</span></td><td><span class="kc">ヨ</span></td><td><span class="kc">ロ</span></td><td><span class="kc">ヲ</span></td><td></td></tr>
-                    </table>
-                    <h4 style="text-align:center;">Dakuten</h4>
-                    <table class="kana-table">
-                        <tr><th>G</th><th>Z</th><th>D</th><th>B</th><th>P</th></tr>
-                        <tr><td><span class="kc">ガ</span></td><td><span class="kc">ザ</span></td><td><span class="kc">ダ</span></td><td><span class="kc">バ</span></td><td><span class="kc">パ</span></td></tr>
-                        <tr><td><span class="kc">ギ</span></td><td><span class="kc">ジ</span></td><td><span class="kc">ヂ</span></td><td><span class="kc">ビ</span></td><td><span class="kc">ピ</span></td></tr>
-                        <tr><td><span class="kc">グ</span></td><td><span class="kc">ズ</span></td><td><span class="kc">ヅ</span></td><td><span class="kc">ブ</span></td><td><span class="kc">プ</span></td></tr>
-                        <tr><td><span class="kc">ゲ</span></td><td><span class="kc">ゼ</span></td><td><span class="kc">デ</span></td><td><span class="kc">ベ</span></td><td><span class="kc">ペ</span></td></tr>
-                        <tr><td><span class="kc">ゴ</span></td><td><span class="kc">ゾ</span></td><td><span class="kc">ド</span></td><td><span class="kc">ボ</span></td><td><span class="kc">ポ</span></td></tr>
-                    </table>
+                    <table class="kana-table" id="k-table"></table>
                 </div>
             </div>
         </div>
@@ -181,7 +196,7 @@
     </div>
 
     <script>
-        // --- COSTANTI ---
+        // --- DATASETS KANA ---
         const RAW_HIRAGANA = [
             {k:'あ',r:'a'},{k:'い',r:'i'},{k:'う',r:'u'},{k:'え',r:'e'},{k:'お',r:'o'},
             {k:'か',r:'ka'},{k:'き',r:'ki'},{k:'く',r:'ku'},{k:'け',r:'ke'},{k:'こ',r:'ko'},
@@ -230,9 +245,30 @@
         let sessione = [];
         let card = null;
         let punteggio = { ok:0, err:0 };
-        let mode = 'vocab'; // 'vocab' o 'kana'
+        let mode = 'vocab'; 
 
-        // --- FUNZIONI ---
+        // --- AVVIO ---
+        window.onload = function() {
+            try {
+                if(localStorage.getItem('srs_vocab_v9')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v9'));
+                if(localStorage.getItem('srs_frasi_v9')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v9'));
+            } catch(e) { localStorage.clear(); }
+
+            aggiornaConta();
+            popolaFiltri();
+            renderTabelle('h', RAW_HIRAGANA);
+            renderTabelle('k', RAW_KATAKANA);
+            renderFrasi();
+            if(vocaboli.length > 0) nuovaSessione();
+
+            document.getElementById('input-risposta').addEventListener('keydown', function(e){
+                if(e.key === 'Enter') {
+                    if(!document.getElementById('btn-check').classList.contains('hidden')) controlla();
+                    else prossima();
+                }
+            });
+        };
+
         function switchTab(id) {
             document.querySelectorAll('.modulo-content').forEach(d => d.classList.add('hidden'));
             document.getElementById('tab-'+id).classList.remove('hidden');
@@ -242,66 +278,8 @@
             if(id === 'quiz') {
                 mode = 'vocab';
                 document.getElementById('filtro-cat').classList.remove('hidden');
-                nuovaSessione();
+                if(vocaboli.length > 0) nuovaSessione();
             }
-        }
-
-        function caricaDati() {
-            try {
-                if(localStorage.getItem('srs_vocab_v8')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v8'));
-                if(localStorage.getItem('srs_frasi_v8')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v8'));
-            } catch(e) {
-                console.error("Errore lettura localStorage");
-            }
-            aggiornaConta();
-            popolaFiltri();
-            renderFrasi();
-            if(vocaboli.length > 0) nuovaSessione();
-            
-            // Genera pulsanti Kana
-            generaTastiConfig('h');
-            generaTastiConfig('k');
-        }
-
-        function aggiornaConta() {
-            document.getElementById('count-v').innerText = vocaboli.length;
-            document.getElementById('count-f').innerText = frasi.length;
-        }
-
-        // --- KANA QUIZ SETUP ---
-        function generaTastiConfig(prefix) {
-            const container = document.getElementById(prefix+'-config');
-            let html = '';
-            for(let key in KANA_GROUPS) {
-                html += `<label><input type="checkbox" value="${key}" checked> ${key}</label>`;
-            }
-            container.innerHTML = html;
-        }
-
-        function toggleKana(prefix, state) {
-            document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state);
-        }
-
-        function startKanaQuiz(prefix) {
-            const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA;
-            const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`);
-            let pool = [];
-
-            checkboxes.forEach(chk => {
-                const range = KANA_GROUPS[chk.value];
-                pool = pool.concat(dataset.slice(range[0], range[1]));
-            });
-
-            if(pool.length === 0) { alert("Seleziona almeno una riga"); return; }
-            
-            sessione = pool.sort(() => 0.5 - Math.random());
-            mode = 'kana';
-            switchTab('quiz');
-            document.getElementById('filtro-cat').classList.add('hidden'); // Nascondi filtro vocab
-            document.getElementById('quiz-area').classList.remove('hidden');
-            document.getElementById('msg-no-data').classList.add('hidden');
-            punteggio = {ok:0, err:0};
-            prossima();
         }
 
         // --- QUIZ ENGINE ---
@@ -336,10 +314,7 @@
 
             card = sessione.pop();
             const input = document.getElementById('input-risposta');
-            input.value = '';
-            input.disabled = false;
-            input.classList.remove('hidden');
-            input.focus();
+            input.value = ''; input.disabled = false; input.classList.remove('hidden'); input.focus();
 
             document.getElementById('btn-check').classList.remove('hidden');
             document.getElementById('btn-next').classList.add('hidden');
@@ -350,7 +325,7 @@
                 card.dir = dir;
                 if(dir === 'j2i') {
                     document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO";
-                    document.getElementById('prompt-principale').innerHTML = `${card.jpn} <span style="font-size:1rem; cursor:pointer" onclick="parla('${card.jpn}')">🔊</span>`;
+                    document.getElementById('prompt-principale').innerHTML = `${card.jpn} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn}')">🔊</span>`;
                     document.getElementById('prompt-secondario').innerText = card.rom;
                 } else {
                     document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)";
@@ -366,8 +341,7 @@
 
         function controlla() {
             const user = document.getElementById('input-risposta').value.trim().toLowerCase();
-            let ok = false;
-            let ans = "";
+            let ok = false; let ans = "";
 
             if(mode === 'vocab') {
                 if(card.dir === 'j2i') {
@@ -398,7 +372,51 @@
             document.getElementById('btn-next').focus();
         }
 
-        // --- IMPORT/EXPORT ---
+        // --- KANA ---
+        function renderTabelle(prefix, data) {
+            const t = document.getElementById(prefix+'-table');
+            let html = '<tr>';
+            for(let i=0; i<data.length; i++) {
+                html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`;
+                if((i+1)%5 === 0) html += '</tr><tr>';
+            }
+            t.innerHTML = html;
+
+            const conf = document.getElementById(prefix+'-config');
+            let chkHtml = '';
+            for(let key in KANA_GROUPS) {
+                chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`;
+            }
+            conf.innerHTML = chkHtml;
+        }
+
+        function toggleKana(prefix, state) {
+            document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state);
+        }
+
+        function startKanaQuiz(prefix) {
+            const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA;
+            const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`);
+            let pool = [];
+
+            checkboxes.forEach(chk => {
+                const range = KANA_GROUPS[chk.value];
+                pool = pool.concat(dataset.slice(range[0], range[1]));
+            });
+
+            if(pool.length === 0) { alert("Seleziona almeno una riga"); return; }
+            
+            sessione = pool.sort(() => 0.5 - Math.random());
+            mode = 'kana';
+            switchTab('quiz');
+            document.getElementById('filtro-cat').classList.add('hidden');
+            document.getElementById('quiz-area').classList.remove('hidden');
+            document.getElementById('msg-no-data').classList.add('hidden');
+            punteggio = {ok:0, err:0};
+            prossima();
+        }
+
+        // --- IMPORT/EXPORT (CON SEPARATORE PIPE |) ---
         function scarica(type) {
             const url = document.getElementById(type==='vocab'?'url-vocab':'url-frasi').value;
             if(!url) { alert("Link mancante"); return; }
@@ -414,28 +432,42 @@
         }
 
         function parseCSV(text, type) {
-            const lines = text.trim().split(/\r?\n/);
+            const lines = text.trim().split('\n');
             let count = 0;
             if(type === 'vocab') {
                 vocaboli = [];
                 lines.forEach(l => {
-                    const p = l.split(',');
+                    // Cerca il separatore Pipe | se non c'è usa virgola
+                    const sep = l.includes('|') ? '|' : ',';
+                    const p = l.split(sep);
                     if(p.length >= 4) {
-                        vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'});
+                        vocaboli.push({
+                            ita:p[0].trim(), 
+                            eng:p[1].trim(), 
+                            jpn:p[2].trim(), 
+                            rom:p[3].trim(), 
+                            tag:p[4]?p[4].trim():'Gen'
+                        });
                         count++;
                     }
                 });
-                localStorage.setItem('srs_vocab_v8', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v9', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
-                    const p = l.split(',');
+                    const sep = l.includes('|') ? '|' : ',';
+                    const p = l.split(sep);
                     if(p.length >= 3) {
-                        frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'});
+                        frasi.push({
+                            ita:p[0].trim(), 
+                            rom:p[1].trim(), 
+                            jpn:p[2].trim(), 
+                            tag:p[3]?p[3].trim():'Gen'
+                        });
                         count++;
                     }
                 });
-                localStorage.setItem('srs_frasi_v8', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v9', JSON.stringify(frasi));
             }
             alert("Caricati: " + count);
             location.reload();
@@ -445,26 +477,42 @@
             if(confirm("Sicuro?")) { localStorage.clear(); location.reload(); }
         }
 
+        function aggiornaConta() {
+            document.getElementById('count-v').innerText = vocaboli.length;
+            document.getElementById('count-f').innerText = frasi.length;
+        }
+
         function popolaFiltri() {
             const s = document.getElementById('filtro-cat');
             s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
             const tags = new Set(vocaboli.map(v => v.tag));
             tags.forEach(t => s.innerHTML += `<option value="${t}">${t}</option>`);
+
+            const f = document.getElementById('filtro-frasi');
+            f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>';
+            const tagsF = new Set(frasi.map(v => v.tag));
+            tagsF.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`);
         }
 
         function renderFrasi() {
             const div = document.getElementById('lista-frasi');
             const spoiler = document.getElementById('spoiler-check').checked;
+            const filter = document.getElementById('filtro-frasi').value;
+            
             div.innerHTML = '';
-            if(frasi.length === 0) { div.innerHTML = 'Nessuna frase'; return; }
-            frasi.forEach(f => {
+            
+            const list = (filter === 'TUTTI') ? frasi : frasi.filter(f => f.tag === filter);
+
+            if(list.length === 0) { div.innerHTML = '<p style="text-align:center">Nessuna frase</p>'; return; }
+            
+            list.forEach(f => {
                 div.innerHTML += `
                     <div class="frase-entry ${spoiler?'spoiler':''}">
                         <button class="play-btn" onclick="parla('${f.jpn.replace(/'/g,"\\'")} ')">▶</button>
-                        <div style="flex-grow:1">
-                            <span style="font-weight:bold; display:block">${f.jpn}</span>
-                            <span style="font-size:0.8rem; color:#888; display:block">${f.rom}</span>
-                            <span class="frase-ita" style="color:#007aff; cursor:pointer">${f.ita}</span>
+                        <div class="frase-text">
+                            <span class="frase-jpn">${f.jpn}</span>
+                            <span class="frase-rom">${f.rom}</span>
+                            <span class="frase-ita">${f.ita}</span>
                         </div>
                     </div>
                 `;
@@ -476,10 +524,6 @@
             u.lang = 'ja-JP';
             window.speechSynthesis.speak(u);
         }
-
-        // Inizializza tutto dopo che le funzioni sono definite
-        caricaDati();
-
     </script>
 </body>
 </html>
