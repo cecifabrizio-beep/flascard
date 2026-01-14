@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v18.1 (Fixed)</title>
+    <title>Giapponese SRS v18.3 (Smart Check)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -438,33 +438,47 @@
             document.getElementById('btn-next').focus();
         }
 
+        // --- TOLLERANZA PUNTEGGIATURA (Smart Check) ---
+        function cleanText(text) {
+            // Rimuove punti, virgole, punti interrogativi (sia occidentali che giapponesi), esclamativi e spazi extra
+            return text.toLowerCase().replace(/[.,?？。、!！]/g, '').trim();
+        }
+
         function controlla() {
             const input = document.getElementById('input-risposta');
             const feed = document.getElementById('feedback');
-            const user = input.value.trim().toLowerCase();
+            // Usiamo cleanText sull'input utente
+            const user = cleanText(input.value);
             let ok = false; let ans = "";
 
             if(mode === 'vocab') {
                 if(card.dir === 'j2i') {
-                    // Controllo semplice per italiano o inglese
-                    if(user == card.ita.toLowerCase() || (card.eng && user == card.eng.toLowerCase())) ok = true;
+                    // Confrontiamo versioni "pulite"
+                    if(user == cleanText(card.ita) || (card.eng && user == cleanText(card.eng))) ok = true;
                     ans = card.ita;
                 } else {
-                    // Romaji o giapponese esatto
-                    if(user == card.rom.toLowerCase() || user == card.jpn) ok = true;
+                    // Confrontiamo versioni "pulite" per romaji o giapponese
+                    if(user == cleanText(card.rom) || user == cleanText(card.jpn)) ok = true;
                     ans = `${card.rom} (${card.jpn})`;
                 }
             } else {
-                if(user == card.r) ok = true; ans = card.r;
+                // Per i Kana il cleanText non serve molto ma non fa male
+                if(user == cleanText(card.r)) ok = true; ans = card.r;
             }
 
             feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
+            
+            // Logica Audio Manuale: mostriamo l'icona sia se giusto che se sbagliato
+            const jpnSafe = (mode === 'vocab') ? card.jpn.replace(/'/g, "\\'") : '';
+            const audioBtn = (mode === 'vocab') ? ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>` : '';
+
             if(ok) {
-                punteggio.ok++; feed.classList.add('fb-corretto'); feed.innerText = "✅ Esatto!";
-                if(mode==='vocab' && card.dir==='j2i') parla(card.jpn);
+                punteggio.ok++; feed.classList.add('fb-corretto'); 
+                feed.innerHTML = "✅ Esatto!" + audioBtn; 
             } else {
                 punteggio.err++; errori.push(card); 
-                feed.classList.add('fb-sbagliato'); feed.innerHTML = `❌ Sbagliato! Era: <b>${ans}</b>`;
+                feed.classList.add('fb-sbagliato'); 
+                feed.innerHTML = `❌ Sbagliato! Era: <b>${ans}</b>` + audioBtn;
             }
             input.disabled = true;
             document.getElementById('btn-check').classList.add('hidden');
