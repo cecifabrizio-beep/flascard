@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v18.3 (Smart Check)</title>
+    <title>Giapponese SRS v19.0 (Smart Nav)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -132,7 +132,8 @@
                     <h2 id="end-msg">Sessione Completata!</h2>
                     <p id="end-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
                     <button id="btn-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
-                    <button class="btn btn-blue" onclick="openVocabQuiz()" style="margin-top:10px;">Nuova Sessione</button>
+                    
+                    <button id="btn-new-session" class="btn btn-blue" onclick="openVocabQuiz()" style="margin-top:10px;">Nuova Sessione</button>
                 </div>
 
                 <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">
@@ -201,29 +202,26 @@
     </div>
 
     <script>
-        // CONFIGURAZIONE LINK
         const LINK_VOCABOLI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/importa.csv";
         const LINK_FRASI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/frasi.csv";
 
-        // DATI KANA STATICI (Completi)
         const RAW_HIRAGANA=[{k:'あ',r:'a'},{k:'い',r:'i'},{k:'う',r:'u'},{k:'え',r:'e'},{k:'お',r:'o'},{k:'か',r:'ka'},{k:'き',r:'ki'},{k:'く',r:'ku'},{k:'け',r:'ke'},{k:'こ',r:'ko'},{k:'さ',r:'sa'},{k:'し',r:'shi'},{k:'す',r:'su'},{k:'せ',r:'se'},{k:'そ',r:'so'},{k:'た',r:'ta'},{k:'ち',r:'chi'},{k:'つ',r:'tsu'},{k:'て',r:'te'},{k:'と',r:'to'},{k:'な',r:'na'},{k:'に',r:'ni'},{k:'ぬ',r:'nu'},{k:'ね',r:'ne'},{k:'の',r:'no'},{k:'は',r:'ha'},{k:'ひ',r:'hi'},{k:'ふ',r:'fu'},{k:'へ',r:'he'},{k:'ほ',r:'ho'},{k:'ま',r:'ma'},{k:'み',r:'mi'},{k:'む',r:'mu'},{k:'め',r:'me'},{k:'も',r:'mo'},{k:'や',r:'ya'},{k:'ゆ',r:'yu'},{k:'よ',r:'yo'},{k:'ら',r:'ra'},{k:'り',r:'ri'},{k:'る',r:'ru'},{k:'れ',r:'re'},{k:'ろ',r:'ro'},{k:'わ',r:'wa'},{k:'を',r:'wo'},{k:'ん',r:'n'},{k:'が',r:'ga'},{k:'ぎ',r:'gi'},{k:'ぐ',r:'gu'},{k:'げ',r:'ge'},{k:'ご',r:'go'},{k:'ざ',r:'za'},{k:'じ',r:'ji'},{k:'ず',r:'zu'},{k:'ぜ',r:'ze'},{k:'ぞ',r:'zo'},{k:'だ',r:'da'},{k:'ぢ',r:'ji'},{k:'づ',r:'zu'},{k:'で',r:'de'},{k:'ど',r:'do'},{k:'ば',r:'ba'},{k:'び',r:'bi'},{k:'ぶ',r:'bu'},{k:'べ',r:'be'},{k:'ぼ',r:'bo'},{k:'ぱ',r:'pa'},{k:'ぴ',r:'pi'},{k:'ぷ',r:'pu'},{k:'ぺ',r:'pe'},{k:'ぽ',r:'po'},{k:'きゃ',r:'kya'},{k:'きゅ',r:'kyu'},{k:'きょ',r:'kyo'},{k:'しゃ',r:'sha'},{k:'しゅ',r:'shu'},{k:'しょ',r:'sho'},{k:'ちゃ',r:'cha'},{k:'ちゅ',r:'chu'},{k:'ちょ',r:'cho'},{k:'にゃ',r:'nya'},{k:'にゅ',r:'nyu'},{k:'にょ',r:'nyo'},{k:'ひゃ',r:'hya'},{k:'ひゅ',r:'hyu'},{k:'ひょ',r:'hyo'},{k:'みゃ',r:'mya'},{k:'みゅ',r:'myu'},{k:'みょ',r:'myo'},{k:'りゃ',r:'rya'},{k:'りゅ',r:'ryu'},{k:'りょ',r:'ryo'},{k:'ぎゃ',r:'gya'},{k:'ぎゅ',r:'gyu'},{k:'ぎょ',r:'gyo'},{k:'じゃ',r:'ja'},{k:'じゅ',r:'ju'},{k:'じょ',r:'jo'},{k:'びゃ',r:'bya'},{k:'びゅ',r:'byu'},{k:'びょ',r:'byo'},{k:'ぴゃ',r:'pya'},{k:'ぴゅ',r:'pyu'},{k:'ぴょ',r:'pyo'}];
         const RAW_KATAKANA=[{k:'ア',r:'a'},{k:'イ',r:'i'},{k:'ウ',r:'u'},{k:'エ',r:'e'},{k:'オ',r:'o'},{k:'カ',r:'ka'},{k:'キ',r:'ki'},{k:'ク',r:'ku'},{k:'ケ',r:'ke'},{k:'コ',r:'ko'},{k:'サ',r:'sa'},{k:'シ',r:'shi'},{k:'ス',r:'su'},{k:'セ',r:'se'},{k:'ソ',r:'so'},{k:'タ',r:'ta'},{k:'チ',r:'chi'},{k:'ツ',r:'tsu'},{k:'テ',r:'te'},{k:'ト',r:'to'},{k:'ナ',r:'na'},{k:'ニ',r:'ni'},{k:'ヌ',r:'nu'},{k:'ネ',r:'ne'},{k:'ノ',r:'no'},{k:'ハ',r:'ha'},{k:'ヒ',r:'hi'},{k:'フ',r:'fu'},{k:'ヘ',r:'he'},{k:'ホ',r:'ho'},{k:'マ',r:'ma'},{k:'ミ',r:'mi'},{k:'ム',r:'mu'},{k:'メ',r:'me'},{k:'モ',r:'mo'},{k:'ヤ',r:'ya'},{k:'ユ',r:'yu'},{k:'ヨ',r:'yo'},{k:'ラ',r:'ra'},{k:'リ',r:'ri'},{k:'ル',r:'ru'},{k:'レ',r:'re'},{k:'ロ',r:'ro'},{k:'ワ',r:'wa'},{k:'ヲ',r:'wo'},{k:'ン',r:'n'},{k:'ガ',r:'ga'},{k:'ギ',r:'gi'},{k:'グ',r:'gu'},{k:'ゲ',r:'ge'},{k:'ゴ',r:'go'},{k:'ザ',r:'za'},{k:'ジ',r:'ji'},{k:'ズ',r:'zu'},{k:'ゼ',r:'ze'},{k:'ゾ',r:'zo'},{k:'ダ',r:'da'},{k:'ヂ',r:'ji'},{k:'ヅ',r:'zu'},{k:'デ',r:'de'},{k:'ド',r:'do'},{k:'バ',r:'ba'},{k:'ビ',r:'bi'},{k:'ブ',r:'bu'},{k:'ベ',r:'be'},{k:'ボ',r:'bo'},{k:'パ',r:'pa'},{k:'ピ',r:'pi'},{k:'プ',r:'pu'},{k:'ペ',r:'pe'},{k:'ポ',r:'po'},{k:'キャ',r:'kya'},{k:'キュ',r:'kyu'},{k:'キョ',r:'kyo'},{k:'シャ',r:'sha'},{k:'シュ',r:'shu'},{k:'ショ',r:'sho'},{k:'チャ',r:'cha'},{k:'チュ',r:'chu'},{k:'チョ',r:'cho'},{k:'ニャ',r:'nya'},{k:'ニュ',r:'nyu'},{k:'ニョ',r:'nyo'},{k:'ヒャ',r:'hya'},{k:'ヒュ',r:'hyu'},{k:'ヒョ',r:'hyo'},{k:'ミャ',r:'mya'},{k:'ミュ',r:'myu'},{k:'ミョ',r:'myo'},{k:'リャ',r:'rya'},{k:'リュ',r:'ryu'},{k:'リョ',r:'ryo'},{k:'ギャ',r:'gya'},{k:'ギュ',r:'gyu'},{k:'ギョ',r:'gyo'},{k:'ジャ',r:'ja'},{k:'ジュ',r:'ju'},{k:'ジョ',r:'jo'},{k:'ビャ',r:'bya'},{k:'ビュ',r:'byu'},{k:'ビョ',r:'byo'},{k:'ピャ',r:'pya'},{k:'ピュ',r:'pyu'},{k:'ピョ',r:'pyo'}];
         const KANA_GROUPS = {'Vocali':[0,5],'K':[5,10],'S':[10,15],'T':[15,20],'N':[20,25],'H':[25,30],'M':[30,35],'Y':[35,38],'R':[38,43],'W/N':[43,46],'Dakuten':[46,71],'Yoon':[71,104]};
 
         let vocaboli = []; let frasi = []; let sessione = []; let errori = []; let card = null;
         let punteggio = { ok:0, err:0 }; let mode = 'vocab'; let mixMode = false; let activePool = [];
+        let currentKanaPrefix = 'h'; // Traccia se siamo in Hiragana o Katakana
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v18')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v18'));
-                if(localStorage.getItem('srs_frasi_v18')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v18'));
+                if(localStorage.getItem('srs_vocab_v19')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v19'));
+                if(localStorage.getItem('srs_frasi_v19')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v19'));
             } catch(e) { localStorage.clear(); }
 
             aggiornaConta(); popolaFiltri();
             renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); renderFrasi(); renderStudio();
             
-            // Auto sync solo se vuoto o su richiesta esplicita per risparmiare risorse, 
-            // ma qui lo lasciamo per comodità iniziale
             if(vocaboli.length === 0) forceSync();
 
             document.getElementById('input-risposta').addEventListener('keydown', function(e){
@@ -242,7 +240,6 @@
 
         function forceSync() {
             showNotification("Download dati in corso...", "sync-loading");
-            // Aggiunto timestamp per evitare la cache del browser
             const ts = new Date().getTime();
             Promise.all([ 
                 fetch(LINK_VOCABOLI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Vocab')), 
@@ -266,6 +263,11 @@
             
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if(btnElement) btnElement.classList.add('active');
+            else {
+                // Fallback visuale se chiamo switchTab via codice
+                const navBtn = document.querySelector(`button[onclick*="'${id}'"]`);
+                if(navBtn) navBtn.classList.add('active');
+            }
         }
 
         // --- STUDIO ---
@@ -277,11 +279,8 @@
             const list = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
             if(list.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessun vocabolo.</p>'; return; }
 
-            // Usiamo map e join per performance migliore
             div.innerHTML = list.map(v => {
                 const jpnSafe = v.jpn.replace(/'/g,"\\'");
-                // Nota: innerHTML qui è accettabile se ci fidiamo della fonte CSV, 
-                // ma in produzione vera dovremmo sanificare v.jpn/rom/ita
                 return `
                     <div class="list-entry">
                         <button class="play-btn" onclick="parla('${jpnSafe}')">▶</button>
@@ -315,7 +314,6 @@
                     return;
                 }
                 document.getElementById('msg-no-data').classList.add('hidden');
-                // Mischia e prendi 10
                 sessione = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
             }
             errori = []; punteggio = { ok:0, err:0 }; prossima();
@@ -341,7 +339,6 @@
             const btnCheck = document.getElementById('btn-check');
             const btnNext = document.getElementById('btn-next');
 
-            // Reset UI
             feed.classList.add('hidden'); feed.classList.remove('fb-corretto', 'fb-sbagliato');
             btnNext.classList.add('hidden');
             document.getElementById('punteggio').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
@@ -391,20 +388,38 @@
         function concludiSessione() {
             document.getElementById('quiz-area').classList.add('hidden');
             document.getElementById('end-session-box').classList.remove('hidden');
+            
             let msg = "Sessione Perfetta!";
             if(errori.length > 0) msg = "Sessione Conclusa";
             document.getElementById('end-msg').innerText = msg;
             document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
+            
             const btnRip = document.getElementById('btn-ripasso');
-            if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; }
-            else { btnRip.classList.add('hidden'); }
+            if(errori.length > 0) { 
+                btnRip.classList.remove('hidden'); 
+                btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; 
+            } else { 
+                btnRip.classList.add('hidden'); 
+            }
+
+            // GESTIONE DEL TASTO FINALE (SMART)
+            const btnNew = document.getElementById('btn-new-session');
+            if(mode === 'vocab') {
+                btnNew.innerText = "Nuova Sessione Vocaboli";
+                btnNew.onclick = openVocabQuiz;
+            } else {
+                // È Kana
+                const label = (currentKanaPrefix === 'h') ? "Hiragana" : "Katakana";
+                btnNew.innerText = `Torna a ${label}`;
+                btnNew.onclick = function() {
+                    switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana');
+                };
+            }
         }
 
         function generaScelte(corretta) {
             const div = document.getElementById('choices-area'); div.innerHTML = '';
             let pool = activePool.filter(x => x.k !== corretta.k);
-            
-            // Fallback se il pool è troppo piccolo
             if(pool.length < 3) {
                pool = (mode==='kana' && corretta.k.match(/[あ-ん]/)) ? RAW_HIRAGANA : RAW_KATAKANA;
                pool = pool.filter(x => x.k !== corretta.k);
@@ -438,37 +453,28 @@
             document.getElementById('btn-next').focus();
         }
 
-        // --- TOLLERANZA PUNTEGGIATURA (Smart Check) ---
-        function cleanText(text) {
-            // Rimuove punti, virgole, punti interrogativi (sia occidentali che giapponesi), esclamativi e spazi extra
-            return text.toLowerCase().replace(/[.,?？。、!！]/g, '').trim();
-        }
+        // --- TOLLERANZA (Smart Check) ---
+        function cleanText(text) { return text.toLowerCase().replace(/[.,?？。、!！]/g, '').trim(); }
 
         function controlla() {
             const input = document.getElementById('input-risposta');
             const feed = document.getElementById('feedback');
-            // Usiamo cleanText sull'input utente
             const user = cleanText(input.value);
             let ok = false; let ans = "";
 
             if(mode === 'vocab') {
                 if(card.dir === 'j2i') {
-                    // Confrontiamo versioni "pulite"
                     if(user == cleanText(card.ita) || (card.eng && user == cleanText(card.eng))) ok = true;
                     ans = card.ita;
                 } else {
-                    // Confrontiamo versioni "pulite" per romaji o giapponese
                     if(user == cleanText(card.rom) || user == cleanText(card.jpn)) ok = true;
                     ans = `${card.rom} (${card.jpn})`;
                 }
             } else {
-                // Per i Kana il cleanText non serve molto ma non fa male
                 if(user == cleanText(card.r)) ok = true; ans = card.r;
             }
 
             feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
-            
-            // Logica Audio Manuale: mostriamo l'icona sia se giusto che se sbagliato
             const jpnSafe = (mode === 'vocab') ? card.jpn.replace(/'/g, "\\'") : '';
             const audioBtn = (mode === 'vocab') ? ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>` : '';
 
@@ -497,7 +503,6 @@
             t.innerHTML = html;
             const conf = document.getElementById(prefix+'-config');
             let chkHtml = '';
-            // Object.keys garantisce iterazione, anche se l'ordine non è spec garantito, è standard nei browser moderni
             Object.keys(KANA_GROUPS).forEach(key => {
                  chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`;
             });
@@ -507,6 +512,7 @@
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
 
         function startKanaQuiz(prefix) {
+            currentKanaPrefix = prefix; // Salva se H o K per il ritorno
             const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA;
             const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`);
             const mixCheck = document.getElementById(prefix + '-mix-mode');
@@ -519,12 +525,12 @@
             if(pool.length === 0) { alert("Seleziona almeno una riga"); return; }
             
             activePool = pool;
-            sessione = pool.sort(() => 0.5 - Math.random()); // Kana fa tutto il set
+            sessione = pool.sort(() => 0.5 - Math.random());
             mode = 'kana';
             
-            switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); // Hack per tenere la tab attiva visivamente
+            switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`));
             document.getElementById('filtro-cat').classList.add('hidden');
-            nuovaSessione(); // Avvia la sessione
+            nuovaSessione(); 
         }
 
         // --- PARSER ---
@@ -534,18 +540,17 @@
             if(type === 'vocab') {
                 vocaboli = [];
                 lines.forEach(l => {
-                    // Gestione base dei separatori (migliorabile per CSV complessi)
                     const sep = l.includes('|') ? '|' : ','; const p = l.split(sep);
                     if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; }
                 });
-                localStorage.setItem('srs_vocab_v18', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v19', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
                     const sep = l.includes('|') ? '|' : ','; const p = l.split(sep);
                     if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; }
                 });
-                localStorage.setItem('srs_frasi_v18', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v19', JSON.stringify(frasi));
             }
             if(reload) location.reload();
             return count;
