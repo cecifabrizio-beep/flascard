@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v21.0 (Scrittura Ibrida)</title>
+    <title>Giapponese SRS v22.0 (Smart Canvas)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -61,14 +61,14 @@
         /* --- AREA SCRITTURA (CANVAS) --- */
         #canvas-container {
             position: relative; margin: 20px auto; width: 280px; height: 280px;
-            border: 2px dashed #bbb; border-radius: 12px; background: #fff; touch-action: none; /* Importante per mobile */
+            border: 2px dashed #bbb; border-radius: 12px; background: #fff; touch-action: none; 
         }
         canvas { width: 100%; height: 100%; border-radius: 12px; cursor: crosshair; }
         
         .soluzione-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 10rem; color: rgba(255, 0, 0, 0.2); pointer-events: none; /* Trasparente */
+            font-size: 10rem; color: rgba(255, 0, 0, 0.2); pointer-events: none;
             font-family: "Yu Mincho", serif;
         }
         .soluzione-visibile { color: rgba(40, 167, 69, 0.8) !important; z-index: 10; }
@@ -146,9 +146,9 @@
                         <canvas id="drawing-board"></canvas>
                         <div id="write-solution-overlay" class="soluzione-overlay hidden"></div>
                     </div>
-                    <button class="btn btn-gray" style="margin-bottom:15px;" onclick="clearCanvas()">🧹 Cancella Disegno</button>
+                    <button id="btn-clear-canvas" class="btn btn-gray" style="margin-bottom:15px;" onclick="clearCanvas()">🧹 Cancella Disegno</button>
 
-                    <input type="text" id="input-write" class="input-box" placeholder="Oppure digita qui..." autocomplete="off">
+                    <input type="text" id="input-write" class="input-box" placeholder="Digita qui..." autocomplete="off">
                     
                     <div id="feedback-write" class="feedback-box hidden"></div>
 
@@ -276,8 +276,8 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v21')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v21'));
-                if(localStorage.getItem('srs_frasi_v21')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v21'));
+                if(localStorage.getItem('srs_vocab_v22')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v22'));
+                if(localStorage.getItem('srs_frasi_v22')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v22'));
             } catch(e) { localStorage.clear(); }
 
             aggiornaConta(); popolaFiltri();
@@ -340,22 +340,16 @@
         function initCanvas() {
             canvas = document.getElementById('drawing-board');
             ctx = canvas.getContext('2d');
-            
-            // Set canvas resolution
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
-            
             ctx.lineWidth = 4;
             ctx.lineCap = 'round';
             ctx.strokeStyle = '#000';
 
-            // Mouse Events
             canvas.addEventListener('mousedown', startDraw);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDraw);
             canvas.addEventListener('mouseout', stopDraw);
-
-            // Touch Events
             canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); });
             canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); });
             canvas.addEventListener('touchend', stopDraw);
@@ -397,6 +391,8 @@
             }
             card = writeSession.pop();
             const rev = document.getElementById('write-mode-check').checked;
+            const canvasContainer = document.getElementById('canvas-container');
+            const clearBtn = document.getElementById('btn-clear-canvas');
             
             // UI Reset
             clearCanvas();
@@ -411,14 +407,19 @@
             document.getElementById('btn-next-write').classList.add('hidden');
 
             const label = document.getElementById('prompt-scrittura');
+            
             if(!rev) {
                 // Std: Romaji -> Scrivi Kana
                 label.innerText = card.rom;
                 document.getElementById('write-label').innerText = "SCRIVI IL GIAPPONESE";
+                canvasContainer.classList.remove('hidden');
+                clearBtn.classList.remove('hidden');
             } else {
-                // Rev: Kana -> Scrivi Romaji
+                // Rev: Kana -> Scrivi Romaji (Nascondi Canvas)
                 label.innerText = card.jpn;
                 document.getElementById('write-label').innerText = "SCRIVI IL ROMAJI";
+                canvasContainer.classList.add('hidden');
+                clearBtn.classList.add('hidden');
             }
         }
 
@@ -433,11 +434,9 @@
             let target = "";
 
             if(!rev) {
-                // Target: Giapponese
                 target = card.jpn;
                 if(val === cleanText(card.jpn)) ok = true;
             } else {
-                // Target: Romaji o Ita
                 target = card.rom;
                 if(val === cleanText(card.rom) || val === cleanText(card.ita)) ok = true;
             }
@@ -445,15 +444,14 @@
             feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
             
             if(val === "") {
-                // Caso Disegno / Vuoto -> Mostra errore ma è solo visual check
                 feed.classList.add('fb-sbagliato');
                 feed.innerHTML = `Soluzione: <b>${target}</b>`;
-                // Mostra soluzione in sovrimpressione al canvas
-                overlay.innerText = (!rev) ? card.jpn : "?"; // Solo se deve scrivere Jap ha senso l'overlay
-                overlay.classList.remove('hidden');
-                overlay.classList.add('soluzione-visibile');
+                if(!rev) {
+                    overlay.innerText = card.jpn;
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('soluzione-visibile');
+                }
             } else {
-                // Caso Testo Digitato
                 if(ok) {
                     feed.classList.add('fb-corretto');
                     feed.innerText = "✅ Esatto!";
@@ -739,14 +737,14 @@
                     const sep = l.includes('|') ? '|' : ','; const p = l.split(sep);
                     if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; }
                 });
-                localStorage.setItem('srs_vocab_v21', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v22', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
                     const sep = l.includes('|') ? '|' : ','; const p = l.split(sep);
                     if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; }
                 });
-                localStorage.setItem('srs_frasi_v21', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v22', JSON.stringify(frasi));
             }
             if(reload) location.reload();
             return count;
