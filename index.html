@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v22.0 (Smart Canvas)</title>
+    <title>Giapponese SRS v23.0 (Writing + Meaning)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -55,12 +55,12 @@
         .btn-wrong { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24 !important; opacity: 0.6; }
 
         /* --- PROMPT --- */
-        #prompt-principale, #prompt-scrittura { font-size: 3rem; margin: 10px 0; text-align: center; font-weight: 500; min-height: 60px; word-break: keep-all; }
-        #prompt-secondario { font-size: 1.1rem; color: #666; text-align: center; margin-bottom: 20px; min-height: 20px; }
+        #prompt-principale, #prompt-scrittura { font-size: 3rem; margin: 5px 0; text-align: center; font-weight: 500; min-height: 60px; word-break: keep-all; }
+        #prompt-secondario, #sub-scrittura { font-size: 1.1rem; color: #666; text-align: center; margin-bottom: 20px; min-height: 20px; font-style: italic; }
 
         /* --- AREA SCRITTURA (CANVAS) --- */
         #canvas-container {
-            position: relative; margin: 20px auto; width: 280px; height: 280px;
+            position: relative; margin: 10px auto 20px auto; width: 280px; height: 280px;
             border: 2px dashed #bbb; border-radius: 12px; background: #fff; touch-action: none; 
         }
         canvas { width: 100%; height: 100%; border-radius: 12px; cursor: crosshair; }
@@ -140,9 +140,9 @@
 
                 <div id="write-area" class="hidden">
                     <div style="text-align:center; color:#aaa; font-size:0.85rem; font-weight:bold; letter-spacing:1px;" id="write-label">SCRIVI IL KANA</div>
+                    
                     <div id="prompt-scrittura">...</div>
-
-                    <div id="canvas-container">
+                    <div id="sub-scrittura">...</div> <div id="canvas-container">
                         <canvas id="drawing-board"></canvas>
                         <div id="write-solution-overlay" class="soluzione-overlay hidden"></div>
                     </div>
@@ -276,8 +276,8 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v22')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v22'));
-                if(localStorage.getItem('srs_frasi_v22')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v22'));
+                if(localStorage.getItem('srs_vocab_v23')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v23'));
+                if(localStorage.getItem('srs_frasi_v23')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v23'));
             } catch(e) { localStorage.clear(); }
 
             aggiornaConta(); popolaFiltri();
@@ -407,7 +407,11 @@
             document.getElementById('btn-next-write').classList.add('hidden');
 
             const label = document.getElementById('prompt-scrittura');
+            const sub = document.getElementById('sub-scrittura');
             
+            // SEMPRE VISIBILE: La traduzione in Italiano
+            sub.innerText = `(${card.ita})`;
+
             if(!rev) {
                 // Std: Romaji -> Scrivi Kana
                 label.innerText = card.rom;
@@ -737,14 +741,14 @@
                     const sep = l.includes('|') ? '|' : ','; const p = l.split(sep);
                     if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; }
                 });
-                localStorage.setItem('srs_vocab_v22', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v23', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
                     const sep = l.includes('|') ? '|' : ','; const p = l.split(sep);
                     if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; }
                 });
-                localStorage.setItem('srs_frasi_v22', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v23', JSON.stringify(frasi));
             }
             if(reload) location.reload();
             return count;
