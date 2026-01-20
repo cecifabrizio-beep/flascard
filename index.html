@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v19.0 (Smart Nav)</title>
+    <title>Giapponese SRS v21.0 (Scrittura Ibrida)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -26,7 +26,7 @@
         .nav-btn { flex: 1; padding: 12px; border: none; border-radius: 25px; background-color: #fff; color: #555; font-weight: 600; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
         .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 8px rgba(0,122,255,0.3); }
 
-        /* --- UI INPUT & FEEDBACK --- */
+        /* --- UI COMPONENTI --- */
         .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; transition: all 0.3s; }
         .input-box:focus { border-color: #007aff; outline: none; }
         
@@ -40,6 +40,8 @@
         .btn-green { background-color: #28a745; } 
         .btn-orange { background-color: #fd7e14; }
         .btn-red { background-color: #dc3545; }
+        .btn-purple { background-color: #af52de; }
+        .btn-gray { background-color: #8e8e93; font-size: 0.9rem; padding: 8px; }
 
         /* --- SCELTA MULTIPLA --- */
         #choices-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
@@ -52,20 +54,33 @@
         .btn-correct { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724 !important; }
         .btn-wrong { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24 !important; opacity: 0.6; }
 
-        /* --- QUIZ LAYOUT --- */
-        #prompt-principale { font-size: 3rem; margin: 10px 0; text-align: center; font-weight: 500; min-height: 60px; word-break: keep-all; }
+        /* --- PROMPT --- */
+        #prompt-principale, #prompt-scrittura { font-size: 3rem; margin: 10px 0; text-align: center; font-weight: 500; min-height: 60px; word-break: keep-all; }
         #prompt-secondario { font-size: 1.1rem; color: #666; text-align: center; margin-bottom: 20px; min-height: 20px; }
 
-        /* --- ASCOLTO & STUDIO LAYOUT --- */
+        /* --- AREA SCRITTURA (CANVAS) --- */
+        #canvas-container {
+            position: relative; margin: 20px auto; width: 280px; height: 280px;
+            border: 2px dashed #bbb; border-radius: 12px; background: #fff; touch-action: none; /* Importante per mobile */
+        }
+        canvas { width: 100%; height: 100%; border-radius: 12px; cursor: crosshair; }
+        
+        .soluzione-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10rem; color: rgba(255, 0, 0, 0.2); pointer-events: none; /* Trasparente */
+            font-family: "Yu Mincho", serif;
+        }
+        .soluzione-visibile { color: rgba(40, 167, 69, 0.8) !important; z-index: 10; }
+
+        /* --- LISTA STUDIO --- */
         .list-entry { display: flex; align-items: flex-start; background: #ffffff; border-bottom: 1px solid #eee; padding: 15px 10px; gap: 15px; }
         .play-btn { width: 48px; height: 48px; border-radius: 50%; background: #007aff; color: white; border: none; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,122,255,0.2); }
         .play-btn:active { transform: scale(0.95); }
         .list-text { flex-grow: 1; }
-        
         .txt-jpn { font-weight: bold; font-size: 1.25rem; display: block; color: #333; margin-bottom: 4px; line-height: 1.4; }
         .txt-rom { font-size: 0.9rem; color: #888; display: block; margin-bottom: 6px; }
         .txt-ita { color: #007aff; font-size: 1rem; font-weight: 500; display: block; cursor: pointer; background: #f0f8ff; padding: 5px 8px; border-radius: 6px; display: inline-block; }
-        
         .spoiler .txt-ita { background: #e0e0e0; color: transparent; user-select: none; }
         .spoiler .txt-ita:hover { background: #f0f8ff; color: #007aff; cursor: help; }
 
@@ -87,6 +102,7 @@
 
     <nav id="main-nav">
         <button class="nav-btn" onclick="switchTab('studio', this)">📖 Studio</button>
+        <button class="nav-btn" onclick="switchTab('scrittura', this)">✍️ Scrittura</button>
         <button class="nav-btn active" onclick="switchTab('quiz', this); openVocabQuiz()">Quiz Vocaboli</button>
         <button class="nav-btn" onclick="switchTab('ascolto', this)">Ascolto</button>
         <button class="nav-btn" onclick="switchTab('hiragana', this)">Hiragana</button>
@@ -104,6 +120,47 @@
                     <option value="TUTTI">Tutte le Categorie</option>
                 </select>
                 <div id="lista-studio"></div>
+            </div>
+        </div>
+
+        <div id="tab-scrittura" class="modulo-content hidden">
+            <div class="card">
+                <h2>✍️ Esercizio Scrittura</h2>
+                
+                <div id="write-config">
+                    <p style="text-align:center; color:#666; font-size:0.9rem;">Scegli cosa scrivere:</p>
+                    <select id="filtro-scrittura" class="input-box">
+                        <option value="TUTTI">Tutte le Categorie</option>
+                    </select>
+                    <label class="mix-toggle" style="justify-content:center;">
+                        <input type="checkbox" id="write-mode-check"> Mostra Kana → Scrivi Romaji
+                    </label>
+                    <button class="btn btn-purple" style="margin-top:15px;" onclick="startWriteSession()">Inizia Sessione (10)</button>
+                </div>
+
+                <div id="write-area" class="hidden">
+                    <div style="text-align:center; color:#aaa; font-size:0.85rem; font-weight:bold; letter-spacing:1px;" id="write-label">SCRIVI IL KANA</div>
+                    <div id="prompt-scrittura">...</div>
+
+                    <div id="canvas-container">
+                        <canvas id="drawing-board"></canvas>
+                        <div id="write-solution-overlay" class="soluzione-overlay hidden"></div>
+                    </div>
+                    <button class="btn btn-gray" style="margin-bottom:15px;" onclick="clearCanvas()">🧹 Cancella Disegno</button>
+
+                    <input type="text" id="input-write" class="input-box" placeholder="Oppure digita qui..." autocomplete="off">
+                    
+                    <div id="feedback-write" class="feedback-box hidden"></div>
+
+                    <div style="margin-top:15px; display:flex; gap:10px;">
+                        <button id="btn-check-write" class="btn btn-blue" onclick="checkScrittura()">Controlla</button>
+                        <button id="btn-next-write" class="btn btn-green hidden" onclick="nextWriteCard()">Prossima →</button>
+                    </div>
+                    
+                    <div style="text-align:center; margin-top:20px;">
+                        <button class="btn btn-red" style="width:auto; font-size:0.8rem;" onclick="quitWriteSession()">Esci</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -132,7 +189,6 @@
                     <h2 id="end-msg">Sessione Completata!</h2>
                     <p id="end-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
                     <button id="btn-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
-                    
                     <button id="btn-new-session" class="btn btn-blue" onclick="openVocabQuiz()" style="margin-top:10px;">Nuova Sessione</button>
                 </div>
 
@@ -211,12 +267,17 @@
 
         let vocaboli = []; let frasi = []; let sessione = []; let errori = []; let card = null;
         let punteggio = { ok:0, err:0 }; let mode = 'vocab'; let mixMode = false; let activePool = [];
-        let currentKanaPrefix = 'h'; // Traccia se siamo in Hiragana o Katakana
+        let currentKanaPrefix = 'h'; 
+        
+        // STATO SCRITTURA
+        let writeSession = [];
+        let canvas, ctx;
+        let isDrawing = false;
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v19')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v19'));
-                if(localStorage.getItem('srs_frasi_v19')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v19'));
+                if(localStorage.getItem('srs_vocab_v21')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v21'));
+                if(localStorage.getItem('srs_frasi_v21')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v21'));
             } catch(e) { localStorage.clear(); }
 
             aggiornaConta(); popolaFiltri();
@@ -224,11 +285,17 @@
             
             if(vocaboli.length === 0) forceSync();
 
+            // Init Canvas
+            initCanvas();
+
             document.getElementById('input-risposta').addEventListener('keydown', function(e){
                 if(e.key === 'Enter' && !this.classList.contains('hidden')) {
                     if(!document.getElementById('btn-check').classList.contains('hidden')) controlla();
                     else prossima();
                 }
+            });
+            document.getElementById('input-write').addEventListener('keydown', function(e){
+                if(e.key === 'Enter') checkScrittura();
             });
         };
 
@@ -264,10 +331,146 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             if(btnElement) btnElement.classList.add('active');
             else {
-                // Fallback visuale se chiamo switchTab via codice
                 const navBtn = document.querySelector(`button[onclick*="'${id}'"]`);
                 if(navBtn) navBtn.classList.add('active');
             }
+        }
+
+        // --- SCRITTURA LOGIC ---
+        function initCanvas() {
+            canvas = document.getElementById('drawing-board');
+            ctx = canvas.getContext('2d');
+            
+            // Set canvas resolution
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000';
+
+            // Mouse Events
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseout', stopDraw);
+
+            // Touch Events
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); });
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); });
+            canvas.addEventListener('touchend', stopDraw);
+        }
+
+        function startDraw(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function draw(e) {
+            if(!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+        }
+
+        function stopDraw() { isDrawing = false; }
+        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+        function startWriteSession() {
+            const filter = document.getElementById('filtro-scrittura').value;
+            const pool = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
+            if(pool.length === 0) { alert("Nessun vocabolo."); return; }
+            
+            writeSession = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+            document.getElementById('write-config').classList.add('hidden');
+            document.getElementById('write-area').classList.remove('hidden');
+            nextWriteCard();
+        }
+
+        function nextWriteCard() {
+            if(writeSession.length === 0) {
+                alert("Sessione Scrittura Completata!");
+                quitWriteSession();
+                return;
+            }
+            card = writeSession.pop();
+            const rev = document.getElementById('write-mode-check').checked;
+            
+            // UI Reset
+            clearCanvas();
+            document.getElementById('input-write').value = '';
+            document.getElementById('input-write').disabled = false;
+            document.getElementById('feedback-write').classList.add('hidden');
+            document.getElementById('feedback-write').classList.remove('fb-corretto', 'fb-sbagliato');
+            document.getElementById('write-solution-overlay').classList.add('hidden');
+            document.getElementById('write-solution-overlay').classList.remove('soluzione-visibile');
+            
+            document.getElementById('btn-check-write').classList.remove('hidden');
+            document.getElementById('btn-next-write').classList.add('hidden');
+
+            const label = document.getElementById('prompt-scrittura');
+            if(!rev) {
+                // Std: Romaji -> Scrivi Kana
+                label.innerText = card.rom;
+                document.getElementById('write-label').innerText = "SCRIVI IL GIAPPONESE";
+            } else {
+                // Rev: Kana -> Scrivi Romaji
+                label.innerText = card.jpn;
+                document.getElementById('write-label').innerText = "SCRIVI IL ROMAJI";
+            }
+        }
+
+        function checkScrittura() {
+            const input = document.getElementById('input-write');
+            const val = cleanText(input.value);
+            const feed = document.getElementById('feedback-write');
+            const overlay = document.getElementById('write-solution-overlay');
+            const rev = document.getElementById('write-mode-check').checked; // false = Scrivi Jap
+
+            let ok = false;
+            let target = "";
+
+            if(!rev) {
+                // Target: Giapponese
+                target = card.jpn;
+                if(val === cleanText(card.jpn)) ok = true;
+            } else {
+                // Target: Romaji o Ita
+                target = card.rom;
+                if(val === cleanText(card.rom) || val === cleanText(card.ita)) ok = true;
+            }
+
+            feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
+            
+            if(val === "") {
+                // Caso Disegno / Vuoto -> Mostra errore ma è solo visual check
+                feed.classList.add('fb-sbagliato');
+                feed.innerHTML = `Soluzione: <b>${target}</b>`;
+                // Mostra soluzione in sovrimpressione al canvas
+                overlay.innerText = (!rev) ? card.jpn : "?"; // Solo se deve scrivere Jap ha senso l'overlay
+                overlay.classList.remove('hidden');
+                overlay.classList.add('soluzione-visibile');
+            } else {
+                // Caso Testo Digitato
+                if(ok) {
+                    feed.classList.add('fb-corretto');
+                    feed.innerText = "✅ Esatto!";
+                } else {
+                    feed.classList.add('fb-sbagliato');
+                    feed.innerHTML = `❌ Errato! Era: <b>${target}</b>`;
+                }
+            }
+
+            input.disabled = true;
+            document.getElementById('btn-check-write').classList.add('hidden');
+            document.getElementById('btn-next-write').classList.remove('hidden');
+        }
+
+        function quitWriteSession() {
+            document.getElementById('write-area').classList.add('hidden');
+            document.getElementById('write-config').classList.remove('hidden');
         }
 
         // --- STUDIO ---
@@ -388,12 +591,10 @@
         function concludiSessione() {
             document.getElementById('quiz-area').classList.add('hidden');
             document.getElementById('end-session-box').classList.remove('hidden');
-            
             let msg = "Sessione Perfetta!";
             if(errori.length > 0) msg = "Sessione Conclusa";
             document.getElementById('end-msg').innerText = msg;
             document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
-            
             const btnRip = document.getElementById('btn-ripasso');
             if(errori.length > 0) { 
                 btnRip.classList.remove('hidden'); 
@@ -402,18 +603,14 @@
                 btnRip.classList.add('hidden'); 
             }
 
-            // GESTIONE DEL TASTO FINALE (SMART)
             const btnNew = document.getElementById('btn-new-session');
             if(mode === 'vocab') {
                 btnNew.innerText = "Nuova Sessione Vocaboli";
                 btnNew.onclick = openVocabQuiz;
             } else {
-                // È Kana
                 const label = (currentKanaPrefix === 'h') ? "Hiragana" : "Katakana";
                 btnNew.innerText = `Torna a ${label}`;
-                btnNew.onclick = function() {
-                    switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana');
-                };
+                btnNew.onclick = function() { switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana'); };
             }
         }
 
@@ -453,7 +650,6 @@
             document.getElementById('btn-next').focus();
         }
 
-        // --- TOLLERANZA (Smart Check) ---
         function cleanText(text) { return text.toLowerCase().replace(/[.,?？。、!！]/g, '').trim(); }
 
         function controlla() {
@@ -512,7 +708,7 @@
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
 
         function startKanaQuiz(prefix) {
-            currentKanaPrefix = prefix; // Salva se H o K per il ritorno
+            currentKanaPrefix = prefix;
             const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA;
             const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`);
             const mixCheck = document.getElementById(prefix + '-mix-mode');
@@ -543,14 +739,14 @@
                     const sep = l.includes('|') ? '|' : ','; const p = l.split(sep);
                     if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; }
                 });
-                localStorage.setItem('srs_vocab_v19', JSON.stringify(vocaboli));
+                localStorage.setItem('srs_vocab_v21', JSON.stringify(vocaboli));
             } else {
                 frasi = [];
                 lines.forEach(l => {
                     const sep = l.includes('|') ? '|' : ','; const p = l.split(sep);
                     if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; }
                 });
-                localStorage.setItem('srs_frasi_v19', JSON.stringify(frasi));
+                localStorage.setItem('srs_frasi_v21', JSON.stringify(frasi));
             }
             if(reload) location.reload();
             return count;
@@ -567,11 +763,13 @@
         function popolaFiltri() {
             const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
             const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
+            const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
             
             const tags = new Set(vocaboli.map(v => v.tag));
             tags.forEach(t => {
                 s.innerHTML += `<option value="${t}">${t}</option>`;
                 s2.innerHTML += `<option value="${t}">${t}</option>`;
+                s3.innerHTML += `<option value="${t}">${t}</option>`;
             });
 
             const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>';
@@ -598,7 +796,7 @@
             if ('speechSynthesis' in window) {
                 const u = new SpeechSynthesisUtterance(t); 
                 u.lang = 'ja-JP'; 
-                u.rate = 0.9; // Leggermente più lento per studio
+                u.rate = 0.9; 
                 window.speechSynthesis.speak(u); 
             } else {
                 alert("Il tuo browser non supporta la sintesi vocale.");
