@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v26.0 (Color)</title>
+    <title>Giapponese SRS v27.0 (Smart Highlight)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -12,8 +12,8 @@
         .card { background: #ffffff; padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .hidden { display: none !important; }
 
-        /* --- EVIDENZIAZIONE AUTOMATICA (NEW) --- */
-        .hlt { color: #e91e63; font-weight: bold; } /* Colore per le doppie/lunghe */
+        /* --- EVIDENZIAZIONE (NEW COLOR) --- */
+        .hlt { color: #e91e63; font-weight: 700; } /* Colore Rosso/Magenta per i suoni lunghi */
 
         /* --- NOTIFICHE --- */
         #sync-status { position: fixed; top: 10px; right: 10px; padding: 10px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; z-index: 1000; }
@@ -36,7 +36,7 @@
         .btn:active { transform: scale(0.98); }
         .btn-blue { background-color: #007aff; } .btn-green { background-color: #28a745; } .btn-orange { background-color: #fd7e14; } .btn-red { background-color: #dc3545; } .btn-purple { background-color: #af52de; } .btn-gray { background-color: #8e8e93; font-size: 0.9rem; padding: 8px; }
 
-        /* --- LAYOUT SPECIFICI --- */
+        /* --- LAYOUT --- */
         #choices-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .choice-btn { background: #f8f9fa; border: 2px solid #e9ecef; padding: 20px; font-size: 2rem; border-radius: 16px; cursor: pointer; transition: 0.2s; font-weight: bold; color: #333; display: flex; justify-content: center; align-items: center; }
         .choice-btn:hover { background: #e2e6ea; border-color: #adb5bd; }
@@ -46,13 +46,11 @@
         #prompt-principale, #prompt-scrittura { font-size: 3rem; margin: 5px 0; text-align: center; font-weight: 500; min-height: 60px; word-break: keep-all; }
         #prompt-secondario, #sub-scrittura { font-size: 1.1rem; color: #666; text-align: center; margin-bottom: 20px; min-height: 20px; font-style: italic; }
         
-        /* Area Disegno */
         #canvas-container { position: relative; margin: 10px auto 20px auto; width: 280px; height: 280px; border: 2px dashed #bbb; border-radius: 12px; background: #fff; touch-action: none; }
         canvas { width: 100%; height: 100%; border-radius: 12px; cursor: crosshair; }
         .soluzione-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10rem; color: rgba(255, 0, 0, 0.2); pointer-events: none; font-family: "Yu Mincho", serif; }
         .soluzione-visibile { color: rgba(40, 167, 69, 0.8) !important; z-index: 10; }
         
-        /* Liste */
         .list-entry { display: flex; align-items: flex-start; background: #ffffff; border-bottom: 1px solid #eee; padding: 15px 10px; gap: 15px; }
         .play-btn { width: 48px; height: 48px; border-radius: 50%; background: #007aff; color: white; border: none; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,122,255,0.2); }
         .list-text { flex-grow: 1; }
@@ -62,7 +60,6 @@
         .spoiler .txt-ita { background: #e0e0e0; color: transparent; user-select: none; }
         .spoiler .txt-ita:hover { background: #f0f8ff; color: #007aff; cursor: help; }
         
-        /* Kana */
         .kana-table { width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; }
         .kana-table th { background: #f2f2f7; padding: 8px; font-size: 0.9rem; color: #666; }
         .kana-table td { border: 1px solid #eee; padding: 8px; font-size: 1.1rem; }
@@ -89,7 +86,7 @@
         <div id="tab-studio" class="modulo-content hidden">
             <div class="card">
                 <h2>Studia Vocaboli</h2>
-                <p style="font-size:0.9rem; color:#666; text-align:center;">Le doppie lettere (suoni lunghi o raddoppi) sono colorate.</p>
+                <p style="font-size:0.9rem; color:#666; text-align:center;">Le lettere rosse indicano suoni lunghi o raddoppi.</p>
                 <select id="filtro-studio" class="input-box" onchange="renderStudio()"><option value="TUTTI">Tutte le Categorie</option></select>
                 <div id="lista-studio"></div>
             </div>
@@ -199,8 +196,8 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v26')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v26'));
-                if(localStorage.getItem('srs_frasi_v26')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v26'));
+                if(localStorage.getItem('srs_vocab_v27')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v27'));
+                if(localStorage.getItem('srs_frasi_v27')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v27'));
             } catch(e) { localStorage.clear(); }
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); renderFrasi(); renderStudio();
             if(vocaboli.length === 0) forceSync();
@@ -231,10 +228,10 @@
             else { const navBtn = document.querySelector(`button[onclick*="'${id}'"]`); if(navBtn) navBtn.classList.add('active'); }
         }
 
-        // --- FUNZIONE EVIDENZIATORE (AUTO COLOR) ---
+        // --- INTELLIGENT HIGHLIGHT (DOUBLE + EI + OU) ---
         function formatRomaji(text) {
-            // Cerca qualsiasi lettera ripetuta (aa, oo, tt, pp...) e la colora
-            return text.replace(/([a-zA-Z])\1/g, '<span class="hlt">$1$1</span>');
+            // Regola: Trova doppie lettere (aa,tt..) OPPURE 'ei' OPPURE 'ou'
+            return text.replace(/([a-z])\1|ei|ou/gi, '<span class="hlt">$&</span>');
         }
 
         function cleanText(text) { return text.toLowerCase().replace(/[.,?？。、!！]/g, '').trim(); }
@@ -278,7 +275,7 @@
             sub.innerText = `(${card.ita})`; 
 
             if(!rev) {
-                label.innerHTML = formatRomaji(card.rom); // USA AUTO COLOR
+                label.innerHTML = formatRomaji(card.rom); // Highlight anche qui
                 document.getElementById('write-label').innerText = "SCRIVI IL GIAPPONESE";
                 canvasContainer.classList.remove('hidden'); clearBtn.classList.remove('hidden');
             } else {
@@ -336,7 +333,6 @@
             if(list.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessun vocabolo.</p>'; return; }
             div.innerHTML = list.map(v => {
                 const jpnSafe = v.jpn.replace(/'/g,"\\'");
-                // USA AUTO COLOR ANCHE QUI
                 return `<div class="list-entry"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${v.jpn}</span><span class="txt-rom">${formatRomaji(v.rom)}</span><span class="txt-ita">${v.ita}</span></div></div>`;
             }).join('');
         }
@@ -363,7 +359,7 @@
             let showInput = true;
             if(mode === 'vocab') {
                 const dir = Math.random() > 0.5 ? 'j2i' : 'i2j'; card.dir = dir;
-                if(dir === 'j2i') { document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO"; document.getElementById('prompt-principale').innerHTML = `${card.jpn} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn.replace(/'/g,"\\'")} ')">🔊</span>`; document.getElementById('prompt-secondario').innerText = formatRomaji(card.rom); } // Highlight
+                if(dir === 'j2i') { document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO"; document.getElementById('prompt-principale').innerHTML = `${card.jpn} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn.replace(/'/g,"\\'")} ')">🔊</span>`; document.getElementById('prompt-secondario').innerText = formatRomaji(card.rom); }
                 else { document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)"; document.getElementById('prompt-principale').innerText = card.ita; document.getElementById('prompt-secondario').innerText = card.eng || ""; }
             } else {
                 let dir = 'k2r'; if(mixMode && Math.random() > 0.5) dir = 'r2k'; card.dir = dir;
@@ -408,7 +404,7 @@
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
         function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); nuovaSessione(); }
-        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v26', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v26', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
+        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v27', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v27', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
         function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; }
         function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
