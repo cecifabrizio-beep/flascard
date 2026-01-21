@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v27.0 (Smart Highlight)</title>
+    <title>Giapponese SRS v28.0 (Final Fix)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -13,7 +13,7 @@
         .hidden { display: none !important; }
 
         /* --- EVIDENZIAZIONE (NEW COLOR) --- */
-        .hlt { color: #e91e63; font-weight: 700; } /* Colore Rosso/Magenta per i suoni lunghi */
+        .hlt { color: #e91e63; font-weight: 700; } 
 
         /* --- NOTIFICHE --- */
         #sync-status { position: fixed; top: 10px; right: 10px; padding: 10px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; z-index: 1000; }
@@ -91,15 +91,18 @@
                 <div id="lista-studio"></div>
             </div>
         </div>
+        
         <div id="tab-scrittura" class="modulo-content hidden">
             <div class="card">
                 <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio-write">Pronto</div>
+                
                 <div id="write-config">
                     <p style="text-align:center; color:#666; font-size:0.9rem;">Scegli cosa scrivere:</p>
                     <select id="filtro-scrittura" class="input-box"><option value="TUTTI">Tutte le Categorie</option></select>
                     <label class="mix-toggle" style="justify-content:center;"><input type="checkbox" id="write-mode-check"> Mostra Kana → Scrivi Romaji</label>
                     <button class="btn btn-purple" style="margin-top:15px;" onclick="startWriteSession()">Inizia Sessione (10)</button>
                 </div>
+
                 <div id="write-area" class="hidden">
                     <div style="text-align:center; color:#aaa; font-size:0.85rem; font-weight:bold; letter-spacing:1px;" id="write-label">SCRIVI IL KANA</div>
                     <div id="prompt-scrittura">...</div>
@@ -114,8 +117,16 @@
                     </div>
                     <div style="text-align:center; margin-top:20px;"><button class="btn btn-red" style="width:auto; font-size:0.8rem;" onclick="quitWriteSession()">Esci</button></div>
                 </div>
+
+                <div id="end-write-box" class="hidden" style="text-align:center; padding:20px;">
+                    <h2 id="end-write-msg">Sessione Completata!</h2>
+                    <p id="end-write-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
+                    <button id="btn-write-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
+                    <button class="btn btn-blue" onclick="startWriteSession()" style="margin-top:10px;">Nuova Sessione</button>
+                </div>
             </div>
         </div>
+
         <div id="tab-quiz" class="modulo-content">
             <div class="card">
                 <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio">Pronto</div>
@@ -196,8 +207,8 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v27')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v27'));
-                if(localStorage.getItem('srs_frasi_v27')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v27'));
+                if(localStorage.getItem('srs_vocab_v28')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v28'));
+                if(localStorage.getItem('srs_frasi_v28')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v28'));
             } catch(e) { localStorage.clear(); }
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); renderFrasi(); renderStudio();
             if(vocaboli.length === 0) forceSync();
@@ -228,12 +239,7 @@
             else { const navBtn = document.querySelector(`button[onclick*="'${id}'"]`); if(navBtn) navBtn.classList.add('active'); }
         }
 
-        // --- INTELLIGENT HIGHLIGHT (DOUBLE + EI + OU) ---
-        function formatRomaji(text) {
-            // Regola: Trova doppie lettere (aa,tt..) OPPURE 'ei' OPPURE 'ou'
-            return text.replace(/([a-z])\1|ei|ou/gi, '<span class="hlt">$&</span>');
-        }
-
+        function formatRomaji(text) { return text.replace(/([a-z])\1|ei|ou/gi, '<span class="hlt">$&</span>'); }
         function cleanText(text) { return text.toLowerCase().replace(/[.,?？。、!！]/g, '').trim(); }
 
         function initCanvas() {
@@ -252,7 +258,11 @@
             const pool = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
             if(pool.length === 0) { alert("Nessun vocabolo."); return; }
             writeSession = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
-            document.getElementById('write-config').classList.add('hidden'); document.getElementById('write-area').classList.remove('hidden'); document.getElementById('end-session-box').classList.add('hidden');
+            
+            document.getElementById('write-config').classList.add('hidden'); 
+            document.getElementById('write-area').classList.remove('hidden'); 
+            document.getElementById('end-write-box').classList.add('hidden'); // Nasconde fine sessione
+            
             errori = []; punteggio = {ok:0, err:0}; nextWriteCard();
         }
 
@@ -275,7 +285,7 @@
             sub.innerText = `(${card.ita})`; 
 
             if(!rev) {
-                label.innerHTML = formatRomaji(card.rom); // Highlight anche qui
+                label.innerHTML = formatRomaji(card.rom); 
                 document.getElementById('write-label').innerText = "SCRIVI IL GIAPPONESE";
                 canvasContainer.classList.remove('hidden'); clearBtn.classList.remove('hidden');
             } else {
@@ -318,13 +328,17 @@
         }
 
         function endScritturaSession() {
-            document.getElementById('write-area').classList.add('hidden'); document.getElementById('end-session-box').classList.remove('hidden');
-            document.getElementById('end-msg').innerText = (errori.length === 0) ? "Scrittura Perfetta!" : "Sessione Scrittura Conclusa";
-            document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
-            const btnRip = document.getElementById('btn-ripasso');
-            if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } else { btnRip.classList.add('hidden'); }
-            const btnNew = document.getElementById('btn-new-session'); btnNew.innerText = "Nuova Sessione Scrittura"; btnNew.onclick = startWriteSession;
+            document.getElementById('write-area').classList.add('hidden'); 
+            document.getElementById('end-write-box').classList.remove('hidden'); // MOSTRA IL NUOVO BOX
+            
+            document.getElementById('end-write-msg').innerText = (errori.length === 0) ? "Scrittura Perfetta!" : "Sessione Scrittura Conclusa";
+            document.getElementById('end-write-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
+            
+            const btnRip = document.getElementById('btn-write-ripasso');
+            if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } 
+            else { btnRip.classList.add('hidden'); }
         }
+
         function quitWriteSession() { document.getElementById('write-area').classList.add('hidden'); document.getElementById('write-config').classList.remove('hidden'); }
 
         function renderStudio() {
@@ -348,8 +362,18 @@
             errori = []; punteggio = { ok:0, err:0 }; prossima();
         }
         function avviaRipasso() {
-            if(mode === 'scrittura') { writeSession = [...errori]; errori = []; document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('write-area').classList.remove('hidden'); nextWriteCard(); }
-            else { sessione = [...errori]; errori = []; document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); prossima(); }
+            if(mode === 'scrittura') { 
+                writeSession = [...errori]; errori = []; 
+                document.getElementById('end-write-box').classList.add('hidden'); 
+                document.getElementById('write-area').classList.remove('hidden'); 
+                nextWriteCard(); 
+            }
+            else { 
+                sessione = [...errori]; errori = []; 
+                document.getElementById('end-session-box').classList.add('hidden'); 
+                document.getElementById('quiz-area').classList.remove('hidden'); 
+                prossima(); 
+            }
         }
         function prossima() {
             if(sessione.length === 0) { concludiSessione(); return; }
@@ -404,7 +428,7 @@
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
         function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); nuovaSessione(); }
-        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v27', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v27', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
+        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v28', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v28', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
         function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; }
         function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
