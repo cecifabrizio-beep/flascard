@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v30.0 (Smart Kana)</title>
+    <title>Giapponese SRS v31.0 (Phonetic Tolerance)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -17,7 +17,7 @@
             background-color: #ffeb3b; 
             color: #000;
             border-radius: 3px;
-            padding: 0 1px;
+            padding: 0 2px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         } 
 
@@ -171,29 +171,9 @@
             </div>
         </div>
         <div id="tab-hiragana" class="modulo-content hidden">
-            <div class="card">
-                <h2>Hiragana</h2>
-                <div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;">
-                    <label class="mix-toggle"><input type="checkbox" id="h-mix-mode"> 🔀 Modalità Mista (Include Scelta Multipla)</label>
-                    <div class="config-grid" id="h-config"></div>
-                    <div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', true)">Tutto</button><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', false)">Nulla</button></div>
-                    <button class="btn btn-green" onclick="startKanaQuiz('h')">AVVIA QUIZ HIRAGANA</button>
-                </div>
-                <div style="overflow-x:auto;"><table class="kana-table" id="h-table"></table></div>
-            </div>
-        </div>
+            <div class="card"><h2>Hiragana</h2><div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;"><label class="mix-toggle"><input type="checkbox" id="h-mix-mode"> 🔀 Modalità Mista</label><div class="config-grid" id="h-config"></div><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', true)">Tutto</button><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', false)">Nulla</button></div><button class="btn btn-green" onclick="startKanaQuiz('h')">AVVIA QUIZ HIRAGANA</button></div><div style="overflow-x:auto;"><table class="kana-table" id="h-table"></table></div></div></div>
         <div id="tab-katakana" class="modulo-content hidden">
-            <div class="card">
-                <h2>Katakana</h2>
-                <div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;">
-                    <label class="mix-toggle"><input type="checkbox" id="k-mix-mode"> 🔀 Modalità Mista (Include Scelta Multipla)</label>
-                    <div class="config-grid" id="k-config"></div>
-                    <div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', true)">Tutto</button><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', false)">Nulla</button></div>
-                    <button class="btn btn-green" onclick="startKanaQuiz('k')">AVVIA QUIZ KATAKANA</button>
-                </div>
-                <div style="overflow-x:auto;"><table class="kana-table" id="k-table"></table></div>
-            </div>
-        </div>
+            <div class="card"><h2>Katakana</h2><div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;"><label class="mix-toggle"><input type="checkbox" id="k-mix-mode"> 🔀 Modalità Mista</label><div class="config-grid" id="k-config"></div><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', true)">Tutto</button><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', false)">Nulla</button></div><button class="btn btn-green" onclick="startKanaQuiz('k')">AVVIA QUIZ KATAKANA</button></div><div style="overflow-x:auto;"><table class="kana-table" id="k-table"></table></div></div></div>
     </div>
 
     <script>
@@ -210,8 +190,8 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v30')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v30'));
-                if(localStorage.getItem('srs_frasi_v30')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v30'));
+                if(localStorage.getItem('srs_vocab_v31')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v31'));
+                if(localStorage.getItem('srs_frasi_v31')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v31'));
             } catch(e) { localStorage.clear(); }
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); renderFrasi(); renderStudio();
             if(vocaboli.length === 0) forceSync();
@@ -242,27 +222,23 @@
             else { const navBtn = document.querySelector(`button[onclick*="'${id}'"]`); if(navBtn) navBtn.classList.add('active'); }
         }
 
-        // --- FORMATTAZIONE INTELLIGENTE ROMAJI + KANA ---
-        function formatRomaji(text) { 
-            return text.replace(/([a-z])\1|ei|ou/gi, '<span class="hlt">$&</span>'); 
-        }
-
+        // --- FORMATTAZIONE INTELLIGENTE ---
+        function formatRomaji(text) { return text.replace(/([a-z])\1|ei|ou/gi, '<span class="hlt">$&</span>'); }
         function formatKana(text) {
-            // 1. Evidenzia sempre 'ッ', 'っ', 'ー' (raddoppi e allungamenti certi)
             let out = text.replace(/([ッっー])/g, '<span class="hlt">$1</span>');
-            
-            // 2. Intelligenza: Se trova una 'う' preceduta da suoni O, la evidenzia
-            // Lista suoni che finiscono in O: おこそとのほもよろをごぞどぼぽ
             out = out.replace(/([おこそとのほもよろをごぞどぼぽ])(う)/g, '$1<span class="hlt">$2</span>');
-
-            // 3. Intelligenza: Se trova una 'い' preceduta da suoni E, la evidenzia
-            // Lista suoni che finiscono in E: えけせてねへめれげぜでべぺ
             out = out.replace(/([えけせてねへめれげぜでべぺ])(い)/g, '$1<span class="hlt">$2</span>');
-
             return out;
         }
 
-        function cleanText(text) { return text.toLowerCase().replace(/[.,?？。、!！]/g, '').trim(); }
+        // --- CLEAN TEXT CON TOLLERANZA FONETICA (OO=OU, EE=EI) ---
+        function cleanText(text) { 
+            return text.toLowerCase()
+                .replace(/[.,?？。、!！]/g, '')
+                .replace(/oo/g, 'ou') // TOLLERANZA 1: "oo" diventa "ou"
+                .replace(/ee/g, 'ei') // TOLLERANZA 2: "ee" diventa "ei"
+                .trim(); 
+        }
 
         function initCanvas() {
             canvas = document.getElementById('drawing-board'); ctx = canvas.getContext('2d'); canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
@@ -309,7 +285,7 @@
                 document.getElementById('write-label').innerText = "SCRIVI IL GIAPPONESE";
                 document.getElementById('canvas-container').classList.remove('hidden'); document.getElementById('btn-clear-canvas').classList.remove('hidden');
             } else {
-                label.innerHTML = formatKana(card.jpn); // Applica l'evidenziatore intelligente ai KANA
+                label.innerHTML = formatKana(card.jpn); 
                 document.getElementById('write-label').innerText = "SCRIVI IL ROMAJI";
                 document.getElementById('canvas-container').classList.add('hidden'); document.getElementById('btn-clear-canvas').classList.add('hidden');
             }
@@ -317,6 +293,7 @@
 
         function checkScrittura() {
             const input = document.getElementById('input-write');
+            // USA TOLLERANZA
             const val = cleanText(input.value); 
             const feed = document.getElementById('feedback-write');
             const overlay = document.getElementById('write-solution-overlay');
@@ -328,6 +305,8 @@
                 if(val === cleanText(card.jpn)) ok = true;
             } else {
                 target = card.rom;
+                // Qui cleanText trasforma il target (se aveva 'ou') in 'ou', 
+                // e l'input (se aveva 'oo') in 'ou'. Quindi 'oo' == 'ou' -> VERO.
                 if(val === cleanText(card.rom) || val === cleanText(card.ita)) ok = true;
             }
 
@@ -335,13 +314,10 @@
             const jpnSafe = card.jpn.replace(/'/g, "\\'");
             const audioBtn = ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>`;
 
-            if(val === "") {
+            if(input.value.trim() === "") { // Controllo se è vuoto (disegno)
                 punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato');
-                
-                // Mostra la soluzione con l'evidenziatore intelligente
                 let solDisplay = (!rev) ? formatKana(card.jpn) : formatRomaji(card.rom);
                 feed.innerHTML = `Soluzione: <b>${solDisplay}</b>` + audioBtn;
-                
                 if(!rev) { overlay.innerText = card.jpn; overlay.classList.remove('hidden'); overlay.classList.add('soluzione-visibile'); }
             } else {
                 if(ok) { punteggio.ok++; feed.classList.add('fb-corretto'); feed.innerHTML = "✅ Esatto!" + audioBtn; }
@@ -373,7 +349,6 @@
             if(list.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessun vocabolo.</p>'; return; }
             div.innerHTML = list.map(v => {
                 const jpnSafe = v.jpn.replace(/'/g,"\\'");
-                // APPLICA EVIDENZIATORE SIA A KANA CHE A ROMAJI
                 return `<div class="list-entry"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(v.jpn)}</span><span class="txt-rom">${formatRomaji(v.rom)}</span><span class="txt-ita">${v.ita}</span></div></div>`;
             }).join('');
         }
@@ -455,11 +430,11 @@
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
         function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); nuovaSessione(); }
-        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v30', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v30', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
+        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v31', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v31', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
         function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; }
         function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
-        function renderFrasi() { const div = document.getElementById('lista-frasi'); const spoiler = document.getElementById('spoiler-check').checked; const filter = document.getElementById('filtro-frasi').value; div.innerHTML = ''; const list = (filter === 'TUTTI') ? frasi : frasi.filter(f => f.tag === filter); if(list.length === 0) { div.innerHTML = '<p style="text-align:center">Nessuna frase</p>'; return; } div.innerHTML = list.map(f => { const jpnSafe = f.jpn.replace(/'/g,"\\'"); return `<div class="list-entry ${spoiler?'spoiler':''}"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(f.jpn)}</span><span class="txt-rom">${formatRomaji(f.rom)}</span><span class="txt-ita">${f.ita}</span></div></div>`; }).join(''); }
+        function renderFrasi() { const div = document.getElementById('lista-frasi'); const spoiler = document.getElementById('spoiler-check').checked; const filter = document.getElementById('filtro-frasi').value; div.innerHTML = ''; const list = (filter === 'TUTTI') ? frasi : frasi.filter(f => f.tag === filter); if(list.length === 0) { div.innerHTML = '<p style="text-align:center">Nessuna frase</p>'; return; } div.innerHTML = list.map(f => { const jpnSafe = f.jpn.replace(/'/g,"\\'"); return `<div class="list-entry ${spoiler?'spoiler':''}"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${f.jpn}</span><span class="txt-rom">${formatRomaji(f.rom)}</span><span class="txt-ita">${f.ita}</span></div></div>`; }).join(''); }
         function parla(t) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(t); u.lang = 'ja-JP'; u.rate = 0.9; window.speechSynthesis.speak(u); } else { alert("Il tuo browser non supporta la sintesi vocale."); } }
     </script>
 </body>
