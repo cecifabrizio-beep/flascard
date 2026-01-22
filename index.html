@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v31.0 (Tolleranza Totale)</title>
+    <title>Giapponese SRS v32.0 (Deck Mode)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -74,6 +74,10 @@
         .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .checkbox-label { background: white; padding: 8px; border-radius: 8px; border: 1px solid #eee; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .mix-toggle { background: #e7f3ff; border: 1px solid #007aff; color: #007aff; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+
+        /* NUOVO: Stato Deck */
+        .deck-status { text-align: center; font-size: 0.9rem; color: #666; margin-top: 5px; font-weight: 500; }
+        .deck-badge { background: #e0e0e0; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -103,9 +107,10 @@
                 <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio-write">Pronto</div>
                 <div id="write-config">
                     <p style="text-align:center; color:#666; font-size:0.9rem;">Scegli cosa scrivere:</p>
-                    <select id="filtro-scrittura" class="input-box"><option value="TUTTI">Tutte le Categorie</option></select>
-                    <label class="mix-toggle" style="justify-content:center;"><input type="checkbox" id="write-mode-check"> Mostra Kana → Scrivi Romaji</label>
-                    <button class="btn btn-purple" style="margin-top:15px;" onclick="startWriteSession()">Inizia Sessione (10)</button>
+                    <select id="filtro-scrittura" class="input-box" onchange="resetDeck('scrittura')"><option value="TUTTI">Tutte le Categorie</option></select>
+                    <div class="deck-status" id="deck-status-write"></div>
+                    <label class="mix-toggle" style="justify-content:center; margin-top:10px;"><input type="checkbox" id="write-mode-check"> Mostra Kana → Scrivi Romaji</label>
+                    <button class="btn btn-purple" style="margin-top:15px;" id="btn-start-write" onclick="startWriteSession()">Inizia Sessione</button>
                 </div>
                 <div id="write-area" class="hidden">
                     <div style="text-align:center; color:#aaa; font-size:0.85rem; font-weight:bold; letter-spacing:1px;" id="write-label">SCRIVI IL KANA</div>
@@ -125,7 +130,7 @@
                     <h2 id="end-write-msg">Sessione Completata!</h2>
                     <p id="end-write-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
                     <button id="btn-write-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
-                    <button class="btn btn-blue" onclick="startWriteSession()" style="margin-top:10px;">Nuova Sessione</button>
+                    <button class="btn btn-blue" id="btn-write-continue" onclick="startWriteSession()" style="margin-top:10px;">Nuova Sessione</button>
                 </div>
             </div>
         </div>
@@ -133,8 +138,14 @@
         <div id="tab-quiz" class="modulo-content">
             <div class="card">
                 <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio">Pronto</div>
-                <select id="filtro-cat" class="input-box" onchange="openVocabQuiz()"><option value="TUTTI">Tutte le Categorie</option></select>
-                <div id="quiz-area">
+                <select id="filtro-cat" class="input-box" onchange="resetDeck('quiz')"><option value="TUTTI">Tutte le Categorie</option></select>
+                <div class="deck-status" id="deck-status-quiz" style="margin-bottom:15px;"></div>
+                
+                <div id="quiz-start-screen" style="text-align:center; padding:20px;">
+                     <button class="btn btn-blue" id="btn-start-quiz" onclick="nuovaSessione()">Inizia Quiz</button>
+                </div>
+
+                <div id="quiz-area" class="hidden">
                     <div style="text-align:center; color:#aaa; font-size:0.85rem; font-weight:bold; letter-spacing:1px;" id="q-label">DOMANDA</div>
                     <div id="prompt-principale">...</div>
                     <div id="prompt-secondario">...</div>
@@ -150,7 +161,7 @@
                     <h2 id="end-msg">Sessione Completata!</h2>
                     <p id="end-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
                     <button id="btn-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
-                    <button id="btn-new-session" class="btn btn-blue" onclick="openVocabQuiz()" style="margin-top:10px;">Nuova Sessione</button>
+                    <button id="btn-new-session" class="btn btn-blue" onclick="nuovaSessione()" style="margin-top:10px;">Prossima Sessione</button>
                 </div>
                 <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">Caricamento dati...<br><button class="btn btn-blue" style="margin-top:10px; width:auto;" onclick="forceSync()">🔄 Scarica Dati</button></div>
             </div>
@@ -187,6 +198,10 @@
         let punteggio = { ok:0, err:0 }; let mode = 'vocab'; let mixMode = false; let activePool = [];
         let currentKanaPrefix = 'h'; 
         let writeSession = []; let canvas, ctx; let isDrawing = false;
+        
+        // DECK VARIABLES
+        let activeDeckQuiz = []; 
+        let activeDeckWrite = [];
 
         window.onload = function() {
             try {
@@ -198,6 +213,10 @@
             initCanvas();
             document.getElementById('input-risposta').addEventListener('keydown', function(e){ if(e.key === 'Enter' && !this.classList.contains('hidden')) { if(!document.getElementById('btn-check').classList.contains('hidden')) controlla(); else prossima(); } });
             document.getElementById('input-write').addEventListener('keydown', function(e){ if(e.key === 'Enter') checkScrittura(); });
+            
+            // Init Deck States
+            resetDeck('quiz');
+            resetDeck('scrittura');
         };
 
         function showNotification(msg, type) { const el = document.getElementById('sync-status'); el.className = type; el.innerText = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
@@ -210,6 +229,7 @@
                 const countF = parseCSV(txtF, 'frasi', false);
                 showNotification(`Aggiornato! V:${countV} F:${countF}`, "sync-success");
                 aggiornaConta(); popolaFiltri(); renderFrasi(); renderStudio();
+                resetDeck('quiz'); resetDeck('scrittura');
                 if(vocaboli.length > 0) openVocabQuiz(); 
             }).catch(e => { console.error(e); showNotification("Errore Scaricamento Dati", "sync-error"); });
         }
@@ -222,6 +242,33 @@
             else { const navBtn = document.querySelector(`button[onclick*="'${id}'"]`); if(navBtn) navBtn.classList.add('active'); }
         }
 
+        // --- DECK MANAGEMENT ---
+        function resetDeck(type) {
+            let selectId = (type === 'quiz') ? 'filtro-cat' : 'filtro-scrittura';
+            let statusId = (type === 'quiz') ? 'deck-status-quiz' : 'deck-status-write';
+            let filter = document.getElementById(selectId).value;
+            
+            let pool = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
+            // Copia e mescola
+            let deck = [...pool].sort(() => 0.5 - Math.random());
+            
+            if(type === 'quiz') activeDeckQuiz = deck;
+            else activeDeckWrite = deck;
+
+            updateDeckStatus(type);
+        }
+
+        function updateDeckStatus(type) {
+            let statusId = (type === 'quiz') ? 'deck-status-quiz' : 'deck-status-write';
+            let deck = (type === 'quiz') ? activeDeckQuiz : activeDeckWrite;
+            let el = document.getElementById(statusId);
+            if(deck.length > 0) {
+                el.innerHTML = `Parole rimanenti nel mazzo: <span class="deck-badge">${deck.length}</span>`;
+            } else {
+                el.innerHTML = `<span style="color:#28a745">★ Categoria Completata! ★</span>`;
+            }
+        }
+
         // --- FORMATTAZIONE INTELLIGENTE ---
         function formatRomaji(text) { return text.replace(/([a-z])\1|ei|ou/gi, '<span class="hlt">$&</span>'); }
         function formatKana(text) {
@@ -230,14 +277,8 @@
             out = out.replace(/([えけせてねへめれげぜでべぺ])(い)/g, '$1<span class="hlt">$2</span>');
             return out;
         }
-
-        // --- CLEAN TEXT CON TOLLERANZA FONETICA (OO=OU, EE=EI) ---
         function cleanText(text) { 
-            return text.toLowerCase()
-                .replace(/[.,?？。、!！]/g, '')
-                .replace(/oo/g, 'ou') // TOLLERANZA 1: "oo" diventa "ou"
-                .replace(/ee/g, 'ei') // TOLLERANZA 2: "ee" diventa "ei"
-                .trim(); 
+            return text.toLowerCase().replace(/[.,?？。、!！]/g, '').replace(/oo/g, 'ou').replace(/ee/g, 'ei').trim(); 
         }
 
         function initCanvas() {
@@ -252,10 +293,15 @@
 
         function startWriteSession() {
             mode = 'scrittura';
-            const filter = document.getElementById('filtro-scrittura').value;
-            const pool = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
-            if(pool.length === 0) { alert("Nessun vocabolo."); return; }
-            writeSession = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+            if(activeDeckWrite.length === 0) {
+                if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) {
+                    resetDeck('scrittura');
+                } else { return; }
+            }
+            // Prendi al massimo 10 carte
+            let n = Math.min(10, activeDeckWrite.length);
+            writeSession = activeDeckWrite.splice(0, n);
+            updateDeckStatus('scrittura'); // Aggiorna contatore
             
             document.getElementById('write-config').classList.add('hidden'); 
             document.getElementById('write-area').classList.remove('hidden'); 
@@ -293,28 +339,20 @@
 
         function checkScrittura() {
             const input = document.getElementById('input-write');
-            // USA TOLLERANZA
             const val = cleanText(input.value); 
             const feed = document.getElementById('feedback-write');
             const overlay = document.getElementById('write-solution-overlay');
             const rev = document.getElementById('write-mode-check').checked; 
             let ok = false; let target = "";
 
-            if(!rev) {
-                target = card.jpn;
-                if(val === cleanText(card.jpn)) ok = true;
-            } else {
-                target = card.rom;
-                // Qui cleanText trasforma il target (se aveva 'ou') in 'ou', 
-                // e l'input (se aveva 'oo') in 'ou'. Quindi 'oo' == 'ou' -> VERO.
-                if(val === cleanText(card.rom) || val === cleanText(card.ita)) ok = true;
-            }
+            if(!rev) { target = card.jpn; if(val === cleanText(card.jpn)) ok = true; } 
+            else { target = card.rom; if(val === cleanText(card.rom) || val === cleanText(card.ita)) ok = true; }
 
             feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
             const jpnSafe = card.jpn.replace(/'/g, "\\'");
             const audioBtn = ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>`;
 
-            if(input.value.trim() === "") { // Controllo se è vuoto (disegno)
+            if(input.value.trim() === "") { 
                 punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato');
                 let solDisplay = (!rev) ? formatKana(card.jpn) : formatRomaji(card.rom);
                 feed.innerHTML = `Soluzione: <b>${solDisplay}</b>` + audioBtn;
@@ -334,14 +372,27 @@
         function endScritturaSession() {
             document.getElementById('write-area').classList.add('hidden'); 
             document.getElementById('end-write-box').classList.remove('hidden');
-            document.getElementById('end-write-msg').innerText = (errori.length === 0) ? "Scrittura Perfetta!" : "Sessione Scrittura Conclusa";
+            document.getElementById('end-write-msg').innerText = "Sessione Completata";
             document.getElementById('end-write-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
+            
             const btnRip = document.getElementById('btn-write-ripasso');
             if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } 
             else { btnRip.classList.add('hidden'); }
+
+            const btnCont = document.getElementById('btn-write-continue');
+            if(activeDeckWrite.length === 0) {
+                btnCont.innerText = "🎉 Categoria Completata! (Ricomincia)";
+                btnCont.onclick = function() { resetDeck('scrittura'); startWriteSession(); }
+            } else {
+                btnCont.innerText = `Prossime ${Math.min(10, activeDeckWrite.length)} parole →`;
+                btnCont.onclick = startWriteSession;
+            }
         }
 
-        function quitWriteSession() { document.getElementById('write-area').classList.add('hidden'); document.getElementById('write-config').classList.remove('hidden'); }
+        function quitWriteSession() { 
+            // Rimetti le parole non usate nel mazzo? No, meglio perderle per ora o sarebbe complicato
+            document.getElementById('write-area').classList.add('hidden'); document.getElementById('write-config').classList.remove('hidden'); updateDeckStatus('scrittura');
+        }
 
         function renderStudio() {
             const div = document.getElementById('lista-studio'); const filter = document.getElementById('filtro-studio').value; div.innerHTML = '';
@@ -353,16 +404,34 @@
             }).join('');
         }
 
-        function openVocabQuiz() { mode = 'vocab'; document.getElementById('filtro-cat').classList.remove('hidden'); nuovaSessione(); }
+        function openVocabQuiz() { 
+            mode = 'vocab'; 
+            document.getElementById('filtro-cat').classList.remove('hidden');
+            document.getElementById('quiz-start-screen').classList.remove('hidden'); // Mostra bottone start
+            document.getElementById('quiz-area').classList.add('hidden'); // Nascondi quiz vero
+            document.getElementById('end-session-box').classList.add('hidden');
+            updateDeckStatus('quiz');
+        }
+
         function nuovaSessione() {
-            document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden');
-            if(mode === 'vocab') {
-                const cat = document.getElementById('filtro-cat').value; const pool = (cat === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === cat);
-                if(pool.length === 0) { document.getElementById('quiz-area').classList.add('hidden'); document.getElementById('msg-no-data').classList.remove('hidden'); return; }
-                document.getElementById('msg-no-data').classList.add('hidden'); sessione = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+            // Controlla mazzo
+            if(activeDeckQuiz.length === 0) {
+                if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) {
+                    resetDeck('quiz');
+                } else { return; }
             }
+
+            document.getElementById('quiz-start-screen').classList.add('hidden');
+            document.getElementById('end-session-box').classList.add('hidden'); 
+            document.getElementById('quiz-area').classList.remove('hidden');
+
+            let n = Math.min(10, activeDeckQuiz.length);
+            sessione = activeDeckQuiz.splice(0, n);
+            updateDeckStatus('quiz');
+
             errori = []; punteggio = { ok:0, err:0 }; prossima();
         }
+
         function avviaRipasso() {
             if(mode === 'scrittura') { 
                 writeSession = [...errori]; errori = []; 
@@ -388,6 +457,7 @@
                 if(dir === 'j2i') { document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO"; document.getElementById('prompt-principale').innerHTML = `${formatKana(card.jpn)} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn.replace(/'/g,"\\'")} ')">🔊</span>`; document.getElementById('prompt-secondario').innerText = formatRomaji(card.rom); }
                 else { document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)"; document.getElementById('prompt-principale').innerText = card.ita; document.getElementById('prompt-secondario').innerText = card.eng || ""; }
             } else {
+                // KANA QUIZ logic (semplificata per ora, non usa il deck system)
                 let dir = 'k2r'; if(mixMode && Math.random() > 0.5) dir = 'r2k'; card.dir = dir;
                 if(dir === 'k2r') { document.getElementById('q-label').innerText = "SCRIVI IL ROMAJI"; document.getElementById('prompt-principale').innerText = card.k; document.getElementById('prompt-secondario').innerText = ""; }
                 else { document.getElementById('q-label').innerText = "SELEZIONA IL KANA"; document.getElementById('prompt-principale').innerText = card.r; document.getElementById('prompt-secondario').innerText = ""; showInput = false; generaScelte(card); }
@@ -397,12 +467,24 @@
         }
         function concludiSessione() {
             document.getElementById('quiz-area').classList.add('hidden'); document.getElementById('end-session-box').classList.remove('hidden');
-            let msg = "Sessione Perfetta!"; if(errori.length > 0) msg = "Sessione Conclusa";
+            let msg = "Sessione Completata"; 
             document.getElementById('end-msg').innerText = msg; document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
             const btnRip = document.getElementById('btn-ripasso'); if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } else { btnRip.classList.add('hidden'); }
+            
             const btnNew = document.getElementById('btn-new-session');
-            if(mode === 'vocab') { btnNew.innerText = "Nuova Sessione Vocaboli"; btnNew.onclick = openVocabQuiz; }
-            else { const label = (currentKanaPrefix === 'h') ? "Hiragana" : "Katakana"; btnNew.innerText = `Torna a ${label}`; btnNew.onclick = function() { switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana'); }; }
+            if(mode === 'vocab') { 
+                if(activeDeckQuiz.length === 0) {
+                     btnNew.innerText = "🎉 Categoria Completata! (Ricomincia)";
+                     btnNew.onclick = function() { resetDeck('quiz'); nuovaSessione(); }
+                } else {
+                     btnNew.innerText = `Prossime ${Math.min(10, activeDeckQuiz.length)} parole →`;
+                     btnNew.onclick = nuovaSessione; 
+                }
+            }
+            else { 
+                // Logica Kana standard
+                const label = (currentKanaPrefix === 'h') ? "Hiragana" : "Katakana"; btnNew.innerText = `Torna a ${label}`; btnNew.onclick = function() { switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana'); }; 
+            }
         }
         function generaScelte(corretta) {
             const div = document.getElementById('choices-area'); div.innerHTML = '';
@@ -434,7 +516,7 @@
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
         function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; }
         function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
-        function renderFrasi() { const div = document.getElementById('lista-frasi'); const spoiler = document.getElementById('spoiler-check').checked; const filter = document.getElementById('filtro-frasi').value; div.innerHTML = ''; const list = (filter === 'TUTTI') ? frasi : frasi.filter(f => f.tag === filter); if(list.length === 0) { div.innerHTML = '<p style="text-align:center">Nessuna frase</p>'; return; } div.innerHTML = list.map(f => { const jpnSafe = f.jpn.replace(/'/g,"\\'"); return `<div class="list-entry ${spoiler?'spoiler':''}"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${f.jpn}</span><span class="txt-rom">${formatRomaji(f.rom)}</span><span class="txt-ita">${f.ita}</span></div></div>`; }).join(''); }
+        function renderFrasi() { const div = document.getElementById('lista-frasi'); const spoiler = document.getElementById('spoiler-check').checked; const filter = document.getElementById('filtro-frasi').value; div.innerHTML = ''; const list = (filter === 'TUTTI') ? frasi : frasi.filter(f => f.tag === filter); if(list.length === 0) { div.innerHTML = '<p style="text-align:center">Nessuna frase</p>'; return; } div.innerHTML = list.map(f => { const jpnSafe = f.jpn.replace(/'/g,"\\'"); return `<div class="list-entry ${spoiler?'spoiler':''}"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(f.jpn)}</span><span class="txt-rom">${formatRomaji(f.rom)}</span><span class="txt-ita">${f.ita}</span></div></div>`; }).join(''); }
         function parla(t) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(t); u.lang = 'ja-JP'; u.rate = 0.9; window.speechSynthesis.speak(u); } else { alert("Il tuo browser non supporta la sintesi vocale."); } }
     </script>
 </body>
