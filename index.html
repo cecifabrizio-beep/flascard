@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v33.0 (Kana Fix)</title>
+    <title>Giapponese SRS v35.0 (Smart Enter)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -35,6 +35,9 @@
         /* --- UI COMPONENTI --- */
         .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; transition: all 0.3s; }
         .input-box:focus { border-color: #007aff; outline: none; }
+        /* Stile readOnly per sembrare disabilitato ma mantenere il focus */
+        .input-box:read-only { background-color: #f8f9fa; color: #666; border-color: #eee; }
+
         .feedback-box { text-align: center; font-weight: bold; font-size: 1.2rem; padding: 15px; border-radius: 12px; margin: 15px 0; border: 2px solid transparent; }
         .fb-corretto { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
         .fb-sbagliato { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
@@ -205,14 +208,28 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v33')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v33'));
-                if(localStorage.getItem('srs_frasi_v33')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v33'));
+                if(localStorage.getItem('srs_vocab_v35')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v35'));
+                if(localStorage.getItem('srs_frasi_v35')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v35'));
             } catch(e) { localStorage.clear(); }
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); renderFrasi(); renderStudio();
             if(vocaboli.length === 0) forceSync();
             initCanvas();
-            document.getElementById('input-risposta').addEventListener('keydown', function(e){ if(e.key === 'Enter' && !this.classList.contains('hidden')) { if(!document.getElementById('btn-check').classList.contains('hidden')) controlla(); else prossima(); } });
-            document.getElementById('input-write').addEventListener('keydown', function(e){ if(e.key === 'Enter') checkScrittura(); });
+            // EVENT LISTENER QUIZ VOCABOLI / KANA
+            document.getElementById('input-risposta').addEventListener('keydown', function(e){ 
+                if(e.key === 'Enter' && !this.classList.contains('hidden')) { 
+                    e.preventDefault(); // Evita strani focus
+                    if(!document.getElementById('btn-check').classList.contains('hidden')) controlla(); 
+                    else prossima(); 
+                } 
+            });
+            // EVENT LISTENER SCRITTURA
+            document.getElementById('input-write').addEventListener('keydown', function(e){ 
+                if(e.key === 'Enter') {
+                    e.preventDefault();
+                    if(!document.getElementById('btn-check-write').classList.contains('hidden')) checkScrittura();
+                    else nextWriteCard();
+                }
+            });
             
             // Init Deck States
             resetDeck('quiz');
@@ -314,7 +331,12 @@
             const rev = document.getElementById('write-mode-check').checked;
             
             clearCanvas();
-            document.getElementById('input-write').value = ''; document.getElementById('input-write').disabled = false;
+            // IMPORTANTE: Resetta readOnly, non disabled, e riattiva il focus
+            const input = document.getElementById('input-write');
+            input.value = ''; 
+            input.readOnly = false; // <<< MODIFICA FOCUS
+            input.disabled = false;
+            
             document.getElementById('feedback-write').classList.add('hidden'); document.getElementById('feedback-write').classList.remove('fb-corretto', 'fb-sbagliato');
             document.getElementById('write-solution-overlay').classList.add('hidden'); document.getElementById('write-solution-overlay').classList.remove('soluzione-visibile');
             document.getElementById('btn-check-write').classList.remove('hidden'); document.getElementById('btn-next-write').classList.add('hidden');
@@ -333,6 +355,8 @@
                 document.getElementById('write-label').innerText = "SCRIVI IL ROMAJI";
                 document.getElementById('canvas-container').classList.add('hidden'); document.getElementById('btn-clear-canvas').classList.add('hidden');
             }
+            // Forziamo il focus sull'input
+            setTimeout(() => input.focus(), 50);
         }
 
         function checkScrittura() {
@@ -350,20 +374,25 @@
             const jpnSafe = card.jpn.replace(/'/g, "\\'");
             const audioBtn = ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>`;
 
+            let solDisplay = (!rev) ? formatKana(card.jpn) : formatRomaji(card.rom);
+
             if(input.value.trim() === "") { 
                 punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato');
-                let solDisplay = (!rev) ? formatKana(card.jpn) : formatRomaji(card.rom);
                 feed.innerHTML = `Soluzione: <b>${solDisplay}</b>` + audioBtn;
                 if(!rev) { overlay.innerText = card.jpn; overlay.classList.remove('hidden'); overlay.classList.add('soluzione-visibile'); }
             } else {
-                if(ok) { punteggio.ok++; feed.classList.add('fb-corretto'); feed.innerHTML = "✅ Esatto!" + audioBtn; }
-                else { 
+                if(ok) { 
+                    punteggio.ok++; feed.classList.add('fb-corretto'); 
+                    feed.innerHTML = "✅ Esatto!" + audioBtn; 
+                } else { 
                     punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato'); 
-                    let solDisplay = (!rev) ? formatKana(card.jpn) : formatRomaji(card.rom);
                     feed.innerHTML = `❌ Errato! Era: <b>${solDisplay}</b>` + audioBtn; 
+                    if(!rev) { overlay.innerText = card.jpn; overlay.classList.remove('hidden'); overlay.classList.add('soluzione-visibile'); }
                 }
             }
-            input.disabled = true; document.getElementById('btn-check-write').classList.add('hidden'); document.getElementById('btn-next-write').classList.remove('hidden');
+            // IMPORTANTE: Usa readOnly per mantenere il focus e permettere il secondo Enter
+            input.readOnly = true; 
+            document.getElementById('btn-check-write').classList.add('hidden'); document.getElementById('btn-next-write').classList.remove('hidden');
             document.getElementById('punteggio-write').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
         }
 
@@ -412,14 +441,11 @@
 
         function nuovaSessione() {
             if(mode === 'kana') {
-                // Se siamo in modalità Kana, NON usiamo il deck
                 document.getElementById('end-session-box').classList.add('hidden');
                 document.getElementById('quiz-area').classList.remove('hidden');
                 errori = []; punteggio = { ok:0, err:0 }; prossima();
                 return;
             }
-
-            // Modalità Vocaboli
             if(activeDeckQuiz.length === 0) {
                 if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) {
                     resetDeck('quiz');
@@ -465,7 +491,13 @@
                 if(dir === 'k2r') { document.getElementById('q-label').innerText = "SCRIVI IL ROMAJI"; document.getElementById('prompt-principale').innerText = card.k; document.getElementById('prompt-secondario').innerText = ""; }
                 else { document.getElementById('q-label').innerText = "SELEZIONA IL KANA"; document.getElementById('prompt-principale').innerText = card.r; document.getElementById('prompt-secondario').innerText = ""; showInput = false; generaScelte(card); }
             }
-            if(showInput) { input.value = ''; input.disabled = false; input.classList.remove('hidden'); choicesDiv.classList.add('hidden'); btnCheck.classList.remove('hidden'); input.focus(); }
+            if(showInput) { 
+                input.value = ''; 
+                input.readOnly = false; // <<< MODIFICA FOCUS
+                input.disabled = false;
+                input.classList.remove('hidden'); choicesDiv.classList.add('hidden'); btnCheck.classList.remove('hidden'); 
+                setTimeout(() => input.focus(), 50); 
+            }
             else { input.classList.add('hidden'); choicesDiv.classList.remove('hidden'); btnCheck.classList.add('hidden'); }
         }
         function concludiSessione() {
@@ -509,12 +541,16 @@
             } else { if(user == cleanText(card.r)) ok = true; ans = card.r; }
             feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato'); const jpnSafe = (mode === 'vocab') ? card.jpn.replace(/'/g, "\\'") : ''; const audioBtn = (mode === 'vocab') ? ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>` : '';
             if(ok) { punteggio.ok++; feed.classList.add('fb-corretto'); feed.innerHTML = "✅ Esatto!" + audioBtn; } else { punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato'); feed.innerHTML = `❌ Sbagliato! Era: <b>${ans}</b>` + audioBtn; }
-            input.disabled = true; document.getElementById('btn-check').classList.add('hidden'); document.getElementById('btn-next').classList.remove('hidden'); document.getElementById('btn-next').focus();
+            
+            // IMPORTANTE: Usa readOnly per mantenere il focus e permettere il secondo Enter
+            input.readOnly = true;
+            document.getElementById('btn-check').classList.add('hidden'); document.getElementById('btn-next').classList.remove('hidden'); 
+            // NON sposto il focus sul bottone, lo lascio sull'input
         }
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
         function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); document.getElementById('deck-status-quiz').innerHTML = ''; document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); nuovaSessione(); }
-        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v33', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v33', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
+        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v35', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v35', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
         function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; }
         function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
