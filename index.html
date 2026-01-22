@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v32.0 (Deck Mode)</title>
+    <title>Giapponese SRS v33.0 (Kana Fix)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -205,8 +205,8 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v31')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v31'));
-                if(localStorage.getItem('srs_frasi_v31')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v31'));
+                if(localStorage.getItem('srs_vocab_v33')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v33'));
+                if(localStorage.getItem('srs_frasi_v33')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v33'));
             } catch(e) { localStorage.clear(); }
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); renderFrasi(); renderStudio();
             if(vocaboli.length === 0) forceSync();
@@ -249,7 +249,6 @@
             let filter = document.getElementById(selectId).value;
             
             let pool = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
-            // Copia e mescola
             let deck = [...pool].sort(() => 0.5 - Math.random());
             
             if(type === 'quiz') activeDeckQuiz = deck;
@@ -298,10 +297,9 @@
                     resetDeck('scrittura');
                 } else { return; }
             }
-            // Prendi al massimo 10 carte
             let n = Math.min(10, activeDeckWrite.length);
             writeSession = activeDeckWrite.splice(0, n);
-            updateDeckStatus('scrittura'); // Aggiorna contatore
+            updateDeckStatus('scrittura');
             
             document.getElementById('write-config').classList.add('hidden'); 
             document.getElementById('write-area').classList.remove('hidden'); 
@@ -390,7 +388,6 @@
         }
 
         function quitWriteSession() { 
-            // Rimetti le parole non usate nel mazzo? No, meglio perderle per ora o sarebbe complicato
             document.getElementById('write-area').classList.add('hidden'); document.getElementById('write-config').classList.remove('hidden'); updateDeckStatus('scrittura');
         }
 
@@ -407,20 +404,27 @@
         function openVocabQuiz() { 
             mode = 'vocab'; 
             document.getElementById('filtro-cat').classList.remove('hidden');
-            document.getElementById('quiz-start-screen').classList.remove('hidden'); // Mostra bottone start
-            document.getElementById('quiz-area').classList.add('hidden'); // Nascondi quiz vero
+            document.getElementById('quiz-start-screen').classList.remove('hidden'); 
+            document.getElementById('quiz-area').classList.add('hidden'); 
             document.getElementById('end-session-box').classList.add('hidden');
             updateDeckStatus('quiz');
         }
 
         function nuovaSessione() {
-            // Controlla mazzo
+            if(mode === 'kana') {
+                // Se siamo in modalità Kana, NON usiamo il deck
+                document.getElementById('end-session-box').classList.add('hidden');
+                document.getElementById('quiz-area').classList.remove('hidden');
+                errori = []; punteggio = { ok:0, err:0 }; prossima();
+                return;
+            }
+
+            // Modalità Vocaboli
             if(activeDeckQuiz.length === 0) {
                 if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) {
                     resetDeck('quiz');
                 } else { return; }
             }
-
             document.getElementById('quiz-start-screen').classList.add('hidden');
             document.getElementById('end-session-box').classList.add('hidden'); 
             document.getElementById('quiz-area').classList.remove('hidden');
@@ -457,7 +461,6 @@
                 if(dir === 'j2i') { document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO"; document.getElementById('prompt-principale').innerHTML = `${formatKana(card.jpn)} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn.replace(/'/g,"\\'")} ')">🔊</span>`; document.getElementById('prompt-secondario').innerText = formatRomaji(card.rom); }
                 else { document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)"; document.getElementById('prompt-principale').innerText = card.ita; document.getElementById('prompt-secondario').innerText = card.eng || ""; }
             } else {
-                // KANA QUIZ logic (semplificata per ora, non usa il deck system)
                 let dir = 'k2r'; if(mixMode && Math.random() > 0.5) dir = 'r2k'; card.dir = dir;
                 if(dir === 'k2r') { document.getElementById('q-label').innerText = "SCRIVI IL ROMAJI"; document.getElementById('prompt-principale').innerText = card.k; document.getElementById('prompt-secondario').innerText = ""; }
                 else { document.getElementById('q-label').innerText = "SELEZIONA IL KANA"; document.getElementById('prompt-principale').innerText = card.r; document.getElementById('prompt-secondario').innerText = ""; showInput = false; generaScelte(card); }
@@ -482,7 +485,6 @@
                 }
             }
             else { 
-                // Logica Kana standard
                 const label = (currentKanaPrefix === 'h') ? "Hiragana" : "Katakana"; btnNew.innerText = `Torna a ${label}`; btnNew.onclick = function() { switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana'); }; 
             }
         }
@@ -511,8 +513,8 @@
         }
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
-        function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); nuovaSessione(); }
-        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v31', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v31', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
+        function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); document.getElementById('deck-status-quiz').innerHTML = ''; document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); nuovaSessione(); }
+        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v33', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v33', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
         function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; }
         function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
