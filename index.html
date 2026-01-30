@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v35.0 (Smart Enter)</title>
+    <title>Giapponese SRS v36.0 (Fix Grafico)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -208,8 +208,8 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v35')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v35'));
-                if(localStorage.getItem('srs_frasi_v35')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v35'));
+                if(localStorage.getItem('srs_vocab_v36')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v36'));
+                if(localStorage.getItem('srs_frasi_v36')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v36'));
             } catch(e) { localStorage.clear(); }
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); renderFrasi(); renderStudio();
             if(vocaboli.length === 0) forceSync();
@@ -217,7 +217,7 @@
             // EVENT LISTENER QUIZ VOCABOLI / KANA
             document.getElementById('input-risposta').addEventListener('keydown', function(e){ 
                 if(e.key === 'Enter' && !this.classList.contains('hidden')) { 
-                    e.preventDefault(); // Evita strani focus
+                    e.preventDefault(); 
                     if(!document.getElementById('btn-check').classList.contains('hidden')) controlla(); 
                     else prossima(); 
                 } 
@@ -331,10 +331,9 @@
             const rev = document.getElementById('write-mode-check').checked;
             
             clearCanvas();
-            // IMPORTANTE: Resetta readOnly, non disabled, e riattiva il focus
             const input = document.getElementById('input-write');
             input.value = ''; 
-            input.readOnly = false; // <<< MODIFICA FOCUS
+            input.readOnly = false; 
             input.disabled = false;
             
             document.getElementById('feedback-write').classList.add('hidden'); document.getElementById('feedback-write').classList.remove('fb-corretto', 'fb-sbagliato');
@@ -355,7 +354,6 @@
                 document.getElementById('write-label').innerText = "SCRIVI IL ROMAJI";
                 document.getElementById('canvas-container').classList.add('hidden'); document.getElementById('btn-clear-canvas').classList.add('hidden');
             }
-            // Forziamo il focus sull'input
             setTimeout(() => input.focus(), 50);
         }
 
@@ -390,7 +388,6 @@
                     if(!rev) { overlay.innerText = card.jpn; overlay.classList.remove('hidden'); overlay.classList.add('soluzione-visibile'); }
                 }
             }
-            // IMPORTANTE: Usa readOnly per mantenere il focus e permettere il secondo Enter
             input.readOnly = true; 
             document.getElementById('btn-check-write').classList.add('hidden'); document.getElementById('btn-next-write').classList.remove('hidden');
             document.getElementById('punteggio-write').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
@@ -484,8 +481,17 @@
             let showInput = true;
             if(mode === 'vocab') {
                 const dir = Math.random() > 0.5 ? 'j2i' : 'i2j'; card.dir = dir;
-                if(dir === 'j2i') { document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO"; document.getElementById('prompt-principale').innerHTML = `${formatKana(card.jpn)} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn.replace(/'/g,"\\'")} ')">🔊</span>`; document.getElementById('prompt-secondario').innerText = formatRomaji(card.rom); }
-                else { document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)"; document.getElementById('prompt-principale').innerText = card.ita; document.getElementById('prompt-secondario').innerText = card.eng || ""; }
+                if(dir === 'j2i') { 
+                    document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO"; 
+                    // FIX v36: Uso innerHTML per interpretare il tag <span class="hlt">
+                    document.getElementById('prompt-principale').innerHTML = `${formatKana(card.jpn)} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn.replace(/'/g,"\\'")} ')">🔊</span>`; 
+                    document.getElementById('prompt-secondario').innerHTML = formatRomaji(card.rom); 
+                }
+                else { 
+                    document.getElementById('q-label').innerText = "TRADUCI IN GIAPPONESE (ROMAJI)"; 
+                    document.getElementById('prompt-principale').innerText = card.ita; 
+                    document.getElementById('prompt-secondario').innerText = card.eng || ""; 
+                }
             } else {
                 let dir = 'k2r'; if(mixMode && Math.random() > 0.5) dir = 'r2k'; card.dir = dir;
                 if(dir === 'k2r') { document.getElementById('q-label').innerText = "SCRIVI IL ROMAJI"; document.getElementById('prompt-principale').innerText = card.k; document.getElementById('prompt-secondario').innerText = ""; }
@@ -493,7 +499,7 @@
             }
             if(showInput) { 
                 input.value = ''; 
-                input.readOnly = false; // <<< MODIFICA FOCUS
+                input.readOnly = false; 
                 input.disabled = false;
                 input.classList.remove('hidden'); choicesDiv.classList.add('hidden'); btnCheck.classList.remove('hidden'); 
                 setTimeout(() => input.focus(), 50); 
@@ -550,7 +556,7 @@
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
         function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); document.getElementById('deck-status-quiz').innerHTML = ''; document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); nuovaSessione(); }
-        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v35', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v35', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
+        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v36', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v36', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
         function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; }
         function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
