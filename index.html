@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v36.0 (Fix Grafico)</title>
+    <title>Giapponese SRS v37.2 (Grammatica2)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -35,7 +35,6 @@
         /* --- UI COMPONENTI --- */
         .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; transition: all 0.3s; }
         .input-box:focus { border-color: #007aff; outline: none; }
-        /* Stile readOnly per sembrare disabilitato ma mantenere il focus */
         .input-box:read-only { background-color: #f8f9fa; color: #666; border-color: #eee; }
 
         .feedback-box { text-align: center; font-weight: bold; font-size: 1.2rem; padding: 15px; border-radius: 12px; margin: 15px 0; border: 2px solid transparent; }
@@ -45,7 +44,18 @@
         .btn:active { transform: scale(0.98); }
         .btn-blue { background-color: #007aff; } .btn-green { background-color: #28a745; } .btn-orange { background-color: #fd7e14; } .btn-red { background-color: #dc3545; } .btn-purple { background-color: #af52de; } .btn-gray { background-color: #8e8e93; font-size: 0.9rem; padding: 8px; }
 
-        /* --- LAYOUT --- */
+        /* --- GRAMMATICA ACCORDION --- */
+        .gram-item { border: 1px solid #eee; border-radius: 12px; margin-bottom: 10px; overflow: hidden; background: #fff; }
+        .gram-header { padding: 15px; background: #f8f9fa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #333; }
+        .gram-header:hover { background: #e9ecef; }
+        .gram-content { display: none; padding: 15px; border-top: 1px solid #eee; }
+        .gram-content p { margin: 0 0 10px 0; color: #555; line-height: 1.5; }
+        .gram-example { background: #f0f8ff; padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #007aff; }
+        .gram-ex-jp { font-weight: bold; font-size: 1.1rem; color: #333; display: block; margin-bottom: 4px; }
+        .gram-ex-rom { font-size: 0.9rem; color: #888; display: block; margin-bottom: 4px; }
+        .gram-ex-it { font-size: 0.95rem; color: #007aff; font-style: italic; }
+
+        /* --- LAYOUT QUIZ --- */
         #choices-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .choice-btn { background: #f8f9fa; border: 2px solid #e9ecef; padding: 20px; font-size: 2rem; border-radius: 16px; cursor: pointer; transition: 0.2s; font-weight: bold; color: #333; display: flex; justify-content: center; align-items: center; }
         .choice-btn:hover { background: #e2e6ea; border-color: #adb5bd; }
@@ -78,7 +88,6 @@
         .checkbox-label { background: white; padding: 8px; border-radius: 8px; border: 1px solid #eee; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .mix-toggle { background: #e7f3ff; border: 1px solid #007aff; color: #007aff; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; }
 
-        /* NUOVO: Stato Deck */
         .deck-status { text-align: center; font-size: 0.9rem; color: #666; margin-top: 5px; font-weight: 500; }
         .deck-badge { background: #e0e0e0; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-left: 5px; }
     </style>
@@ -88,6 +97,7 @@
     <h1>Set di Studio Giapponese</h1>
     <nav id="main-nav">
         <button class="nav-btn" onclick="switchTab('studio', this)">📖 Studio</button>
+        <button class="nav-btn" onclick="switchTab('grammatica', this)">🎓 Grammatica</button>
         <button class="nav-btn" onclick="switchTab('scrittura', this)">✍️ Scrittura</button>
         <button class="nav-btn active" onclick="switchTab('quiz', this); openVocabQuiz()">Quiz Vocaboli</button>
         <button class="nav-btn" onclick="switchTab('ascolto', this)">Ascolto</button>
@@ -102,6 +112,13 @@
                 <p style="font-size:0.9rem; color:#666; text-align:center;">Giallo = Allungamenti e Raddoppi</p>
                 <select id="filtro-studio" class="input-box" onchange="renderStudio()"><option value="TUTTI">Tutte le Categorie</option></select>
                 <div id="lista-studio"></div>
+            </div>
+        </div>
+
+        <div id="tab-grammatica" class="modulo-content hidden">
+            <div class="card">
+                <h2>Regole Grammaticali</h2>
+                <div id="lista-grammatica"></div>
             </div>
         </div>
         
@@ -180,7 +197,7 @@
         <div id="tab-gestione" class="modulo-content hidden">
             <div class="card">
                 <h2>Stato Dati</h2>
-                <p>Vocaboli: <b id="count-v">0</b> | Frasi: <b id="count-f">0</b></p>
+                <p>Vocaboli: <b id="count-v">0</b> | Frasi: <b id="count-f">0</b> | Grammatica: <b id="count-g">0</b></p>
                 <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;"><button class="btn btn-blue" onclick="forceSync()">🔄 Forza Aggiornamento</button><button class="btn btn-red" style="margin-top:10px;" onclick="resetTotale()">🗑 Reset Completo</button></div>
             </div>
         </div>
@@ -193,28 +210,34 @@
     <script>
         const LINK_VOCABOLI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/importa.csv";
         const LINK_FRASI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/frasi.csv";
+        // LINK AGGIORNATO A GRAMMATICA2.CSV
+        const LINK_GRAMMATICA = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/grammatica2.csv";
+        
         const RAW_HIRAGANA=[{k:'あ',r:'a'},{k:'い',r:'i'},{k:'う',r:'u'},{k:'え',r:'e'},{k:'お',r:'o'},{k:'か',r:'ka'},{k:'き',r:'ki'},{k:'く',r:'ku'},{k:'け',r:'ke'},{k:'こ',r:'ko'},{k:'さ',r:'sa'},{k:'し',r:'shi'},{k:'す',r:'su'},{k:'せ',r:'se'},{k:'そ',r:'so'},{k:'た',r:'ta'},{k:'ち',r:'chi'},{k:'つ',r:'tsu'},{k:'て',r:'te'},{k:'と',r:'to'},{k:'な',r:'na'},{k:'に',r:'ni'},{k:'ぬ',r:'nu'},{k:'ね',r:'ne'},{k:'の',r:'no'},{k:'は',r:'ha'},{k:'ひ',r:'hi'},{k:'ふ',r:'fu'},{k:'へ',r:'he'},{k:'ほ',r:'ho'},{k:'ま',r:'ma'},{k:'み',r:'mi'},{k:'む',r:'mu'},{k:'め',r:'me'},{k:'も',r:'mo'},{k:'や',r:'ya'},{k:'ゆ',r:'yu'},{k:'よ',r:'yo'},{k:'ら',r:'ra'},{k:'り',r:'ri'},{k:'る',r:'ru'},{k:'れ',r:'re'},{k:'ろ',r:'ro'},{k:'わ',r:'wa'},{k:'を',r:'wo'},{k:'ん',r:'n'},{k:'が',r:'ga'},{k:'ぎ',r:'gi'},{k:'ぐ',r:'gu'},{k:'げ',r:'ge'},{k:'ご',r:'go'},{k:'ざ',r:'za'},{k:'じ',r:'ji'},{k:'ず',r:'zu'},{k:'ぜ',r:'ze'},{k:'ぞ',r:'zo'},{k:'だ',r:'da'},{k:'ぢ',r:'ji'},{k:'づ',r:'zu'},{k:'で',r:'de'},{k:'ど',r:'do'},{k:'ば',r:'ba'},{k:'び',r:'bi'},{k:'ぶ',r:'bu'},{k:'べ',r:'be'},{k:'ぼ',r:'bo'},{k:'ぱ',r:'pa'},{k:'ぴ',r:'pi'},{k:'ぷ',r:'pu'},{k:'ぺ',r:'pe'},{k:'ぽ',r:'po'},{k:'きゃ',r:'kya'},{k:'きゅ',r:'kyu'},{k:'きょ',r:'kyo'},{k:'しゃ',r:'sha'},{k:'しゅ',r:'shu'},{k:'しょ',r:'sho'},{k:'ちゃ',r:'cha'},{k:'ちゅ',r:'chu'},{k:'ちょ',r:'cho'},{k:'にゃ',r:'nya'},{k:'にゅ',r:'nyu'},{k:'にょ',r:'nyo'},{k:'ひゃ',r:'hya'},{k:'ひゅ',r:'hyu'},{k:'ひょ',r:'hyo'},{k:'みゃ',r:'mya'},{k:'みゅ',r:'myu'},{k:'みょ',r:'myo'},{k:'りゃ',r:'rya'},{k:'りゅ',r:'ryu'},{k:'りょ',r:'ryo'},{k:'ぎゃ',r:'gya'},{k:'ぎゅ',r:'gyu'},{k:'ぎょ',r:'gyo'},{k:'じゃ',r:'ja'},{k:'じゅ',r:'ju'},{k:'じょ',r:'jo'},{k:'びゃ',r:'bya'},{k:'びゅ',r:'byu'},{k:'びょ',r:'byo'},{k:'ぴゃ',r:'pya'},{k:'ぴゅ',r:'pyu'},{k:'ぴょ',r:'pyo'}];
         const RAW_KATAKANA=[{k:'ア',r:'a'},{k:'イ',r:'i'},{k:'ウ',r:'u'},{k:'エ',r:'e'},{k:'オ',r:'o'},{k:'カ',r:'ka'},{k:'キ',r:'ki'},{k:'ク',r:'ku'},{k:'ケ',r:'ke'},{k:'コ',r:'ko'},{k:'サ',r:'sa'},{k:'シ',r:'shi'},{k:'ス',r:'su'},{k:'セ',r:'se'},{k:'ソ',r:'so'},{k:'タ',r:'ta'},{k:'チ',r:'chi'},{k:'ツ',r:'tsu'},{k:'テ',r:'te'},{k:'ト',r:'to'},{k:'ナ',r:'na'},{k:'ニ',r:'ni'},{k:'ヌ',r:'nu'},{k:'ネ',r:'ne'},{k:'ノ',r:'no'},{k:'ハ',r:'ha'},{k:'ヒ',r:'hi'},{k:'フ',r:'fu'},{k:'ヘ',r:'he'},{k:'ホ',r:'ho'},{k:'マ',r:'ma'},{k:'ミ',r:'mi'},{k:'ム',r:'mu'},{k:'メ',r:'me'},{k:'モ',r:'mo'},{k:'ヤ',r:'ya'},{k:'ユ',r:'yu'},{k:'ヨ',r:'yo'},{k:'ラ',r:'ra'},{k:'リ',r:'ri'},{k:'ル',r:'ru'},{k:'レ',r:'re'},{k:'ロ',r:'ro'},{k:'ワ',r:'wa'},{k:'ヲ',r:'wo'},{k:'ン',r:'n'},{k:'ガ',r:'ga'},{k:'ギ',r:'gi'},{k:'グ',r:'gu'},{k:'ゲ',r:'ge'},{k:'ゴ',r:'go'},{k:'ザ',r:'za'},{k:'ジ',r:'ji'},{k:'ズ',r:'zu'},{k:'ゼ',r:'ze'},{k:'ゾ',r:'zo'},{k:'ダ',r:'da'},{k:'ヂ',r:'ji'},{k:'ヅ',r:'zu'},{k:'デ',r:'de'},{k:'ド',r:'do'},{k:'バ',r:'ba'},{k:'ビ',r:'bi'},{k:'ブ',r:'bu'},{k:'ベ',r:'be'},{k:'ボ',r:'bo'},{k:'パ',r:'pa'},{k:'ピ',r:'pi'},{k:'プ',r:'pu'},{k:'ペ',r:'pe'},{k:'ポ',r:'po'},{k:'キャ',r:'kya'},{k:'キュ',r:'kyu'},{k:'キョ',r:'kyo'},{k:'シャ',r:'sha'},{k:'シュ',r:'shu'},{k:'ショ',r:'sho'},{k:'チャ',r:'cha'},{k:'チュ',r:'chu'},{k:'チョ',r:'cho'},{k:'ニャ',r:'nya'},{k:'ニュ',r:'nyu'},{k:'ニョ',r:'nyo'},{k:'ヒャ',r:'hya'},{k:'ヒュ',r:'hyu'},{k:'ヒョ',r:'hyo'},{k:'ミャ',r:'mya'},{k:'ミュ',r:'myu'},{k:'ミョ',r:'myo'},{k:'リャ',r:'rya'},{k:'リュ',r:'ryu'},{k:'リョ',r:'ryo'},{k:'ギャ',r:'gya'},{k:'ギュ',r:'gyu'},{k:'ギョ',r:'gyo'},{k:'ジャ',r:'ja'},{k:'ジュ',r:'ju'},{k:'ジョ',r:'jo'},{k:'ビャ',r:'bya'},{k:'ビュ',r:'byu'},{k:'ビョ',r:'byo'},{k:'ピャ',r:'pya'},{k:'ピュ',r:'pyu'},{k:'ピョ',r:'pyo'}];
         const KANA_GROUPS = {'Vocali':[0,5],'K':[5,10],'S':[10,15],'T':[15,20],'N':[20,25],'H':[25,30],'M':[30,35],'Y':[35,38],'R':[38,43],'W/N':[43,46],'Dakuten':[46,71],'Yoon':[71,104]};
 
-        let vocaboli = []; let frasi = []; let sessione = []; let errori = []; let card = null;
+        let vocaboli = []; let frasi = []; let grammatica = []; let sessione = []; let errori = []; let card = null;
         let punteggio = { ok:0, err:0 }; let mode = 'vocab'; let mixMode = false; let activePool = [];
         let currentKanaPrefix = 'h'; 
         let writeSession = []; let canvas, ctx; let isDrawing = false;
         
-        // DECK VARIABLES
         let activeDeckQuiz = []; 
         let activeDeckWrite = [];
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v36')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v36'));
-                if(localStorage.getItem('srs_frasi_v36')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v36'));
+                if(localStorage.getItem('srs_vocab_v37_2')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v37_2'));
+                if(localStorage.getItem('srs_frasi_v37_2')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v37_2'));
+                if(localStorage.getItem('srs_gramm_v37_2')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v37_2'));
             } catch(e) { localStorage.clear(); }
-            aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); renderFrasi(); renderStudio();
+            
+            aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
+            renderFrasi(); renderStudio(); renderGrammatica();
+
             if(vocaboli.length === 0) forceSync();
             initCanvas();
-            // EVENT LISTENER QUIZ VOCABOLI / KANA
+            
             document.getElementById('input-risposta').addEventListener('keydown', function(e){ 
                 if(e.key === 'Enter' && !this.classList.contains('hidden')) { 
                     e.preventDefault(); 
@@ -222,7 +245,6 @@
                     else prossima(); 
                 } 
             });
-            // EVENT LISTENER SCRITTURA
             document.getElementById('input-write').addEventListener('keydown', function(e){ 
                 if(e.key === 'Enter') {
                     e.preventDefault();
@@ -231,7 +253,6 @@
                 }
             });
             
-            // Init Deck States
             resetDeck('quiz');
             resetDeck('scrittura');
         };
@@ -240,12 +261,17 @@
         function forceSync() {
             showNotification("Download dati in corso...", "sync-loading");
             const ts = new Date().getTime();
-            Promise.all([fetch(LINK_VOCABOLI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Vocab')), fetch(LINK_FRASI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Frasi'))])
-            .then(([txtV, txtF]) => {
+            Promise.all([
+                fetch(LINK_VOCABOLI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Vocab')), 
+                fetch(LINK_FRASI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Frasi')),
+                fetch(LINK_GRAMMATICA + "?t=" + ts).then(r => r.ok ? r.text() : Promise.resolve("")) 
+            ])
+            .then(([txtV, txtF, txtG]) => {
                 const countV = parseCSV(txtV, 'vocab', false);
                 const countF = parseCSV(txtF, 'frasi', false);
-                showNotification(`Aggiornato! V:${countV} F:${countF}`, "sync-success");
-                aggiornaConta(); popolaFiltri(); renderFrasi(); renderStudio();
+                const countG = parseCSV(txtG, 'grammatica', false);
+                showNotification(`Aggiornato! V:${countV} F:${countF} G:${countG}`, "sync-success");
+                aggiornaConta(); popolaFiltri(); renderFrasi(); renderStudio(); renderGrammatica();
                 resetDeck('quiz'); resetDeck('scrittura');
                 if(vocaboli.length > 0) openVocabQuiz(); 
             }).catch(e => { console.error(e); showNotification("Errore Scaricamento Dati", "sync-error"); });
@@ -259,18 +285,13 @@
             else { const navBtn = document.querySelector(`button[onclick*="'${id}'"]`); if(navBtn) navBtn.classList.add('active'); }
         }
 
-        // --- DECK MANAGEMENT ---
         function resetDeck(type) {
             let selectId = (type === 'quiz') ? 'filtro-cat' : 'filtro-scrittura';
             let statusId = (type === 'quiz') ? 'deck-status-quiz' : 'deck-status-write';
             let filter = document.getElementById(selectId).value;
-            
             let pool = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
             let deck = [...pool].sort(() => 0.5 - Math.random());
-            
-            if(type === 'quiz') activeDeckQuiz = deck;
-            else activeDeckWrite = deck;
-
+            if(type === 'quiz') activeDeckQuiz = deck; else activeDeckWrite = deck;
             updateDeckStatus(type);
         }
 
@@ -278,14 +299,10 @@
             let statusId = (type === 'quiz') ? 'deck-status-quiz' : 'deck-status-write';
             let deck = (type === 'quiz') ? activeDeckQuiz : activeDeckWrite;
             let el = document.getElementById(statusId);
-            if(deck.length > 0) {
-                el.innerHTML = `Parole rimanenti nel mazzo: <span class="deck-badge">${deck.length}</span>`;
-            } else {
-                el.innerHTML = `<span style="color:#28a745">★ Categoria Completata! ★</span>`;
-            }
+            if(deck.length > 0) el.innerHTML = `Parole rimanenti nel mazzo: <span class="deck-badge">${deck.length}</span>`;
+            else el.innerHTML = `<span style="color:#28a745">★ Categoria Completata! ★</span>`;
         }
 
-        // --- FORMATTAZIONE INTELLIGENTE ---
         function formatRomaji(text) { return text.replace(/([a-z])\1|ei|ou/gi, '<span class="hlt">$&</span>'); }
         function formatKana(text) {
             let out = text.replace(/([ッっー])/g, '<span class="hlt">$1</span>');
@@ -293,9 +310,7 @@
             out = out.replace(/([えけせてねへめれげぜでべぺ])(い)/g, '$1<span class="hlt">$2</span>');
             return out;
         }
-        function cleanText(text) { 
-            return text.toLowerCase().replace(/[.,?？。、!！]/g, '').replace(/oo/g, 'ou').replace(/ee/g, 'ei').trim(); 
-        }
+        function cleanText(text) { return text.toLowerCase().replace(/[.,?？。、!！]/g, '').replace(/oo/g, 'ou').replace(/ee/g, 'ei').trim(); }
 
         function initCanvas() {
             canvas = document.getElementById('drawing-board'); ctx = canvas.getContext('2d'); canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
@@ -309,181 +324,112 @@
 
         function startWriteSession() {
             mode = 'scrittura';
-            if(activeDeckWrite.length === 0) {
-                if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) {
-                    resetDeck('scrittura');
-                } else { return; }
-            }
+            if(activeDeckWrite.length === 0) { if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) { resetDeck('scrittura'); } else { return; } }
             let n = Math.min(10, activeDeckWrite.length);
             writeSession = activeDeckWrite.splice(0, n);
             updateDeckStatus('scrittura');
-            
-            document.getElementById('write-config').classList.add('hidden'); 
-            document.getElementById('write-area').classList.remove('hidden'); 
-            document.getElementById('end-write-box').classList.add('hidden'); 
-            
+            document.getElementById('write-config').classList.add('hidden'); document.getElementById('write-area').classList.remove('hidden'); document.getElementById('end-write-box').classList.add('hidden'); 
             errori = []; punteggio = {ok:0, err:0}; nextWriteCard();
         }
 
         function nextWriteCard() {
             if(writeSession.length === 0) { endScritturaSession(); return; }
-            card = writeSession.pop();
-            const rev = document.getElementById('write-mode-check').checked;
-            
-            clearCanvas();
-            const input = document.getElementById('input-write');
-            input.value = ''; 
-            input.readOnly = false; 
-            input.disabled = false;
-            
+            card = writeSession.pop(); const rev = document.getElementById('write-mode-check').checked;
+            clearCanvas(); const input = document.getElementById('input-write'); input.value = ''; input.readOnly = false; input.disabled = false;
             document.getElementById('feedback-write').classList.add('hidden'); document.getElementById('feedback-write').classList.remove('fb-corretto', 'fb-sbagliato');
             document.getElementById('write-solution-overlay').classList.add('hidden'); document.getElementById('write-solution-overlay').classList.remove('soluzione-visibile');
             document.getElementById('btn-check-write').classList.remove('hidden'); document.getElementById('btn-next-write').classList.add('hidden');
             document.getElementById('punteggio-write').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
-
-            const label = document.getElementById('prompt-scrittura');
-            const sub = document.getElementById('sub-scrittura');
-            sub.innerText = `(${card.ita})`; 
-
-            if(!rev) {
-                label.innerHTML = formatRomaji(card.rom); 
-                document.getElementById('write-label').innerText = "SCRIVI IL GIAPPONESE";
-                document.getElementById('canvas-container').classList.remove('hidden'); document.getElementById('btn-clear-canvas').classList.remove('hidden');
-            } else {
-                label.innerHTML = formatKana(card.jpn); 
-                document.getElementById('write-label').innerText = "SCRIVI IL ROMAJI";
-                document.getElementById('canvas-container').classList.add('hidden'); document.getElementById('btn-clear-canvas').classList.add('hidden');
-            }
+            const label = document.getElementById('prompt-scrittura'); const sub = document.getElementById('sub-scrittura'); sub.innerText = `(${card.ita})`; 
+            if(!rev) { label.innerHTML = formatRomaji(card.rom); document.getElementById('write-label').innerText = "SCRIVI IL GIAPPONESE"; document.getElementById('canvas-container').classList.remove('hidden'); document.getElementById('btn-clear-canvas').classList.remove('hidden'); } 
+            else { label.innerHTML = formatKana(card.jpn); document.getElementById('write-label').innerText = "SCRIVI IL ROMAJI"; document.getElementById('canvas-container').classList.add('hidden'); document.getElementById('btn-clear-canvas').classList.add('hidden'); }
             setTimeout(() => input.focus(), 50);
         }
 
         function checkScrittura() {
-            const input = document.getElementById('input-write');
-            const val = cleanText(input.value); 
-            const feed = document.getElementById('feedback-write');
-            const overlay = document.getElementById('write-solution-overlay');
-            const rev = document.getElementById('write-mode-check').checked; 
-            let ok = false; let target = "";
-
-            if(!rev) { target = card.jpn; if(val === cleanText(card.jpn)) ok = true; } 
-            else { target = card.rom; if(val === cleanText(card.rom) || val === cleanText(card.ita)) ok = true; }
-
-            feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
-            const jpnSafe = card.jpn.replace(/'/g, "\\'");
-            const audioBtn = ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>`;
-
-            let solDisplay = (!rev) ? formatKana(card.jpn) : formatRomaji(card.rom);
-
-            if(input.value.trim() === "") { 
-                punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato');
-                feed.innerHTML = `Soluzione: <b>${solDisplay}</b>` + audioBtn;
-                if(!rev) { overlay.innerText = card.jpn; overlay.classList.remove('hidden'); overlay.classList.add('soluzione-visibile'); }
-            } else {
-                if(ok) { 
-                    punteggio.ok++; feed.classList.add('fb-corretto'); 
-                    feed.innerHTML = "✅ Esatto!" + audioBtn; 
-                } else { 
-                    punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato'); 
-                    feed.innerHTML = `❌ Errato! Era: <b>${solDisplay}</b>` + audioBtn; 
-                    if(!rev) { overlay.innerText = card.jpn; overlay.classList.remove('hidden'); overlay.classList.add('soluzione-visibile'); }
-                }
-            }
-            input.readOnly = true; 
-            document.getElementById('btn-check-write').classList.add('hidden'); document.getElementById('btn-next-write').classList.remove('hidden');
-            document.getElementById('punteggio-write').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
+            const input = document.getElementById('input-write'); const val = cleanText(input.value); const feed = document.getElementById('feedback-write'); const overlay = document.getElementById('write-solution-overlay'); const rev = document.getElementById('write-mode-check').checked; 
+            let ok = false; let target = ""; if(!rev) { target = card.jpn; if(val === cleanText(card.jpn)) ok = true; } else { target = card.rom; if(val === cleanText(card.rom) || val === cleanText(card.ita)) ok = true; }
+            feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato'); const jpnSafe = card.jpn.replace(/'/g, "\\'"); const audioBtn = ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>`; let solDisplay = (!rev) ? formatKana(card.jpn) : formatRomaji(card.rom);
+            if(input.value.trim() === "") { punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato'); feed.innerHTML = `Soluzione: <b>${solDisplay}</b>` + audioBtn; if(!rev) { overlay.innerText = card.jpn; overlay.classList.remove('hidden'); overlay.classList.add('soluzione-visibile'); } } 
+            else { if(ok) { punteggio.ok++; feed.classList.add('fb-corretto'); feed.innerHTML = "✅ Esatto!" + audioBtn; } else { punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato'); feed.innerHTML = `❌ Errato! Era: <b>${solDisplay}</b>` + audioBtn; if(!rev) { overlay.innerText = card.jpn; overlay.classList.remove('hidden'); overlay.classList.add('soluzione-visibile'); } } }
+            input.readOnly = true; document.getElementById('btn-check-write').classList.add('hidden'); document.getElementById('btn-next-write').classList.remove('hidden'); document.getElementById('punteggio-write').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
         }
 
         function endScritturaSession() {
-            document.getElementById('write-area').classList.add('hidden'); 
-            document.getElementById('end-write-box').classList.remove('hidden');
-            document.getElementById('end-write-msg').innerText = "Sessione Completata";
-            document.getElementById('end-write-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
-            
-            const btnRip = document.getElementById('btn-write-ripasso');
-            if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } 
-            else { btnRip.classList.add('hidden'); }
-
-            const btnCont = document.getElementById('btn-write-continue');
-            if(activeDeckWrite.length === 0) {
-                btnCont.innerText = "🎉 Categoria Completata! (Ricomincia)";
-                btnCont.onclick = function() { resetDeck('scrittura'); startWriteSession(); }
-            } else {
-                btnCont.innerText = `Prossime ${Math.min(10, activeDeckWrite.length)} parole →`;
-                btnCont.onclick = startWriteSession;
-            }
+            document.getElementById('write-area').classList.add('hidden'); document.getElementById('end-write-box').classList.remove('hidden');
+            document.getElementById('end-write-msg').innerText = "Sessione Completata"; document.getElementById('end-write-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
+            const btnRip = document.getElementById('btn-write-ripasso'); if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } else { btnRip.classList.add('hidden'); }
+            const btnCont = document.getElementById('btn-write-continue'); if(activeDeckWrite.length === 0) { btnCont.innerText = "🎉 Categoria Completata! (Ricomincia)"; btnCont.onclick = function() { resetDeck('scrittura'); startWriteSession(); } } else { btnCont.innerText = `Prossime ${Math.min(10, activeDeckWrite.length)} parole →`; btnCont.onclick = startWriteSession; }
         }
 
-        function quitWriteSession() { 
-            document.getElementById('write-area').classList.add('hidden'); document.getElementById('write-config').classList.remove('hidden'); updateDeckStatus('scrittura');
-        }
+        function quitWriteSession() { document.getElementById('write-area').classList.add('hidden'); document.getElementById('write-config').classList.remove('hidden'); updateDeckStatus('scrittura'); }
 
         function renderStudio() {
             const div = document.getElementById('lista-studio'); const filter = document.getElementById('filtro-studio').value; div.innerHTML = '';
             const list = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
             if(list.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessun vocabolo.</p>'; return; }
-            div.innerHTML = list.map(v => {
-                const jpnSafe = v.jpn.replace(/'/g,"\\'");
-                return `<div class="list-entry"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(v.jpn)}</span><span class="txt-rom">${formatRomaji(v.rom)}</span><span class="txt-ita">${v.ita}</span></div></div>`;
-            }).join('');
+            div.innerHTML = list.map(v => { const jpnSafe = v.jpn.replace(/'/g,"\\'"); return `<div class="list-entry"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(v.jpn)}</span><span class="txt-rom">${formatRomaji(v.rom)}</span><span class="txt-ita">${v.ita}</span></div></div>`; }).join('');
+        }
+
+        function renderGrammatica() {
+            const div = document.getElementById('lista-grammatica'); div.innerHTML = '';
+            if(grammatica.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessuna regola caricata.</p>'; return; }
+            
+            grammatica.forEach((g, idx) => {
+                const jpnSafe = g.es_jpn.replace(/'/g,"\\'");
+                // Crea l'HTML per ogni regola
+                const html = `
+                <div class="gram-item">
+                    <div class="gram-header" onclick="toggleAccordion('g-${idx}')">
+                        <span>${g.titolo}</span>
+                        <span style="color:#007aff">▼</span>
+                    </div>
+                    <div id="g-${idx}" class="gram-content">
+                        <p>${g.spiegazione}</p>
+                        <div class="gram-example">
+                            <span class="gram-ex-jp">${g.es_jpn} <span style="cursor:pointer" onclick="parla('${jpnSafe}')">🔊</span></span>
+                            <span class="gram-ex-rom">${g.es_rom}</span>
+                            <span class="gram-ex-it">${g.es_ita}</span>
+                        </div>
+                    </div>
+                </div>`;
+                div.innerHTML += html;
+            });
+        }
+
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            if(el.style.display === 'block') el.style.display = 'none';
+            else el.style.display = 'block';
         }
 
         function openVocabQuiz() { 
-            mode = 'vocab'; 
-            document.getElementById('filtro-cat').classList.remove('hidden');
-            document.getElementById('quiz-start-screen').classList.remove('hidden'); 
-            document.getElementById('quiz-area').classList.add('hidden'); 
-            document.getElementById('end-session-box').classList.add('hidden');
-            updateDeckStatus('quiz');
+            mode = 'vocab'; document.getElementById('filtro-cat').classList.remove('hidden'); document.getElementById('quiz-start-screen').classList.remove('hidden'); 
+            document.getElementById('quiz-area').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); updateDeckStatus('quiz');
         }
 
         function nuovaSessione() {
-            if(mode === 'kana') {
-                document.getElementById('end-session-box').classList.add('hidden');
-                document.getElementById('quiz-area').classList.remove('hidden');
-                errori = []; punteggio = { ok:0, err:0 }; prossima();
-                return;
-            }
-            if(activeDeckQuiz.length === 0) {
-                if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) {
-                    resetDeck('quiz');
-                } else { return; }
-            }
-            document.getElementById('quiz-start-screen').classList.add('hidden');
-            document.getElementById('end-session-box').classList.add('hidden'); 
-            document.getElementById('quiz-area').classList.remove('hidden');
-
-            let n = Math.min(10, activeDeckQuiz.length);
-            sessione = activeDeckQuiz.splice(0, n);
-            updateDeckStatus('quiz');
-
+            if(mode === 'kana') { document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); errori = []; punteggio = { ok:0, err:0 }; prossima(); return; }
+            if(activeDeckQuiz.length === 0) { if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) { resetDeck('quiz'); } else { return; } }
+            document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden');
+            let n = Math.min(10, activeDeckQuiz.length); sessione = activeDeckQuiz.splice(0, n); updateDeckStatus('quiz');
             errori = []; punteggio = { ok:0, err:0 }; prossima();
         }
 
         function avviaRipasso() {
-            if(mode === 'scrittura') { 
-                writeSession = [...errori]; errori = []; 
-                document.getElementById('end-write-box').classList.add('hidden'); 
-                document.getElementById('write-area').classList.remove('hidden'); 
-                nextWriteCard(); 
-            }
-            else { 
-                sessione = [...errori]; errori = []; 
-                document.getElementById('end-session-box').classList.add('hidden'); 
-                document.getElementById('quiz-area').classList.remove('hidden'); 
-                prossima(); 
-            }
+            if(mode === 'scrittura') { writeSession = [...errori]; errori = []; document.getElementById('end-write-box').classList.add('hidden'); document.getElementById('write-area').classList.remove('hidden'); nextWriteCard(); }
+            else { sessione = [...errori]; errori = []; document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); prossima(); }
         }
+
         function prossima() {
             if(sessione.length === 0) { concludiSessione(); return; }
             card = sessione.pop(); const input = document.getElementById('input-risposta'); const choicesDiv = document.getElementById('choices-area'); const feed = document.getElementById('feedback'); const btnCheck = document.getElementById('btn-check'); const btnNext = document.getElementById('btn-next');
-            feed.classList.add('hidden'); feed.classList.remove('fb-corretto', 'fb-sbagliato'); btnNext.classList.add('hidden');
-            document.getElementById('punteggio').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
+            feed.classList.add('hidden'); feed.classList.remove('fb-corretto', 'fb-sbagliato'); btnNext.classList.add('hidden'); document.getElementById('punteggio').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
             let showInput = true;
             if(mode === 'vocab') {
                 const dir = Math.random() > 0.5 ? 'j2i' : 'i2j'; card.dir = dir;
                 if(dir === 'j2i') { 
                     document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO"; 
-                    // FIX v36: Uso innerHTML per interpretare il tag <span class="hlt">
                     document.getElementById('prompt-principale').innerHTML = `${formatKana(card.jpn)} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn.replace(/'/g,"\\'")} ')">🔊</span>`; 
                     document.getElementById('prompt-secondario').innerHTML = formatRomaji(card.rom); 
                 }
@@ -497,35 +443,19 @@
                 if(dir === 'k2r') { document.getElementById('q-label').innerText = "SCRIVI IL ROMAJI"; document.getElementById('prompt-principale').innerText = card.k; document.getElementById('prompt-secondario').innerText = ""; }
                 else { document.getElementById('q-label').innerText = "SELEZIONA IL KANA"; document.getElementById('prompt-principale').innerText = card.r; document.getElementById('prompt-secondario').innerText = ""; showInput = false; generaScelte(card); }
             }
-            if(showInput) { 
-                input.value = ''; 
-                input.readOnly = false; 
-                input.disabled = false;
-                input.classList.remove('hidden'); choicesDiv.classList.add('hidden'); btnCheck.classList.remove('hidden'); 
-                setTimeout(() => input.focus(), 50); 
-            }
+            if(showInput) { input.value = ''; input.readOnly = false; input.disabled = false; input.classList.remove('hidden'); choicesDiv.classList.add('hidden'); btnCheck.classList.remove('hidden'); setTimeout(() => input.focus(), 50); }
             else { input.classList.add('hidden'); choicesDiv.classList.remove('hidden'); btnCheck.classList.add('hidden'); }
         }
+
         function concludiSessione() {
             document.getElementById('quiz-area').classList.add('hidden'); document.getElementById('end-session-box').classList.remove('hidden');
-            let msg = "Sessione Completata"; 
-            document.getElementById('end-msg').innerText = msg; document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
+            let msg = "Sessione Completata"; document.getElementById('end-msg').innerText = msg; document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
             const btnRip = document.getElementById('btn-ripasso'); if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } else { btnRip.classList.add('hidden'); }
-            
             const btnNew = document.getElementById('btn-new-session');
-            if(mode === 'vocab') { 
-                if(activeDeckQuiz.length === 0) {
-                     btnNew.innerText = "🎉 Categoria Completata! (Ricomincia)";
-                     btnNew.onclick = function() { resetDeck('quiz'); nuovaSessione(); }
-                } else {
-                     btnNew.innerText = `Prossime ${Math.min(10, activeDeckQuiz.length)} parole →`;
-                     btnNew.onclick = nuovaSessione; 
-                }
-            }
-            else { 
-                const label = (currentKanaPrefix === 'h') ? "Hiragana" : "Katakana"; btnNew.innerText = `Torna a ${label}`; btnNew.onclick = function() { switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana'); }; 
-            }
+            if(mode === 'vocab') { if(activeDeckQuiz.length === 0) { btnNew.innerText = "🎉 Categoria Completata! (Ricomincia)"; btnNew.onclick = function() { resetDeck('quiz'); nuovaSessione(); } } else { btnNew.innerText = `Prossime ${Math.min(10, activeDeckQuiz.length)} parole →`; btnNew.onclick = nuovaSessione; } }
+            else { const label = (currentKanaPrefix === 'h') ? "Hiragana" : "Katakana"; btnNew.innerText = `Torna a ${label}`; btnNew.onclick = function() { switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana'); }; }
         }
+
         function generaScelte(corretta) {
             const div = document.getElementById('choices-area'); div.innerHTML = '';
             let pool = activePool.filter(x => x.k !== corretta.k);
@@ -533,12 +463,14 @@
             let options = pool.sort(() => 0.5 - Math.random()).slice(0, 3); options.push(corretta); options.sort(() => 0.5 - Math.random()); 
             options.forEach(opt => { const btn = document.createElement('button'); btn.className = 'choice-btn'; btn.innerText = opt.k; btn.onclick = () => verificaScelta(opt, corretta, btn); div.appendChild(btn); });
         }
+
         function verificaScelta(selezionata, corretta, btnElement) {
             const btns = document.querySelectorAll('.choice-btn'); btns.forEach(b => b.disabled = true); const feed = document.getElementById('feedback'); feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
             if(selezionata.k === corretta.k) { punteggio.ok++; btnElement.classList.add('btn-correct'); feed.classList.add('fb-corretto'); feed.innerText = "✅ Esatto!"; }
             else { punteggio.err++; errori.push(card); btnElement.classList.add('btn-wrong'); feed.classList.add('fb-sbagliato'); feed.innerHTML = `❌ Sbagliato! Era: <b>${corretta.k}</b>`; btns.forEach(b => { if(b.innerText === corretta.k) b.classList.add('btn-correct'); }); }
             document.getElementById('btn-next').classList.remove('hidden'); document.getElementById('btn-next').focus();
         }
+
         function controlla() {
             const input = document.getElementById('input-risposta'); const feed = document.getElementById('feedback'); const user = cleanText(input.value); let ok = false; let ans = "";
             if(mode === 'vocab') {
@@ -547,18 +479,30 @@
             } else { if(user == cleanText(card.r)) ok = true; ans = card.r; }
             feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato'); const jpnSafe = (mode === 'vocab') ? card.jpn.replace(/'/g, "\\'") : ''; const audioBtn = (mode === 'vocab') ? ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>` : '';
             if(ok) { punteggio.ok++; feed.classList.add('fb-corretto'); feed.innerHTML = "✅ Esatto!" + audioBtn; } else { punteggio.err++; errori.push(card); feed.classList.add('fb-sbagliato'); feed.innerHTML = `❌ Sbagliato! Era: <b>${ans}</b>` + audioBtn; }
-            
-            // IMPORTANTE: Usa readOnly per mantenere il focus e permettere il secondo Enter
-            input.readOnly = true;
-            document.getElementById('btn-check').classList.add('hidden'); document.getElementById('btn-next').classList.remove('hidden'); 
-            // NON sposto il focus sul bottone, lo lascio sull'input
+            input.readOnly = true; document.getElementById('btn-check').classList.add('hidden'); document.getElementById('btn-next').classList.remove('hidden'); 
         }
+
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
         function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); document.getElementById('deck-status-quiz').innerHTML = ''; document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); nuovaSessione(); }
-        function parseCSV(text, type, reload) { const lines = text.trim().split('\n'); let count = 0; if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v36', JSON.stringify(vocaboli)); } else { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v36', JSON.stringify(frasi)); } if(reload) location.reload(); return count; }
+        
+        function parseCSV(text, type, reload) { 
+            if(!text) return 0;
+            const lines = text.trim().split('\n'); let count = 0; 
+            if(type === 'vocab') { 
+                vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); 
+                localStorage.setItem('srs_vocab_v37_2', JSON.stringify(vocaboli)); 
+            } else if(type === 'frasi') { 
+                frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); 
+                localStorage.setItem('srs_frasi_v37_2', JSON.stringify(frasi)); 
+            } else if(type === 'grammatica') {
+                grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } });
+                localStorage.setItem('srs_gramm_v37_2', JSON.stringify(grammatica));
+            }
+            if(reload) location.reload(); return count; 
+        }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
-        function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; }
+        function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; document.getElementById('count-g').innerText = grammatica.length; }
         function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
         function renderFrasi() { const div = document.getElementById('lista-frasi'); const spoiler = document.getElementById('spoiler-check').checked; const filter = document.getElementById('filtro-frasi').value; div.innerHTML = ''; const list = (filter === 'TUTTI') ? frasi : frasi.filter(f => f.tag === filter); if(list.length === 0) { div.innerHTML = '<p style="text-align:center">Nessuna frase</p>'; return; } div.innerHTML = list.map(f => { const jpnSafe = f.jpn.replace(/'/g,"\\'"); return `<div class="list-entry ${spoiler?'spoiler':''}"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(f.jpn)}</span><span class="txt-rom">${formatRomaji(f.rom)}</span><span class="txt-ita">${f.ita}</span></div></div>`; }).join(''); }
         function parla(t) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(t); u.lang = 'ja-JP'; u.rate = 0.9; window.speechSynthesis.speak(u); } else { alert("Il tuo browser non supporta la sintesi vocale."); } }
