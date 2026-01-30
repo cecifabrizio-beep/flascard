@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v37.3 (Link Fix)</title>
+    <title>Giapponese SRS v38.0 (Fix Scrittura)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -65,10 +65,25 @@
         #prompt-principale, #prompt-scrittura { font-size: 3rem; margin: 5px 0; text-align: center; font-weight: 500; min-height: 60px; word-break: keep-all; }
         #prompt-secondario, #sub-scrittura { font-size: 1.1rem; color: #666; text-align: center; margin-bottom: 20px; min-height: 20px; font-style: italic; }
         
-        #canvas-container { position: relative; margin: 10px auto 20px auto; width: 280px; height: 280px; border: 2px dashed #bbb; border-radius: 12px; background: #fff; touch-action: none; }
+        #canvas-container { position: relative; margin: 10px auto 20px auto; width: 280px; height: 280px; border: 2px dashed #bbb; border-radius: 12px; background: #fff; touch-action: none; overflow: hidden; }
         canvas { width: 100%; height: 100%; border-radius: 12px; cursor: crosshair; }
-        .soluzione-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10rem; color: rgba(255, 0, 0, 0.2); pointer-events: none; font-family: "Yu Mincho", serif; }
-        .soluzione-visibile { color: rgba(40, 167, 69, 0.8) !important; z-index: 10; }
+        
+        /* FIX VISUALIZZAZIONE SOLUZIONE SCRITTURA */
+        .soluzione-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 3.5rem; /* Dimensione ridotta per far entrare le parole */
+            line-height: 1.2;
+            text-align: center;
+            flex-wrap: wrap; /* Permette alla parola di andare a capo */
+            word-break: break-all;
+            color: rgba(255, 0, 0, 0.2); 
+            pointer-events: none; 
+            font-family: "Yu Mincho", serif; 
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .soluzione-visibile { color: rgba(40, 167, 69, 0.6) !important; z-index: 10; }
         
         .list-entry { display: flex; align-items: flex-start; background: #ffffff; border-bottom: 1px solid #eee; padding: 15px 10px; gap: 15px; }
         .play-btn { width: 48px; height: 48px; border-radius: 50%; background: #007aff; color: white; border: none; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,122,255,0.2); }
@@ -210,7 +225,6 @@
     <script>
         const LINK_VOCABOLI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/importa.csv";
         const LINK_FRASI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/frasi.csv";
-        // LINK AGGIORNATO AL REPO 'flascard'
         const LINK_GRAMMATICA = "https://raw.githubusercontent.com/cecifabrizio-beep/flascard/refs/heads/main/grammatica2.csv";
         
         const RAW_HIRAGANA=[{k:'あ',r:'a'},{k:'い',r:'i'},{k:'う',r:'u'},{k:'え',r:'e'},{k:'お',r:'o'},{k:'か',r:'ka'},{k:'き',r:'ki'},{k:'く',r:'ku'},{k:'け',r:'ke'},{k:'こ',r:'ko'},{k:'さ',r:'sa'},{k:'し',r:'shi'},{k:'す',r:'su'},{k:'せ',r:'se'},{k:'そ',r:'so'},{k:'た',r:'ta'},{k:'ち',r:'chi'},{k:'つ',r:'tsu'},{k:'て',r:'te'},{k:'と',r:'to'},{k:'な',r:'na'},{k:'に',r:'ni'},{k:'ぬ',r:'nu'},{k:'ね',r:'ne'},{k:'の',r:'no'},{k:'は',r:'ha'},{k:'ひ',r:'hi'},{k:'ふ',r:'fu'},{k:'へ',r:'he'},{k:'ほ',r:'ho'},{k:'ま',r:'ma'},{k:'み',r:'mi'},{k:'む',r:'mu'},{k:'め',r:'me'},{k:'も',r:'mo'},{k:'や',r:'ya'},{k:'ゆ',r:'yu'},{k:'よ',r:'yo'},{k:'ら',r:'ra'},{k:'り',r:'ri'},{k:'る',r:'ru'},{k:'れ',r:'re'},{k:'ろ',r:'ro'},{k:'わ',r:'wa'},{k:'を',r:'wo'},{k:'ん',r:'n'},{k:'が',r:'ga'},{k:'ぎ',r:'gi'},{k:'ぐ',r:'gu'},{k:'げ',r:'ge'},{k:'ご',r:'go'},{k:'ざ',r:'za'},{k:'じ',r:'ji'},{k:'ず',r:'zu'},{k:'ぜ',r:'ze'},{k:'ぞ',r:'zo'},{k:'だ',r:'da'},{k:'ぢ',r:'ji'},{k:'づ',r:'zu'},{k:'で',r:'de'},{k:'ど',r:'do'},{k:'ば',r:'ba'},{k:'び',r:'bi'},{k:'ぶ',r:'bu'},{k:'べ',r:'be'},{k:'ぼ',r:'bo'},{k:'ぱ',r:'pa'},{k:'ぴ',r:'pi'},{k:'ぷ',r:'pu'},{k:'ぺ',r:'pe'},{k:'ぽ',r:'po'},{k:'きゃ',r:'kya'},{k:'きゅ',r:'kyu'},{k:'きょ',r:'kyo'},{k:'しゃ',r:'sha'},{k:'しゅ',r:'shu'},{k:'しょ',r:'sho'},{k:'ちゃ',r:'cha'},{k:'ちゅ',r:'chu'},{k:'ちょ',r:'cho'},{k:'にゃ',r:'nya'},{k:'にゅ',r:'nyu'},{k:'にょ',r:'nyo'},{k:'ひゃ',r:'hya'},{k:'ひゅ',r:'hyu'},{k:'ひょ',r:'hyo'},{k:'みゃ',r:'mya'},{k:'みゅ',r:'myu'},{k:'みょ',r:'myo'},{k:'りゃ',r:'rya'},{k:'りゅ',r:'ryu'},{k:'りょ',r:'ryo'},{k:'ぎゃ',r:'gya'},{k:'ぎゅ',r:'gyu'},{k:'ぎょ',r:'gyo'},{k:'じゃ',r:'ja'},{k:'じゅ',r:'ju'},{k:'じょ',r:'jo'},{k:'びゃ',r:'bya'},{k:'びゅ',r:'byu'},{k:'びょ',r:'byo'},{k:'ぴゃ',r:'pya'},{k:'ぴゅ',r:'pyu'},{k:'ぴょ',r:'pyo'}];
@@ -227,9 +241,9 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v37_3')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v37_3'));
-                if(localStorage.getItem('srs_frasi_v37_3')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v37_3'));
-                if(localStorage.getItem('srs_gramm_v37_3')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v37_3'));
+                if(localStorage.getItem('srs_vocab_v38')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v38'));
+                if(localStorage.getItem('srs_frasi_v38')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v38'));
+                if(localStorage.getItem('srs_gramm_v38')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v38'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -491,13 +505,13 @@
             const lines = text.trim().split('\n'); let count = 0; 
             if(type === 'vocab') { 
                 vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_vocab_v37_3', JSON.stringify(vocaboli)); 
+                localStorage.setItem('srs_vocab_v38', JSON.stringify(vocaboli)); 
             } else if(type === 'frasi') { 
                 frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_frasi_v37_3', JSON.stringify(frasi)); 
+                localStorage.setItem('srs_frasi_v38', JSON.stringify(frasi)); 
             } else if(type === 'grammatica') {
                 grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } });
-                localStorage.setItem('srs_gramm_v37_3', JSON.stringify(grammatica));
+                localStorage.setItem('srs_gramm_v38', JSON.stringify(grammatica));
             }
             if(reload) location.reload(); return count; 
         }
