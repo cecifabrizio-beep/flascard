@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v38.0 (Fix Scrittura)</title>
+    <title>Giapponese SRS v39.0 (Modalità Quiz)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -72,10 +72,10 @@
         .soluzione-overlay { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 3.5rem; /* Dimensione ridotta per far entrare le parole */
+            font-size: 3.5rem; 
             line-height: 1.2;
             text-align: center;
-            flex-wrap: wrap; /* Permette alla parola di andare a capo */
+            flex-wrap: wrap; 
             word-break: break-all;
             color: rgba(255, 0, 0, 0.2); 
             pointer-events: none; 
@@ -177,6 +177,12 @@
                 <div class="deck-status" id="deck-status-quiz" style="margin-bottom:15px;"></div>
                 
                 <div id="quiz-start-screen" style="text-align:center; padding:20px;">
+                     <label style="display:block; text-align:left; color:#666; font-size:0.9rem; margin-bottom:5px;">Modalità Quiz:</label>
+                     <select id="quiz-mode-select" class="input-box" style="margin-bottom:15px;">
+                        <option value="MIX">🔀 Misto (Giapponese ↔ Italiano)</option>
+                        <option value="J2I">🇯🇵 Giapponese → 🇮🇹 Italiano</option>
+                        <option value="I2J">🇮🇹 Italiano → 🇯🇵 Giapponese</option>
+                     </select>
                      <button class="btn btn-blue" id="btn-start-quiz" onclick="nuovaSessione()">Inizia Quiz</button>
                 </div>
 
@@ -241,9 +247,9 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v38')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v38'));
-                if(localStorage.getItem('srs_frasi_v38')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v38'));
-                if(localStorage.getItem('srs_gramm_v38')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v38'));
+                if(localStorage.getItem('srs_vocab_v39')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v39'));
+                if(localStorage.getItem('srs_frasi_v39')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v39'));
+                if(localStorage.getItem('srs_gramm_v39')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v39'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -441,7 +447,14 @@
             feed.classList.add('hidden'); feed.classList.remove('fb-corretto', 'fb-sbagliato'); btnNext.classList.add('hidden'); document.getElementById('punteggio').innerText = `Corretti: ${punteggio.ok} | Errori: ${punteggio.err}`;
             let showInput = true;
             if(mode === 'vocab') {
-                const dir = Math.random() > 0.5 ? 'j2i' : 'i2j'; card.dir = dir;
+                const modeSel = document.getElementById('quiz-mode-select').value;
+                let dir = 'j2i';
+                if(modeSel === 'MIX') dir = Math.random() > 0.5 ? 'j2i' : 'i2j';
+                else if(modeSel === 'J2I') dir = 'j2i';
+                else dir = 'i2j';
+                
+                card.dir = dir;
+                
                 if(dir === 'j2i') { 
                     document.getElementById('q-label').innerText = "TRADUCI IN ITALIANO"; 
                     document.getElementById('prompt-principale').innerHTML = `${formatKana(card.jpn)} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn.replace(/'/g,"\\'")} ')">🔊</span>`; 
@@ -505,13 +518,13 @@
             const lines = text.trim().split('\n'); let count = 0; 
             if(type === 'vocab') { 
                 vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_vocab_v38', JSON.stringify(vocaboli)); 
+                localStorage.setItem('srs_vocab_v39', JSON.stringify(vocaboli)); 
             } else if(type === 'frasi') { 
                 frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_frasi_v38', JSON.stringify(frasi)); 
+                localStorage.setItem('srs_frasi_v39', JSON.stringify(frasi)); 
             } else if(type === 'grammatica') {
                 grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } });
-                localStorage.setItem('srs_gramm_v38', JSON.stringify(grammatica));
+                localStorage.setItem('srs_gramm_v39', JSON.stringify(grammatica));
             }
             if(reload) location.reload(); return count; 
         }
