@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v40.1 (Fix Menu)</title>
+    <title>Giapponese SRS v40.2 (Anti-Blocco)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -31,22 +31,23 @@
         .nav-btn { flex: 1; padding: 12px; border: none; border-radius: 25px; background-color: #fff; color: #555; font-weight: 600; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 8px rgba(0,122,255,0.3); }
 
-        /* --- MULTI-CATEGORIA STILE (FIXED) --- */
+        /* --- MULTI-CATEGORIA STILE --- */
         .cat-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; 
             max-height: 250px; overflow-y: auto; padding: 10px; 
             border: 2px solid #f0f0f5; border-radius: 12px; background: #f9f9fc;
-            min-height: 100px; /* Altezza minima per evitare collasso */
+            min-height: 100px; 
         }
         .cat-option { padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.9rem; background: #fff; transition: 0.2s; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .cat-option.selected { background-color: #e7f3ff; border-color: #007aff; color: #007aff; font-weight: bold; box-shadow: 0 0 0 1px #007aff inset; }
         .cat-controls { display: flex; gap: 10px; margin-bottom: 15px; }
-        .loading-msg { grid-column: span 2; text-align: center; color: #888; padding: 20px; font-style: italic; }
+        .loading-msg { grid-column: span 2; text-align: center; color: #888; padding: 20px; font-style: italic; font-size: 0.9rem; }
 
         /* --- NOTIFICHE & GRAMMATICA --- */
         #sync-status { position: fixed; top: 10px; right: 10px; padding: 10px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: none; z-index: 1000; }
         .sync-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .sync-loading { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .sync-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .gram-item { border: 1px solid #eee; border-radius: 12px; margin-bottom: 10px; overflow: hidden; background: #fff; }
         .gram-header { padding: 15px; background: #f8f9fa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #333; }
         .gram-content { display: none; padding: 15px; border-top: 1px solid #eee; }
@@ -121,7 +122,7 @@
                         <button class="btn btn-gray" onclick="toggleAllCats('scrittura', true)">Tutti</button>
                         <button class="btn btn-gray" onclick="toggleAllCats('scrittura', false)">Nessuno</button>
                     </div>
-                    <div id="cat-grid-scrittura" class="cat-grid"></div>
+                    <div id="cat-grid-scrittura" class="cat-grid"><div class="loading-msg">Caricamento dati...</div></div>
 
                     <div class="deck-status" id="deck-status-write"></div>
                     <label class="mix-toggle" style="justify-content:center; margin-top:10px;"><input type="checkbox" id="write-mode-check"> Mostra Kana → Scrivi Romaji</label>
@@ -161,7 +162,7 @@
                         <button class="btn btn-gray" onclick="toggleAllCats('quiz', true)">Tutti</button>
                         <button class="btn btn-gray" onclick="toggleAllCats('quiz', false)">Nessuno</button>
                      </div>
-                     <div id="cat-grid-quiz" class="cat-grid"></div>
+                     <div id="cat-grid-quiz" class="cat-grid"><div class="loading-msg">Caricamento dati...</div></div>
 
                      <div class="deck-status" id="deck-status-quiz" style="margin-bottom:15px;"></div>
 
@@ -196,7 +197,7 @@
             </div>
         </div>
         <div id="tab-ascolto" class="modulo-content hidden"><div class="card"><h2>Dialoghi</h2><select id="filtro-frasi" class="input-box" onchange="renderFrasi()"><option value="TUTTI">Tutti</option></select><div style="text-align:center; margin-bottom:10px;"><input type="checkbox" id="spoiler-check" onchange="renderFrasi()"> Nascondi Ita</div><div id="lista-frasi"></div></div></div>
-        <div id="tab-gestione" class="modulo-content hidden"><div class="card"><h2>Dati</h2><p>Vocaboli: <b id="count-v">0</b> | Frasi: <b id="count-f">0</b></p><button class="btn btn-blue" onclick="forceSync()">Aggiorna</button><button class="btn btn-red" style="margin-top:10px;" onclick="resetTotale()">Reset</button></div></div>
+        <div id="tab-gestione" class="modulo-content hidden"><div class="card"><h2>Dati</h2><p>Vocaboli: <b id="count-v">0</b> | Frasi: <b id="count-f">0</b> | Grammatica: <b id="count-g">0</b></p><button class="btn btn-blue" onclick="forceSync()">Aggiorna</button><button class="btn btn-red" style="margin-top:10px;" onclick="resetTotale()">Reset</button></div></div>
         <div id="tab-hiragana" class="modulo-content hidden"><div class="card"><h2>Hiragana</h2><div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;"><label class="mix-toggle"><input type="checkbox" id="h-mix-mode"> 🔀 Modalità Mista</label><div class="config-grid" id="h-config"></div><button class="btn btn-green" onclick="startKanaQuiz('h')">AVVIA QUIZ</button></div><table class="kana-table" id="h-table"></table></div></div>
         <div id="tab-katakana" class="modulo-content hidden"><div class="card"><h2>Katakana</h2><div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;"><label class="mix-toggle"><input type="checkbox" id="k-mix-mode"> 🔀 Modalità Mista</label><div class="config-grid" id="k-config"></div><button class="btn btn-green" onclick="startKanaQuiz('k')">AVVIA QUIZ</button></div><table class="kana-table" id="k-table"></table></div></div>
     </div>
@@ -220,15 +221,14 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v40')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v40'));
-                if(localStorage.getItem('srs_frasi_v40')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v40'));
-                if(localStorage.getItem('srs_gramm_v40')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v40'));
+                if(localStorage.getItem('srs_vocab_v40_2')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v40_2'));
+                if(localStorage.getItem('srs_frasi_v40_2')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v40_2'));
+                if(localStorage.getItem('srs_gramm_v40_2')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v40_2'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
             renderFrasi(); renderStudio(); renderGrammatica();
 
-            // Se è la prima volta, forza il download
             if(vocaboli.length === 0) forceSync();
             
             initCanvas();
@@ -239,26 +239,41 @@
         };
 
         function showNotification(msg, type) { const el = document.getElementById('sync-status'); el.className = type; el.innerText = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
+        
+        // --- FUNZIONE DI SCARICAMENTO "ANTI-BLOCCO" ---
+        async function fetchSafe(url) {
+            try {
+                const response = await fetch(url + "?t=" + new Date().getTime());
+                if (!response.ok) return ""; // Se fallisce (404), ritorna vuoto ma non blocca
+                return await response.text();
+            } catch (e) {
+                return ""; // Se c'è errore di rete, ritorna vuoto ma non blocca
+            }
+        }
+
         function forceSync() {
             showNotification("Download dati in corso...", "sync-loading");
-            // Mostra caricamento anche nella griglia
-            document.getElementById('cat-grid-quiz').innerHTML = '<div class="loading-msg">Caricamento categorie...<br>(Attendi o clicca Aggiorna)</div>';
+            // Aggiorna messaggio nel box
+            const loadingHtml = '<div class="loading-msg">Caricamento dati...</div>';
+            document.getElementById('cat-grid-quiz').innerHTML = loadingHtml;
+            document.getElementById('cat-grid-scrittura').innerHTML = loadingHtml;
             
-            const ts = new Date().getTime();
             Promise.all([
-                fetch(LINK_VOCABOLI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Vocab')), 
-                fetch(LINK_FRASI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Frasi')),
-                fetch(LINK_GRAMMATICA + "?t=" + ts).then(r => r.ok ? r.text() : Promise.resolve("")) 
+                fetchSafe(LINK_VOCABOLI),
+                fetchSafe(LINK_FRASI),
+                fetchSafe(LINK_GRAMMATICA)
             ])
             .then(([txtV, txtF, txtG]) => {
                 const countV = parseCSV(txtV, 'vocab', false);
                 const countF = parseCSV(txtF, 'frasi', false);
                 const countG = parseCSV(txtG, 'grammatica', false);
+                
                 showNotification(`Aggiornato! V:${countV} F:${countF} G:${countG}`, "sync-success");
                 aggiornaConta(); popolaFiltri(); renderFrasi(); renderStudio(); renderGrammatica();
-                // Dopo il sync, seleziona tutto di default per evitare schermata rossa
+                
+                // Seleziona tutto di default dopo il sync
                 toggleAllCats('quiz', true);
-            }).catch(e => { console.error(e); showNotification("Errore Scaricamento Dati", "sync-error"); });
+            });
         }
 
         function switchTab(id, btnElement) {
@@ -284,8 +299,7 @@
                 createMultiSelect('cat-grid-quiz', sortedTags, 'quiz');
                 createMultiSelect('cat-grid-scrittura', sortedTags, 'scrittura');
             } else {
-                // Gestione caso vuoto
-                const msg = '<div class="loading-msg">Nessun dato. Vai in Gestione > Aggiorna.</div>';
+                const msg = '<div class="loading-msg">Nessuna categoria trovata.<br>Premi "Aggiorna" in Gestione.</div>';
                 document.getElementById('cat-grid-quiz').innerHTML = msg;
                 document.getElementById('cat-grid-scrittura').innerHTML = msg;
             }
@@ -308,7 +322,7 @@
                 };
                 container.appendChild(div);
             });
-            resetDeck(type); // Aggiorna subito il contatore
+            resetDeck(type); 
         }
 
         function toggleAllCats(type, state) {
@@ -527,13 +541,13 @@
             const lines = text.trim().split('\n'); let count = 0; 
             if(type === 'vocab') { 
                 vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_vocab_v40', JSON.stringify(vocaboli)); 
+                localStorage.setItem('srs_vocab_v40_2', JSON.stringify(vocaboli)); 
             } else if(type === 'frasi') { 
                 frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_frasi_v40', JSON.stringify(frasi)); 
+                localStorage.setItem('srs_frasi_v40_2', JSON.stringify(frasi)); 
             } else if(type === 'grammatica') {
                 grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } });
-                localStorage.setItem('srs_gramm_v40', JSON.stringify(grammatica));
+                localStorage.setItem('srs_gramm_v40_2', JSON.stringify(grammatica));
             }
             if(reload) location.reload(); return count; 
         }
