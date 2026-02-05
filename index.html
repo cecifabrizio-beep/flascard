@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v40.2 (Anti-Blocco)</title>
+    <title>Giapponese SRS v40.3 (Link Misti)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -203,6 +203,7 @@
     </div>
 
     <script>
+        // LINK CORRETTI MISTI
         const LINK_VOCABOLI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/importa.csv";
         const LINK_FRASI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/frasi.csv";
         const LINK_GRAMMATICA = "https://raw.githubusercontent.com/cecifabrizio-beep/flascard/refs/heads/main/grammatica2.csv";
@@ -221,9 +222,9 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v40_2')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v40_2'));
-                if(localStorage.getItem('srs_frasi_v40_2')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v40_2'));
-                if(localStorage.getItem('srs_gramm_v40_2')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v40_2'));
+                if(localStorage.getItem('srs_vocab_v40_3')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v40_3'));
+                if(localStorage.getItem('srs_frasi_v40_3')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v40_3'));
+                if(localStorage.getItem('srs_gramm_v40_3')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v40_3'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -244,10 +245,10 @@
         async function fetchSafe(url) {
             try {
                 const response = await fetch(url + "?t=" + new Date().getTime());
-                if (!response.ok) return ""; // Se fallisce (404), ritorna vuoto ma non blocca
+                if (!response.ok) return ""; 
                 return await response.text();
             } catch (e) {
-                return ""; // Se c'è errore di rete, ritorna vuoto ma non blocca
+                return ""; 
             }
         }
 
@@ -289,12 +290,10 @@
             const tags = new Set(vocaboli.map(v => v.tag));
             const sortedTags = Array.from(tags).sort();
             
-            // Studio Tab (Select semplice)
             const sStudio = document.getElementById('filtro-studio');
             sStudio.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
             sortedTags.forEach(t => sStudio.innerHTML += `<option value="${t}">${t}</option>`);
 
-            // Quiz & Scrittura (Multi-Select)
             if(sortedTags.length > 0) {
                 createMultiSelect('cat-grid-quiz', sortedTags, 'quiz');
                 createMultiSelect('cat-grid-scrittura', sortedTags, 'scrittura');
@@ -313,7 +312,7 @@
             container.innerHTML = '';
             tags.forEach(t => {
                 const div = document.createElement('div');
-                div.className = 'cat-option selected'; // Default selected
+                div.className = 'cat-option selected'; 
                 div.innerText = t;
                 div.dataset.value = t;
                 div.onclick = function() {
@@ -541,18 +540,19 @@
             const lines = text.trim().split('\n'); let count = 0; 
             if(type === 'vocab') { 
                 vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_vocab_v40_2', JSON.stringify(vocaboli)); 
+                localStorage.setItem('srs_vocab_v40_3', JSON.stringify(vocaboli)); 
             } else if(type === 'frasi') { 
                 frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_frasi_v40_2', JSON.stringify(frasi)); 
+                localStorage.setItem('srs_frasi_v40_3', JSON.stringify(frasi)); 
             } else if(type === 'grammatica') {
                 grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } });
-                localStorage.setItem('srs_gramm_v40_2', JSON.stringify(grammatica));
+                localStorage.setItem('srs_gramm_v40_3', JSON.stringify(grammatica));
             }
             if(reload) location.reload(); return count; 
         }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
         function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; document.getElementById('count-g').innerText = grammatica.length; }
+        function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
         function renderFrasi() { const div = document.getElementById('lista-frasi'); const spoiler = document.getElementById('spoiler-check').checked; const filter = document.getElementById('filtro-frasi').value; div.innerHTML = ''; const list = (filter === 'TUTTI') ? frasi : frasi.filter(f => f.tag === filter); if(list.length === 0) { div.innerHTML = '<p style="text-align:center">Nessuna frase</p>'; return; } div.innerHTML = list.map(f => { const jpnSafe = f.jpn.replace(/'/g,"\\'"); return `<div class="list-entry ${spoiler?'spoiler':''}"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(f.jpn)}</span><span class="txt-rom">${formatRomaji(f.rom)}</span><span class="txt-ita">${f.ita}</span></div></div>`; }).join(''); }
         function parla(t) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(t); u.lang = 'ja-JP'; u.rate = 0.9; window.speechSynthesis.speak(u); } else { alert("Il tuo browser non supporta la sintesi vocale."); } }
     </script>
