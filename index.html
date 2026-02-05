@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v40.0 (Multi-Categoria)</title>
+    <title>Giapponese SRS v40.1 (Fix Menu)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -31,11 +31,17 @@
         .nav-btn { flex: 1; padding: 12px; border: none; border-radius: 25px; background-color: #fff; color: #555; font-weight: 600; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 8px rgba(0,122,255,0.3); }
 
-        /* --- MULTI-CATEGORIA STILE --- */
-        .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; max-height: 200px; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 12px; }
-        .cat-option { padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.9rem; background: #fff; transition: 0.2s; user-select: none; }
+        /* --- MULTI-CATEGORIA STILE (FIXED) --- */
+        .cat-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; 
+            max-height: 250px; overflow-y: auto; padding: 10px; 
+            border: 2px solid #f0f0f5; border-radius: 12px; background: #f9f9fc;
+            min-height: 100px; /* Altezza minima per evitare collasso */
+        }
+        .cat-option { padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.9rem; background: #fff; transition: 0.2s; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .cat-option.selected { background-color: #e7f3ff; border-color: #007aff; color: #007aff; font-weight: bold; box-shadow: 0 0 0 1px #007aff inset; }
         .cat-controls { display: flex; gap: 10px; margin-bottom: 15px; }
+        .loading-msg { grid-column: span 2; text-align: center; color: #888; padding: 20px; font-style: italic; }
 
         /* --- NOTIFICHE & GRAMMATICA --- */
         #sync-status { position: fixed; top: 10px; right: 10px; padding: 10px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: none; z-index: 1000; }
@@ -222,32 +228,22 @@
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
             renderFrasi(); renderStudio(); renderGrammatica();
 
+            // Se è la prima volta, forza il download
             if(vocaboli.length === 0) forceSync();
+            
             initCanvas();
+            document.getElementById('input-risposta').addEventListener('keydown', function(e){ if(e.key === 'Enter' && !this.classList.contains('hidden')) { e.preventDefault(); if(!document.getElementById('btn-check').classList.contains('hidden')) controlla(); else prossima(); } });
+            document.getElementById('input-write').addEventListener('keydown', function(e){ if(e.key === 'Enter') { e.preventDefault(); if(!document.getElementById('btn-check-write').classList.contains('hidden')) checkScrittura(); else nextWriteCard(); } });
             
-            document.getElementById('input-risposta').addEventListener('keydown', function(e){ 
-                if(e.key === 'Enter' && !this.classList.contains('hidden')) { 
-                    e.preventDefault(); 
-                    if(!document.getElementById('btn-check').classList.contains('hidden')) controlla(); 
-                    else prossima(); 
-                } 
-            });
-            document.getElementById('input-write').addEventListener('keydown', function(e){ 
-                if(e.key === 'Enter') {
-                    e.preventDefault();
-                    if(!document.getElementById('btn-check-write').classList.contains('hidden')) checkScrittura();
-                    else nextWriteCard();
-                }
-            });
-            
-            // Non resetto subito il deck perchè ora dipende dalla selezione manuale
-            updateDeckStatus('quiz');
-            updateDeckStatus('scrittura');
+            updateDeckStatus('quiz'); updateDeckStatus('scrittura');
         };
 
         function showNotification(msg, type) { const el = document.getElementById('sync-status'); el.className = type; el.innerText = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
         function forceSync() {
             showNotification("Download dati in corso...", "sync-loading");
+            // Mostra caricamento anche nella griglia
+            document.getElementById('cat-grid-quiz').innerHTML = '<div class="loading-msg">Caricamento categorie...<br>(Attendi o clicca Aggiorna)</div>';
+            
             const ts = new Date().getTime();
             Promise.all([
                 fetch(LINK_VOCABOLI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Vocab')), 
@@ -260,7 +256,8 @@
                 const countG = parseCSV(txtG, 'grammatica', false);
                 showNotification(`Aggiornato! V:${countV} F:${countF} G:${countG}`, "sync-success");
                 aggiornaConta(); popolaFiltri(); renderFrasi(); renderStudio(); renderGrammatica();
-                if(vocaboli.length > 0) openVocabQuiz(); 
+                // Dopo il sync, seleziona tutto di default per evitare schermata rossa
+                toggleAllCats('quiz', true);
             }).catch(e => { console.error(e); showNotification("Errore Scaricamento Dati", "sync-error"); });
         }
 
@@ -277,14 +274,21 @@
             const tags = new Set(vocaboli.map(v => v.tag));
             const sortedTags = Array.from(tags).sort();
             
-            // Studio Tab (rimane Select semplice)
+            // Studio Tab (Select semplice)
             const sStudio = document.getElementById('filtro-studio');
             sStudio.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
             sortedTags.forEach(t => sStudio.innerHTML += `<option value="${t}">${t}</option>`);
 
             // Quiz & Scrittura (Multi-Select)
-            createMultiSelect('cat-grid-quiz', sortedTags, 'quiz');
-            createMultiSelect('cat-grid-scrittura', sortedTags, 'scrittura');
+            if(sortedTags.length > 0) {
+                createMultiSelect('cat-grid-quiz', sortedTags, 'quiz');
+                createMultiSelect('cat-grid-scrittura', sortedTags, 'scrittura');
+            } else {
+                // Gestione caso vuoto
+                const msg = '<div class="loading-msg">Nessun dato. Vai in Gestione > Aggiorna.</div>';
+                document.getElementById('cat-grid-quiz').innerHTML = msg;
+                document.getElementById('cat-grid-scrittura').innerHTML = msg;
+            }
 
             const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>';
             const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`);
@@ -304,6 +308,7 @@
                 };
                 container.appendChild(div);
             });
+            resetDeck(type); // Aggiorna subito il contatore
         }
 
         function toggleAllCats(type, state) {
@@ -337,7 +342,7 @@
         }
 
         function updateDeckStatus(type) {
-            resetDeck(type); // Ricalcola e aggiorna
+            resetDeck(type); 
         }
 
         // --- FORMATTAZIONE E LOGICA ---
@@ -362,7 +367,7 @@
 
         function startWriteSession() {
             mode = 'scrittura';
-            resetDeck('scrittura'); // Assicura che il deck sia fresco
+            resetDeck('scrittura'); 
             if(activeDeckWrite.length === 0) { alert("Seleziona almeno una categoria!"); return; }
             
             let n = Math.min(10, activeDeckWrite.length);
@@ -432,7 +437,7 @@
         function nuovaSessione() {
             if(mode === 'kana') { document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); errori = []; punteggio = { ok:0, err:0 }; prossima(); return; }
             
-            resetDeck('quiz'); // Refresh selection
+            resetDeck('quiz'); 
             if(activeDeckQuiz.length === 0) { alert("Seleziona almeno una categoria!"); return; }
             
             document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden');
@@ -515,7 +520,7 @@
 
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
-        function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); nuovaSessione(); }
+        function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); document.getElementById('deck-status-quiz').innerHTML = ''; document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); nuovaSessione(); }
         
         function parseCSV(text, type, reload) { 
             if(!text) return 0;
