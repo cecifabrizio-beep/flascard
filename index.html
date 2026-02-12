@@ -3,108 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v39.0 (Modalità Quiz)</title>
+    <title>Giapponese SRS v39.2 (Menu Griglia)</title>
     <style>
         /* --- STILE GENERALE --- */
-        body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        h1 { color: #1c1c1e; margin-bottom: 20px; text-align: center; font-size: 1.8rem; }
+        body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        h1 { color: #1c1c1e; margin-bottom: 15px; text-align: center; font-size: 1.6rem; margin-top: 0; }
         .container { width: 100%; max-width: 600px; margin-bottom: 50px; }
         .card { background: #ffffff; padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .hidden { display: none !important; }
 
-        /* --- EVIDENZIATORE GIALLO --- */
-        .hlt { 
-            background-color: #ffeb3b; 
-            color: #000;
-            border-radius: 3px;
-            padding: 0 2px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        } 
-
-        /* --- NOTIFICHE --- */
-        #sync-status { position: fixed; top: 10px; right: 10px; padding: 10px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none; z-index: 1000; }
-        .sync-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .sync-loading { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .sync-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-
-        /* --- MENU --- */
-        #main-nav { display: flex; gap: 8px; width: 100%; max-width: 600px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
-        .nav-btn { flex: 1; padding: 12px; border: none; border-radius: 25px; background-color: #fff; color: #555; font-weight: 600; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
-        .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 8px rgba(0,122,255,0.3); }
+        /* --- EVIDENZIATORE --- */
+        .hlt { background-color: #ffeb3b; color: #000; border-radius: 3px; padding: 0 2px; } 
 
         /* --- UI COMPONENTI --- */
-        .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; transition: all 0.3s; }
+        .input-box { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; margin-bottom: 10px; text-align: center; }
         .input-box:focus { border-color: #007aff; outline: none; }
-        .input-box:read-only { background-color: #f8f9fa; color: #666; border-color: #eee; }
-
         .feedback-box { text-align: center; font-weight: bold; font-size: 1.2rem; padding: 15px; border-radius: 12px; margin: 15px 0; border: 2px solid transparent; }
         .fb-corretto { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
         .fb-sbagliato { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; transition: 0.1s; }
         .btn:active { transform: scale(0.98); }
-        .btn-blue { background-color: #007aff; } .btn-green { background-color: #28a745; } .btn-orange { background-color: #fd7e14; } .btn-red { background-color: #dc3545; } .btn-purple { background-color: #af52de; } .btn-gray { background-color: #8e8e93; font-size: 0.9rem; padding: 8px; }
+        .btn-blue { background-color: #007aff; } .btn-green { background-color: #28a745; } .btn-orange { background-color: #fd7e14; } .btn-red { background-color: #dc3545; } .btn-purple { background-color: #af52de; } 
+        .btn-gray { background-color: #8e8e93; font-size: 0.9rem; padding: 8px; }
 
-        /* --- GRAMMATICA ACCORDION --- */
+        /* --- MENU NAVIGAZIONE (MODIFICATO A GRIGLIA) --- */
+        #main-nav { 
+            display: flex; 
+            flex-wrap: wrap; /* Permette di andare a capo */
+            gap: 8px; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-bottom: 20px; 
+            justify-content: center; /* Centra i bottoni */
+        }
+        .nav-btn { 
+            flex: 1 1 22%; /* Occupa circa 1/4 dello spazio, minimo 22% */
+            min-width: 80px; /* Larghezza minima per non schiacciarsi troppo */
+            padding: 10px 5px; /* Padding ridotto per risparmiare spazio */
+            border: none; 
+            border-radius: 12px; /* Meno arrotondati per stare meglio vicini */
+            background-color: #fff; 
+            color: #555; 
+            font-weight: 600; 
+            font-size: 0.9rem; /* Testo leggermente più piccolo */
+            cursor: pointer; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            transition: 0.2s; 
+        }
+        .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 8px rgba(0,122,255,0.3); }
+
+        /* --- NOTIFICHE & GRAMMATICA --- */
+        #sync-status { position: fixed; top: 10px; right: 10px; padding: 10px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: none; z-index: 1000; }
+        .sync-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .sync-loading { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .sync-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .gram-item { border: 1px solid #eee; border-radius: 12px; margin-bottom: 10px; overflow: hidden; background: #fff; }
         .gram-header { padding: 15px; background: #f8f9fa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #333; }
-        .gram-header:hover { background: #e9ecef; }
         .gram-content { display: none; padding: 15px; border-top: 1px solid #eee; }
-        .gram-content p { margin: 0 0 10px 0; color: #555; line-height: 1.5; }
         .gram-example { background: #f0f8ff; padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #007aff; }
-        .gram-ex-jp { font-weight: bold; font-size: 1.1rem; color: #333; display: block; margin-bottom: 4px; }
-        .gram-ex-rom { font-size: 0.9rem; color: #888; display: block; margin-bottom: 4px; }
-        .gram-ex-it { font-size: 0.95rem; color: #007aff; font-style: italic; }
+        .gram-ex-jp { font-weight: bold; display: block; margin-bottom: 4px; } .gram-ex-rom { font-size: 0.9rem; color: #888; display: block; } .gram-ex-it { font-size: 0.95rem; color: #007aff; font-style: italic; }
 
-        /* --- LAYOUT QUIZ --- */
+        /* --- QUIZ LAYOUT --- */
         #choices-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .choice-btn { background: #f8f9fa; border: 2px solid #e9ecef; padding: 20px; font-size: 2rem; border-radius: 16px; cursor: pointer; transition: 0.2s; font-weight: bold; color: #333; display: flex; justify-content: center; align-items: center; }
-        .choice-btn:hover { background: #e2e6ea; border-color: #adb5bd; }
+        .choice-btn { background: #f8f9fa; border: 2px solid #e9ecef; padding: 20px; font-size: 2rem; border-radius: 16px; cursor: pointer; font-weight: bold; color: #333; }
         .btn-correct { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724 !important; }
         .btn-wrong { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24 !important; opacity: 0.6; }
-        
         #prompt-principale, #prompt-scrittura { font-size: 3rem; margin: 5px 0; text-align: center; font-weight: 500; min-height: 60px; word-break: keep-all; }
         #prompt-secondario, #sub-scrittura { font-size: 1.1rem; color: #666; text-align: center; margin-bottom: 20px; min-height: 20px; font-style: italic; }
         
+        /* --- CANVAS --- */
         #canvas-container { position: relative; margin: 10px auto 20px auto; width: 280px; height: 280px; border: 2px dashed #bbb; border-radius: 12px; background: #fff; touch-action: none; overflow: hidden; }
         canvas { width: 100%; height: 100%; border-radius: 12px; cursor: crosshair; }
-        
-        /* FIX VISUALIZZAZIONE SOLUZIONE SCRITTURA */
-        .soluzione-overlay { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 3.5rem; 
-            line-height: 1.2;
-            text-align: center;
-            flex-wrap: wrap; 
-            word-break: break-all;
-            color: rgba(255, 0, 0, 0.2); 
-            pointer-events: none; 
-            font-family: "Yu Mincho", serif; 
-            padding: 10px;
-            box-sizing: border-box;
-        }
+        .soluzione-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; line-height: 1.2; text-align: center; flex-wrap: wrap; word-break: break-all; color: rgba(255, 0, 0, 0.2); pointer-events: none; font-family: "Yu Mincho", serif; padding: 10px; box-sizing: border-box; }
         .soluzione-visibile { color: rgba(40, 167, 69, 0.6) !important; z-index: 10; }
-        
+
+        /* --- LISTE --- */
         .list-entry { display: flex; align-items: flex-start; background: #ffffff; border-bottom: 1px solid #eee; padding: 15px 10px; gap: 15px; }
         .play-btn { width: 48px; height: 48px; border-radius: 50%; background: #007aff; color: white; border: none; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,122,255,0.2); }
         .list-text { flex-grow: 1; }
-        .txt-jpn { font-weight: bold; font-size: 1.25rem; display: block; color: #333; margin-bottom: 4px; line-height: 1.4; }
+        .txt-jpn { font-weight: bold; font-size: 1.25rem; display: block; color: #333; margin-bottom: 4px; }
         .txt-rom { font-size: 0.9rem; color: #888; display: block; margin-bottom: 6px; }
-        .txt-ita { color: #007aff; font-size: 1rem; font-weight: 500; display: block; cursor: pointer; background: #f0f8ff; padding: 5px 8px; border-radius: 6px; display: inline-block; }
-        .spoiler .txt-ita { background: #e0e0e0; color: transparent; user-select: none; }
-        .spoiler .txt-ita:hover { background: #f0f8ff; color: #007aff; cursor: help; }
+        .txt-ita { color: #007aff; font-size: 1rem; font-weight: 500; display: inline-block; background: #f0f8ff; padding: 5px 8px; border-radius: 6px; }
+        .spoiler .txt-ita { background: #e0e0e0; color: transparent; user-select: none; } .spoiler .txt-ita:hover { background: #f0f8ff; color: #007aff; cursor: help; }
         
         .kana-table { width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 20px; }
-        .kana-table th { background: #f2f2f7; padding: 8px; font-size: 0.9rem; color: #666; }
-        .kana-table td { border: 1px solid #eee; padding: 8px; font-size: 1.1rem; }
-        .kc { font-weight: bold; display: block; color: #222; }
-        .kr { font-size: 0.75rem; color: #999; }
-        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .checkbox-label { background: white; padding: 8px; border-radius: 8px; border: 1px solid #eee; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .mix-toggle { background: #e7f3ff; border: 1px solid #007aff; color: #007aff; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-
+        .kana-table td { border: 1px solid #eee; padding: 8px; font-size: 1.1rem; } .kc { font-weight: bold; display: block; } .kr { font-size: 0.75rem; color: #999; }
         .deck-status { text-align: center; font-size: 0.9rem; color: #666; margin-top: 5px; font-weight: 500; }
         .deck-badge { background: #e0e0e0; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-left: 5px; }
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .mix-toggle { background: #e7f3ff; border: 1px solid #007aff; color: #007aff; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -131,10 +118,7 @@
         </div>
 
         <div id="tab-grammatica" class="modulo-content hidden">
-            <div class="card">
-                <h2>Regole Grammaticali</h2>
-                <div id="lista-grammatica"></div>
-            </div>
+            <div class="card"><h2>Regole Grammaticali</h2><div id="lista-grammatica"></div></div>
         </div>
         
         <div id="tab-scrittura" class="modulo-content hidden">
@@ -173,6 +157,7 @@
         <div id="tab-quiz" class="modulo-content">
             <div class="card">
                 <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio">Pronto</div>
+                
                 <select id="filtro-cat" class="input-box" onchange="resetDeck('quiz')"><option value="TUTTI">Tutte le Categorie</option></select>
                 <div class="deck-status" id="deck-status-quiz" style="margin-bottom:15px;"></div>
                 
@@ -207,28 +192,14 @@
                 <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">Caricamento dati...<br><button class="btn btn-blue" style="margin-top:10px; width:auto;" onclick="forceSync()">🔄 Scarica Dati</button></div>
             </div>
         </div>
-        <div id="tab-ascolto" class="modulo-content hidden">
-            <div class="card">
-                <h2 style="text-align:center; margin-bottom:20px;">Dialoghi & Frasi</h2>
-                <select id="filtro-frasi" class="input-box" style="margin-bottom:15px;" onchange="renderFrasi()"><option value="TUTTI">Tutti i Dialoghi</option></select>
-                <div style="text-align:center; margin-bottom:15px;"><label style="cursor:pointer; color:#555;"><input type="checkbox" id="spoiler-check" onchange="renderFrasi()"> Nascondi Italiano</label></div>
-                <div id="lista-frasi"></div>
-            </div>
-        </div>
-        <div id="tab-gestione" class="modulo-content hidden">
-            <div class="card">
-                <h2>Stato Dati</h2>
-                <p>Vocaboli: <b id="count-v">0</b> | Frasi: <b id="count-f">0</b> | Grammatica: <b id="count-g">0</b></p>
-                <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;"><button class="btn btn-blue" onclick="forceSync()">🔄 Forza Aggiornamento</button><button class="btn btn-red" style="margin-top:10px;" onclick="resetTotale()">🗑 Reset Completo</button></div>
-            </div>
-        </div>
-        <div id="tab-hiragana" class="modulo-content hidden">
-            <div class="card"><h2>Hiragana</h2><div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;"><label class="mix-toggle"><input type="checkbox" id="h-mix-mode"> 🔀 Modalità Mista</label><div class="config-grid" id="h-config"></div><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', true)">Tutto</button><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('h', false)">Nulla</button></div><button class="btn btn-green" onclick="startKanaQuiz('h')">AVVIA QUIZ HIRAGANA</button></div><div style="overflow-x:auto;"><table class="kana-table" id="h-table"></table></div></div></div>
-        <div id="tab-katakana" class="modulo-content hidden">
-            <div class="card"><h2>Katakana</h2><div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;"><label class="mix-toggle"><input type="checkbox" id="k-mix-mode"> 🔀 Modalità Mista</label><div class="config-grid" id="k-config"></div><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', true)">Tutto</button><button class="btn btn-blue" style="padding:10px;" onclick="toggleKana('k', false)">Nulla</button></div><button class="btn btn-green" onclick="startKanaQuiz('k')">AVVIA QUIZ KATAKANA</button></div><div style="overflow-x:auto;"><table class="kana-table" id="k-table"></table></div></div></div>
+        <div id="tab-ascolto" class="modulo-content hidden"><div class="card"><h2>Dialoghi</h2><select id="filtro-frasi" class="input-box" onchange="renderFrasi()"><option value="TUTTI">Tutti</option></select><div style="text-align:center; margin-bottom:10px;"><input type="checkbox" id="spoiler-check" onchange="renderFrasi()"> Nascondi Ita</div><div id="lista-frasi"></div></div></div>
+        <div id="tab-gestione" class="modulo-content hidden"><div class="card"><h2>Dati</h2><p>Vocaboli: <b id="count-v">0</b> | Frasi: <b id="count-f">0</b> | Grammatica: <b id="count-g">0</b></p><button class="btn btn-blue" onclick="forceSync()">Aggiorna</button><button class="btn btn-red" style="margin-top:10px;" onclick="resetTotale()">Reset</button></div></div>
+        <div id="tab-hiragana" class="modulo-content hidden"><div class="card"><h2>Hiragana</h2><div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;"><label class="mix-toggle"><input type="checkbox" id="h-mix-mode"> 🔀 Modalità Mista</label><div class="config-grid" id="h-config"></div><button class="btn btn-green" onclick="startKanaQuiz('h')">AVVIA QUIZ</button></div><table class="kana-table" id="h-table"></table></div></div>
+        <div id="tab-katakana" class="modulo-content hidden"><div class="card"><h2>Katakana</h2><div style="background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:20px;"><label class="mix-toggle"><input type="checkbox" id="k-mix-mode"> 🔀 Modalità Mista</label><div class="config-grid" id="k-config"></div><button class="btn btn-green" onclick="startKanaQuiz('k')">AVVIA QUIZ</button></div><table class="kana-table" id="k-table"></table></div></div>
     </div>
 
     <script>
+        // LINK CORRETTI MISTI (Japan + Flascard)
         const LINK_VOCABOLI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/importa.csv";
         const LINK_FRASI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/frasi.csv";
         const LINK_GRAMMATICA = "https://raw.githubusercontent.com/cecifabrizio-beep/flascard/refs/heads/main/grammatica2.csv";
@@ -247,54 +218,55 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v39')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v39'));
-                if(localStorage.getItem('srs_frasi_v39')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v39'));
-                if(localStorage.getItem('srs_gramm_v39')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v39'));
+                if(localStorage.getItem('srs_vocab_v39_2')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v39_2'));
+                if(localStorage.getItem('srs_frasi_v39_2')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v39_2'));
+                if(localStorage.getItem('srs_gramm_v39_2')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v39_2'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
             renderFrasi(); renderStudio(); renderGrammatica();
 
             if(vocaboli.length === 0) forceSync();
-            initCanvas();
             
-            document.getElementById('input-risposta').addEventListener('keydown', function(e){ 
-                if(e.key === 'Enter' && !this.classList.contains('hidden')) { 
-                    e.preventDefault(); 
-                    if(!document.getElementById('btn-check').classList.contains('hidden')) controlla(); 
-                    else prossima(); 
-                } 
-            });
-            document.getElementById('input-write').addEventListener('keydown', function(e){ 
-                if(e.key === 'Enter') {
-                    e.preventDefault();
-                    if(!document.getElementById('btn-check-write').classList.contains('hidden')) checkScrittura();
-                    else nextWriteCard();
-                }
-            });
+            initCanvas();
+            document.getElementById('input-risposta').addEventListener('keydown', function(e){ if(e.key === 'Enter' && !this.classList.contains('hidden')) { e.preventDefault(); if(!document.getElementById('btn-check').classList.contains('hidden')) controlla(); else prossima(); } });
+            document.getElementById('input-write').addEventListener('keydown', function(e){ if(e.key === 'Enter') { e.preventDefault(); if(!document.getElementById('btn-check-write').classList.contains('hidden')) checkScrittura(); else nextWriteCard(); } });
             
             resetDeck('quiz');
             resetDeck('scrittura');
         };
 
         function showNotification(msg, type) { const el = document.getElementById('sync-status'); el.className = type; el.innerText = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
+        
+        // --- FUNZIONE DI SCARICAMENTO "ANTI-BLOCCO" (Mantenuta anche qui per sicurezza) ---
+        async function fetchSafe(url) {
+            try {
+                const response = await fetch(url + "?t=" + new Date().getTime());
+                if (!response.ok) return ""; 
+                return await response.text();
+            } catch (e) {
+                return ""; 
+            }
+        }
+
         function forceSync() {
             showNotification("Download dati in corso...", "sync-loading");
-            const ts = new Date().getTime();
+            
             Promise.all([
-                fetch(LINK_VOCABOLI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Vocab')), 
-                fetch(LINK_FRASI + "?t=" + ts).then(r => r.ok ? r.text() : Promise.reject('Err Frasi')),
-                fetch(LINK_GRAMMATICA + "?t=" + ts).then(r => r.ok ? r.text() : Promise.resolve("")) 
+                fetchSafe(LINK_VOCABOLI),
+                fetchSafe(LINK_FRASI),
+                fetchSafe(LINK_GRAMMATICA)
             ])
             .then(([txtV, txtF, txtG]) => {
                 const countV = parseCSV(txtV, 'vocab', false);
                 const countF = parseCSV(txtF, 'frasi', false);
                 const countG = parseCSV(txtG, 'grammatica', false);
+                
                 showNotification(`Aggiornato! V:${countV} F:${countF} G:${countG}`, "sync-success");
                 aggiornaConta(); popolaFiltri(); renderFrasi(); renderStudio(); renderGrammatica();
                 resetDeck('quiz'); resetDeck('scrittura');
                 if(vocaboli.length > 0) openVocabQuiz(); 
-            }).catch(e => { console.error(e); showNotification("Errore Scaricamento Dati", "sync-error"); });
+            });
         }
 
         function switchTab(id, btnElement) {
@@ -397,40 +369,24 @@
             
             grammatica.forEach((g, idx) => {
                 const jpnSafe = g.es_jpn.replace(/'/g,"\\'");
-                // Crea l'HTML per ogni regola
-                const html = `
-                <div class="gram-item">
-                    <div class="gram-header" onclick="toggleAccordion('g-${idx}')">
-                        <span>${g.titolo}</span>
-                        <span style="color:#007aff">▼</span>
-                    </div>
-                    <div id="g-${idx}" class="gram-content">
-                        <p>${g.spiegazione}</p>
-                        <div class="gram-example">
-                            <span class="gram-ex-jp">${g.es_jpn} <span style="cursor:pointer" onclick="parla('${jpnSafe}')">🔊</span></span>
-                            <span class="gram-ex-rom">${g.es_rom}</span>
-                            <span class="gram-ex-it">${g.es_ita}</span>
-                        </div>
-                    </div>
-                </div>`;
+                const html = `<div class="gram-item"><div class="gram-header" onclick="toggleAccordion('g-${idx}')"><span>${g.titolo}</span><span style="color:#007aff">▼</span></div><div id="g-${idx}" class="gram-content"><p>${g.spiegazione}</p><div class="gram-example"><span class="gram-ex-jp">${g.es_jpn} <span style="cursor:pointer" onclick="parla('${jpnSafe}')">🔊</span></span><span class="gram-ex-rom">${g.es_rom}</span><span class="gram-ex-it">${g.es_ita}</span></div></div></div>`;
                 div.innerHTML += html;
             });
         }
 
-        function toggleAccordion(id) {
-            const el = document.getElementById(id);
-            if(el.style.display === 'block') el.style.display = 'none';
-            else el.style.display = 'block';
-        }
+        function toggleAccordion(id) { const el = document.getElementById(id); el.style.display = (el.style.display === 'block') ? 'none' : 'block'; }
 
         function openVocabQuiz() { 
-            mode = 'vocab'; document.getElementById('filtro-cat').classList.remove('hidden'); document.getElementById('quiz-start-screen').classList.remove('hidden'); 
+            mode = 'vocab'; document.getElementById('quiz-start-screen').classList.remove('hidden'); 
             document.getElementById('quiz-area').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); updateDeckStatus('quiz');
         }
 
         function nuovaSessione() {
             if(mode === 'kana') { document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); errori = []; punteggio = { ok:0, err:0 }; prossima(); return; }
+            
+            resetDeck('quiz'); 
             if(activeDeckQuiz.length === 0) { if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) { resetDeck('quiz'); } else { return; } }
+            
             document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden');
             let n = Math.min(10, activeDeckQuiz.length); sessione = activeDeckQuiz.splice(0, n); updateDeckStatus('quiz');
             errori = []; punteggio = { ok:0, err:0 }; prossima();
@@ -518,13 +474,13 @@
             const lines = text.trim().split('\n'); let count = 0; 
             if(type === 'vocab') { 
                 vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_vocab_v39', JSON.stringify(vocaboli)); 
+                localStorage.setItem('srs_vocab_v39_FIX', JSON.stringify(vocaboli)); 
             } else if(type === 'frasi') { 
                 frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_frasi_v39', JSON.stringify(frasi)); 
+                localStorage.setItem('srs_frasi_v39_FIX', JSON.stringify(frasi)); 
             } else if(type === 'grammatica') {
                 grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } });
-                localStorage.setItem('srs_gramm_v39', JSON.stringify(grammatica));
+                localStorage.setItem('srs_gramm_v39_FIX', JSON.stringify(grammatica));
             }
             if(reload) location.reload(); return count; 
         }
