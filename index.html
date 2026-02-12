@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v39.2 (Menu Griglia)</title>
+    <title>Giapponese SRS v39.3 (Fix Conteggio)</title>
     <style>
         /* --- STILE GENERALE --- */
-        body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        h1 { color: #1c1c1e; margin-bottom: 15px; text-align: center; font-size: 1.6rem; margin-top: 0; }
+        body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        h1 { color: #1c1c1e; margin-bottom: 20px; text-align: center; font-size: 1.8rem; }
         .container { width: 100%; max-width: 600px; margin-bottom: 50px; }
         .card { background: #ffffff; padding: 20px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .hidden { display: none !important; }
@@ -26,30 +26,9 @@
         .btn-blue { background-color: #007aff; } .btn-green { background-color: #28a745; } .btn-orange { background-color: #fd7e14; } .btn-red { background-color: #dc3545; } .btn-purple { background-color: #af52de; } 
         .btn-gray { background-color: #8e8e93; font-size: 0.9rem; padding: 8px; }
 
-        /* --- MENU NAVIGAZIONE (MODIFICATO A GRIGLIA) --- */
-        #main-nav { 
-            display: flex; 
-            flex-wrap: wrap; /* Permette di andare a capo */
-            gap: 8px; 
-            width: 100%; 
-            max-width: 600px; 
-            margin-bottom: 20px; 
-            justify-content: center; /* Centra i bottoni */
-        }
-        .nav-btn { 
-            flex: 1 1 22%; /* Occupa circa 1/4 dello spazio, minimo 22% */
-            min-width: 80px; /* Larghezza minima per non schiacciarsi troppo */
-            padding: 10px 5px; /* Padding ridotto per risparmiare spazio */
-            border: none; 
-            border-radius: 12px; /* Meno arrotondati per stare meglio vicini */
-            background-color: #fff; 
-            color: #555; 
-            font-weight: 600; 
-            font-size: 0.9rem; /* Testo leggermente più piccolo */
-            cursor: pointer; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-            transition: 0.2s; 
-        }
+        /* --- MENU NAVIGAZIONE (GRIGLIA COMPATTA) --- */
+        #main-nav { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; max-width: 600px; margin-bottom: 20px; justify-content: center; }
+        .nav-btn { flex: 1 1 22%; min-width: 80px; padding: 10px 5px; border: none; border-radius: 12px; background-color: #fff; color: #555; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s; }
         .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 8px rgba(0,122,255,0.3); }
 
         /* --- NOTIFICHE & GRAMMATICA --- */
@@ -149,7 +128,7 @@
                     <h2 id="end-write-msg">Sessione Completata!</h2>
                     <p id="end-write-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
                     <button id="btn-write-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
-                    <button class="btn btn-blue" id="btn-write-continue" onclick="startWriteSession()" style="margin-top:10px;">Nuova Sessione</button>
+                    <button class="btn btn-blue" id="btn-write-continue" style="margin-top:10px;">...</button>
                 </div>
             </div>
         </div>
@@ -187,7 +166,7 @@
                     <h2 id="end-msg">Sessione Completata!</h2>
                     <p id="end-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
                     <button id="btn-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
-                    <button id="btn-new-session" class="btn btn-blue" onclick="nuovaSessione()" style="margin-top:10px;">Prossima Sessione</button>
+                    <button id="btn-new-session" class="btn btn-blue" style="margin-top:10px;">...</button>
                 </div>
                 <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">Caricamento dati...<br><button class="btn btn-blue" style="margin-top:10px; width:auto;" onclick="forceSync()">🔄 Scarica Dati</button></div>
             </div>
@@ -218,9 +197,9 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v39_2')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v39_2'));
-                if(localStorage.getItem('srs_frasi_v39_2')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v39_2'));
-                if(localStorage.getItem('srs_gramm_v39_2')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v39_2'));
+                if(localStorage.getItem('srs_vocab_v39_3')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v39_3'));
+                if(localStorage.getItem('srs_frasi_v39_3')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v39_3'));
+                if(localStorage.getItem('srs_gramm_v39_3')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v39_3'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -238,7 +217,7 @@
 
         function showNotification(msg, type) { const el = document.getElementById('sync-status'); el.className = type; el.innerText = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
         
-        // --- FUNZIONE DI SCARICAMENTO "ANTI-BLOCCO" (Mantenuta anche qui per sicurezza) ---
+        // --- FUNZIONE DI SCARICAMENTO "ANTI-BLOCCO" ---
         async function fetchSafe(url) {
             try {
                 const response = await fetch(url + "?t=" + new Date().getTime());
@@ -351,7 +330,15 @@
             document.getElementById('write-area').classList.add('hidden'); document.getElementById('end-write-box').classList.remove('hidden');
             document.getElementById('end-write-msg').innerText = "Sessione Completata"; document.getElementById('end-write-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
             const btnRip = document.getElementById('btn-write-ripasso'); if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } else { btnRip.classList.add('hidden'); }
-            const btnCont = document.getElementById('btn-write-continue'); if(activeDeckWrite.length === 0) { btnCont.innerText = "🎉 Categoria Completata! (Ricomincia)"; btnCont.onclick = function() { resetDeck('scrittura'); startWriteSession(); } } else { btnCont.innerText = `Prossime ${Math.min(10, activeDeckWrite.length)} parole →`; btnCont.onclick = startWriteSession; }
+            const btnCont = document.getElementById('btn-write-continue'); 
+            
+            if(activeDeckWrite.length === 0) { 
+                btnCont.innerText = "🎉 Categoria Completata! (Ricomincia)"; 
+                btnCont.onclick = function() { resetDeck('scrittura'); startWriteSession(); } 
+            } else { 
+                btnCont.innerText = `Fai le ultime ${activeDeckWrite.length} parole →`; 
+                btnCont.onclick = startWriteSession; 
+            }
         }
 
         function quitWriteSession() { document.getElementById('write-area').classList.add('hidden'); document.getElementById('write-config').classList.remove('hidden'); updateDeckStatus('scrittura'); }
@@ -384,7 +371,6 @@
         function nuovaSessione() {
             if(mode === 'kana') { document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); errori = []; punteggio = { ok:0, err:0 }; prossima(); return; }
             
-            resetDeck('quiz'); 
             if(activeDeckQuiz.length === 0) { if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) { resetDeck('quiz'); } else { return; } }
             
             document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden');
@@ -435,8 +421,22 @@
             let msg = "Sessione Completata"; document.getElementById('end-msg').innerText = msg; document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
             const btnRip = document.getElementById('btn-ripasso'); if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } else { btnRip.classList.add('hidden'); }
             const btnNew = document.getElementById('btn-new-session');
-            if(mode === 'vocab') { if(activeDeckQuiz.length === 0) { btnNew.innerText = "🎉 Categoria Completata! (Ricomincia)"; btnNew.onclick = function() { resetDeck('quiz'); nuovaSessione(); } } else { btnNew.innerText = `Prossime ${Math.min(10, activeDeckQuiz.length)} parole →`; btnNew.onclick = nuovaSessione; } }
-            else { const label = (currentKanaPrefix === 'h') ? "Hiragana" : "Katakana"; btnNew.innerText = `Torna a ${label}`; btnNew.onclick = function() { switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana'); }; }
+            
+            // --- FIX LOGICA PULSANTE FINALE ---
+            if(mode === 'vocab') { 
+                if(activeDeckQuiz.length === 0) { 
+                    btnNew.innerText = "🎉 Categoria Completata! (Ricomincia)"; 
+                    btnNew.onclick = function() { resetDeck('quiz'); nuovaSessione(); } 
+                } else { 
+                    btnNew.innerText = `Fai le ultime ${activeDeckQuiz.length} parole →`; 
+                    btnNew.onclick = function() { nuovaSessione(); } 
+                } 
+            }
+            else { 
+                const label = (currentKanaPrefix === 'h') ? "Hiragana" : "Katakana"; 
+                btnNew.innerText = `Torna a ${label}`; 
+                btnNew.onclick = function() { switchTab(currentKanaPrefix === 'h' ? 'hiragana' : 'katakana'); }; 
+            }
         }
 
         function generaScelte(corretta) {
@@ -474,13 +474,13 @@
             const lines = text.trim().split('\n'); let count = 0; 
             if(type === 'vocab') { 
                 vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_vocab_v39_FIX', JSON.stringify(vocaboli)); 
+                localStorage.setItem('srs_vocab_v39_3', JSON.stringify(vocaboli)); 
             } else if(type === 'frasi') { 
                 frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_frasi_v39_FIX', JSON.stringify(frasi)); 
+                localStorage.setItem('srs_frasi_v39_3', JSON.stringify(frasi)); 
             } else if(type === 'grammatica') {
                 grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } });
-                localStorage.setItem('srs_gramm_v39_FIX', JSON.stringify(grammatica));
+                localStorage.setItem('srs_gramm_v39_3', JSON.stringify(grammatica));
             }
             if(reload) location.reload(); return count; 
         }
