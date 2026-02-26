@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v41.0 (Multi-Categoria Checkbox)</title>
+    <title>Giapponese SRS v41.1 (Fix UI)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -142,7 +142,7 @@
                     <h2 id="end-write-msg">Sessione Completata!</h2>
                     <p id="end-write-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
                     <button id="btn-write-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
-                    <button class="btn btn-blue" id="btn-write-continue" style="margin-top:10px;">...</button>
+                    <button id="btn-write-continue" class="btn btn-blue" style="margin-top:10px;">...</button>
                 </div>
             </div>
         </div>
@@ -152,7 +152,6 @@
                 <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio">Pronto</div>
                 
                 <div id="quiz-start-screen" style="text-align:center;">
-                     
                      <p style="text-align:left; color:#666; font-size:0.9rem; margin-bottom:5px;">Scegli le categorie:</p>
                      <div class="cat-controls">
                         <button class="btn btn-gray" onclick="toggleCats('quiz', true)">Tutte</button>
@@ -217,9 +216,9 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v41')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v41'));
-                if(localStorage.getItem('srs_frasi_v41')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v41'));
-                if(localStorage.getItem('srs_gramm_v41')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v41'));
+                if(localStorage.getItem('srs_vocab_v41_1')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v41_1'));
+                if(localStorage.getItem('srs_frasi_v41_1')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v41_1'));
+                if(localStorage.getItem('srs_gramm_v41_1')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v41_1'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -277,12 +276,10 @@
         function popolaFiltri() {
             const tags = Array.from(new Set(vocaboli.map(v => v.tag))).sort();
             
-            // Per lo Studio rimane la Select semplice
             const sStudio = document.getElementById('filtro-studio');
             sStudio.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
             tags.forEach(t => sStudio.innerHTML += `<option value="${t}">${t}</option>`);
 
-            // Per Quiz e Scrittura creiamo i Checkbox
             creaCheckbox('filtro-cat-quiz', tags, 'quiz');
             creaCheckbox('filtro-cat-scrittura', tags, 'scrittura');
 
@@ -319,13 +316,11 @@
             let statusId = (type === 'quiz') ? 'deck-status-quiz' : 'deck-status-write';
             let containerId = (type === 'quiz') ? 'filtro-cat-quiz' : 'filtro-cat-scrittura';
             
-            // Trova quali checkbox sono spuntati
             let selectedTags = [];
             document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`).forEach(cb => {
                 selectedTags.push(cb.value);
             });
 
-            // Filtra il mazzo
             let deck = vocaboli.filter(v => selectedTags.includes(v.tag));
             deck = deck.sort(() => 0.5 - Math.random());
             
@@ -433,17 +428,29 @@
 
         function toggleAccordion(id) { const el = document.getElementById(id); el.style.display = (el.style.display === 'block') ? 'none' : 'block'; }
 
+        // --- FUNZIONI RISOLTE PER PREVENIRE SOVRAPPOSIZIONI ---
         function openVocabQuiz() { 
-            mode = 'vocab'; document.getElementById('quiz-start-screen').classList.remove('hidden'); 
-            document.getElementById('quiz-area').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); updateDeckStatus('quiz');
+            mode = 'vocab'; 
+            document.getElementById('quiz-start-screen').classList.remove('hidden'); 
+            document.getElementById('quiz-area').classList.add('hidden'); 
+            document.getElementById('end-session-box').classList.add('hidden'); 
+            updateDeckStatus('quiz');
         }
 
         function nuovaSessione() {
-            if(mode === 'kana') { document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); errori = []; punteggio = { ok:0, err:0 }; prossima(); return; }
+            if(mode === 'kana') { 
+                document.getElementById('quiz-start-screen').classList.add('hidden'); // ASSICURA LA PULIZIA
+                document.getElementById('end-session-box').classList.add('hidden'); 
+                document.getElementById('quiz-area').classList.remove('hidden'); 
+                errori = []; punteggio = { ok:0, err:0 }; prossima(); 
+                return; 
+            }
             
             if(activeDeckQuiz.length === 0) { alert("Seleziona almeno una categoria o ricomincia il mazzo!"); return; }
             
-            document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden');
+            document.getElementById('quiz-start-screen').classList.add('hidden'); 
+            document.getElementById('end-session-box').classList.add('hidden'); 
+            document.getElementById('quiz-area').classList.remove('hidden');
             let n = Math.min(10, activeDeckQuiz.length); sessione = activeDeckQuiz.splice(0, n); updateDeckStatus('quiz');
             errori = []; punteggio = { ok:0, err:0 }; prossima();
         }
@@ -537,20 +544,44 @@
 
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
-        function startKanaQuiz(prefix) { currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } activePool = pool; sessione = pool.sort(() => 0.5 - Math.random()); mode = 'kana'; switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); document.getElementById('filtro-cat').classList.add('hidden'); document.getElementById('deck-status-quiz').innerHTML = ''; document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); nuovaSessione(); }
+        
+        // --- IL BUG ERA QUI, ORA È RISOLTO ---
+        function startKanaQuiz(prefix) { 
+            currentKanaPrefix = prefix; 
+            const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; 
+            const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); 
+            const mixCheck = document.getElementById(prefix + '-mix-mode'); 
+            mixMode = mixCheck.checked; 
+            let pool = []; 
+            checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); 
+            if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } 
+            
+            activePool = pool; 
+            sessione = pool.sort(() => 0.5 - Math.random()); 
+            mode = 'kana'; 
+            
+            switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); 
+            
+            // Pulisce le grafiche
+            document.getElementById('deck-status-quiz').innerHTML = ''; 
+            document.getElementById('quiz-start-screen').classList.add('hidden'); 
+            document.getElementById('end-session-box').classList.add('hidden'); 
+            document.getElementById('quiz-area').classList.remove('hidden'); 
+            nuovaSessione(); 
+        }
         
         function parseCSV(text, type, reload) { 
             if(!text) return 0;
             const lines = text.trim().split('\n'); let count = 0; 
             if(type === 'vocab') { 
                 vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_vocab_v41', JSON.stringify(vocaboli)); 
+                localStorage.setItem('srs_vocab_v41_1', JSON.stringify(vocaboli)); 
             } else if(type === 'frasi') { 
                 frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_frasi_v41', JSON.stringify(frasi)); 
+                localStorage.setItem('srs_frasi_v41_1', JSON.stringify(frasi)); 
             } else if(type === 'grammatica') {
                 grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } });
-                localStorage.setItem('srs_gramm_v41', JSON.stringify(grammatica));
+                localStorage.setItem('srs_gramm_v41_1', JSON.stringify(grammatica));
             }
             if(reload) location.reload(); return count; 
         }
