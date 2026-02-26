@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v39.3 (Fix Conteggio)</title>
+    <title>Giapponese SRS v41.0 (Multi-Categoria Checkbox)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -24,11 +24,20 @@
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; color: white; margin-top: 5px; transition: 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-blue { background-color: #007aff; } .btn-green { background-color: #28a745; } .btn-orange { background-color: #fd7e14; } .btn-red { background-color: #dc3545; } .btn-purple { background-color: #af52de; } 
-        .btn-gray { background-color: #8e8e93; font-size: 0.9rem; padding: 8px; }
+        .btn-gray { background-color: #e5e5ea; color: #333; font-size: 0.9rem; padding: 8px; width: auto; flex:1; }
 
-        /* --- MENU NAVIGAZIONE (GRIGLIA COMPATTA) --- */
+        /* --- MULTI-CATEGORIA CHECKBOX --- */
+        .checkbox-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; 
+            max-height: 250px; overflow-y: auto; padding: 10px; 
+            border: 2px solid #f0f0f5; border-radius: 12px; background: #f9f9fc;
+        }
+        .cat-label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+        .cat-controls { display: flex; gap: 10px; margin-bottom: 10px; }
+
+        /* --- MENU NAVIGAZIONE (GRIGLIA) --- */
         #main-nav { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; max-width: 600px; margin-bottom: 20px; justify-content: center; }
-        .nav-btn { flex: 1 1 22%; min-width: 80px; padding: 10px 5px; border: none; border-radius: 12px; background-color: #fff; color: #555; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s; }
+        .nav-btn { flex: 1 1 22%; min-width: 80px; padding: 12px 5px; border: none; border-radius: 12px; background-color: #fff; color: #555; font-weight: 600; cursor: pointer; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
         .nav-btn.active { background-color: #007aff; color: white; box-shadow: 0 4px 8px rgba(0,122,255,0.3); }
 
         /* --- NOTIFICHE & GRAMMATICA --- */
@@ -44,7 +53,7 @@
 
         /* --- QUIZ LAYOUT --- */
         #choices-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .choice-btn { background: #f8f9fa; border: 2px solid #e9ecef; padding: 20px; font-size: 2rem; border-radius: 16px; cursor: pointer; font-weight: bold; color: #333; }
+        .choice-btn { background: #f8f9fa; border: 2px solid #e9ecef; padding: 20px; font-size: 2rem; border-radius: 16px; cursor: pointer; font-weight: bold; color: #333; display:flex; justify-content:center; align-items:center; }
         .btn-correct { background-color: #d4edda !important; border-color: #28a745 !important; color: #155724 !important; }
         .btn-wrong { background-color: #f8d7da !important; border-color: #dc3545 !important; color: #721c24 !important; opacity: 0.6; }
         #prompt-principale, #prompt-scrittura { font-size: 3rem; margin: 5px 0; text-align: center; font-weight: 500; min-height: 60px; word-break: keep-all; }
@@ -104,10 +113,15 @@
             <div class="card">
                 <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio-write">Pronto</div>
                 <div id="write-config">
-                    <p style="text-align:center; color:#666; font-size:0.9rem;">Scegli cosa scrivere:</p>
-                    <select id="filtro-scrittura" class="input-box" onchange="resetDeck('scrittura')"><option value="TUTTI">Tutte le Categorie</option></select>
+                    <p style="text-align:left; color:#666; font-size:0.9rem; margin-bottom:5px;">Scegli le categorie:</p>
+                    <div class="cat-controls">
+                        <button class="btn btn-gray" onclick="toggleCats('scrittura', true)">Tutte</button>
+                        <button class="btn btn-gray" onclick="toggleCats('scrittura', false)">Nessuna</button>
+                    </div>
+                    <div id="filtro-cat-scrittura" class="checkbox-grid"></div>
+
                     <div class="deck-status" id="deck-status-write"></div>
-                    <label class="mix-toggle" style="justify-content:center; margin-top:10px;"><input type="checkbox" id="write-mode-check"> Mostra Kana → Scrivi Romaji</label>
+                    <label class="mix-toggle" style="justify-content:center; margin-top:15px;"><input type="checkbox" id="write-mode-check"> Mostra Kana → Scrivi Romaji</label>
                     <button class="btn btn-purple" style="margin-top:15px;" id="btn-start-write" onclick="startWriteSession()">Inizia Sessione</button>
                 </div>
                 <div id="write-area" class="hidden">
@@ -137,10 +151,17 @@
             <div class="card">
                 <div style="text-align:center; margin-bottom:15px; color:#888; font-weight:bold;" id="punteggio">Pronto</div>
                 
-                <select id="filtro-cat" class="input-box" onchange="resetDeck('quiz')"><option value="TUTTI">Tutte le Categorie</option></select>
-                <div class="deck-status" id="deck-status-quiz" style="margin-bottom:15px;"></div>
-                
-                <div id="quiz-start-screen" style="text-align:center; padding:20px;">
+                <div id="quiz-start-screen" style="text-align:center;">
+                     
+                     <p style="text-align:left; color:#666; font-size:0.9rem; margin-bottom:5px;">Scegli le categorie:</p>
+                     <div class="cat-controls">
+                        <button class="btn btn-gray" onclick="toggleCats('quiz', true)">Tutte</button>
+                        <button class="btn btn-gray" onclick="toggleCats('quiz', false)">Nessuna</button>
+                     </div>
+                     <div id="filtro-cat-quiz" class="checkbox-grid"></div>
+
+                     <div class="deck-status" id="deck-status-quiz" style="margin-bottom:15px;"></div>
+                     
                      <label style="display:block; text-align:left; color:#666; font-size:0.9rem; margin-bottom:5px;">Modalità Quiz:</label>
                      <select id="quiz-mode-select" class="input-box" style="margin-bottom:15px;">
                         <option value="MIX">🔀 Misto (Giapponese ↔ Italiano)</option>
@@ -168,7 +189,6 @@
                     <button id="btn-ripasso" class="btn btn-orange hidden" onclick="avviaRipasso()">🔁 Ripassa Errori</button>
                     <button id="btn-new-session" class="btn btn-blue" style="margin-top:10px;">...</button>
                 </div>
-                <div id="msg-no-data" class="hidden" style="text-align:center; padding:20px;">Caricamento dati...<br><button class="btn btn-blue" style="margin-top:10px; width:auto;" onclick="forceSync()">🔄 Scarica Dati</button></div>
             </div>
         </div>
         <div id="tab-ascolto" class="modulo-content hidden"><div class="card"><h2>Dialoghi</h2><select id="filtro-frasi" class="input-box" onchange="renderFrasi()"><option value="TUTTI">Tutti</option></select><div style="text-align:center; margin-bottom:10px;"><input type="checkbox" id="spoiler-check" onchange="renderFrasi()"> Nascondi Ita</div><div id="lista-frasi"></div></div></div>
@@ -178,7 +198,7 @@
     </div>
 
     <script>
-        // LINK CORRETTI MISTI (Japan + Flascard)
+        // LINK CORRETTI MISTI
         const LINK_VOCABOLI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/importa.csv";
         const LINK_FRASI = "https://raw.githubusercontent.com/cecifabrizio-beep/japan/refs/heads/main/frasi.csv";
         const LINK_GRAMMATICA = "https://raw.githubusercontent.com/cecifabrizio-beep/flascard/refs/heads/main/grammatica2.csv";
@@ -197,9 +217,9 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v39_3')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v39_3'));
-                if(localStorage.getItem('srs_frasi_v39_3')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v39_3'));
-                if(localStorage.getItem('srs_gramm_v39_3')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v39_3'));
+                if(localStorage.getItem('srs_vocab_v41')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v41'));
+                if(localStorage.getItem('srs_frasi_v41')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v41'));
+                if(localStorage.getItem('srs_gramm_v41')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v41'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -217,7 +237,6 @@
 
         function showNotification(msg, type) { const el = document.getElementById('sync-status'); el.className = type; el.innerText = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
         
-        // --- FUNZIONE DI SCARICAMENTO "ANTI-BLOCCO" ---
         async function fetchSafe(url) {
             try {
                 const response = await fetch(url + "?t=" + new Date().getTime());
@@ -230,13 +249,11 @@
 
         function forceSync() {
             showNotification("Download dati in corso...", "sync-loading");
-            
             Promise.all([
                 fetchSafe(LINK_VOCABOLI),
                 fetchSafe(LINK_FRASI),
                 fetchSafe(LINK_GRAMMATICA)
-            ])
-            .then(([txtV, txtF, txtG]) => {
+            ]).then(([txtV, txtF, txtG]) => {
                 const countV = parseCSV(txtV, 'vocab', false);
                 const countF = parseCSV(txtF, 'frasi', false);
                 const countG = parseCSV(txtG, 'grammatica', false);
@@ -256,13 +273,65 @@
             else { const navBtn = document.querySelector(`button[onclick*="'${id}'"]`); if(navBtn) navBtn.classList.add('active'); }
         }
 
+        // --- CREAZIONE CHECKBOX MULTIPLI ---
+        function popolaFiltri() {
+            const tags = Array.from(new Set(vocaboli.map(v => v.tag))).sort();
+            
+            // Per lo Studio rimane la Select semplice
+            const sStudio = document.getElementById('filtro-studio');
+            sStudio.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>';
+            tags.forEach(t => sStudio.innerHTML += `<option value="${t}">${t}</option>`);
+
+            // Per Quiz e Scrittura creiamo i Checkbox
+            creaCheckbox('filtro-cat-quiz', tags, 'quiz');
+            creaCheckbox('filtro-cat-scrittura', tags, 'scrittura');
+
+            const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>';
+            const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`);
+        }
+
+        function creaCheckbox(containerId, tags, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if(tags.length === 0) { container.innerHTML = '<p style="color:#999; text-align:center; grid-column: span 2;">Nessun dato.</p>'; return; }
+            
+            tags.forEach(tag => {
+                const label = document.createElement('label');
+                label.className = 'cat-label';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = tag;
+                cb.checked = true; // Tutti attivi di default
+                cb.onchange = () => resetDeck(type);
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode(tag));
+                container.appendChild(label);
+            });
+        }
+
+        function toggleCats(type, state) {
+            const id = type === 'quiz' ? 'filtro-cat-quiz' : 'filtro-cat-scrittura';
+            document.querySelectorAll(`#${id} input[type="checkbox"]`).forEach(cb => cb.checked = state);
+            resetDeck(type);
+        }
+
         function resetDeck(type) {
-            let selectId = (type === 'quiz') ? 'filtro-cat' : 'filtro-scrittura';
             let statusId = (type === 'quiz') ? 'deck-status-quiz' : 'deck-status-write';
-            let filter = document.getElementById(selectId).value;
-            let pool = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
-            let deck = [...pool].sort(() => 0.5 - Math.random());
-            if(type === 'quiz') activeDeckQuiz = deck; else activeDeckWrite = deck;
+            let containerId = (type === 'quiz') ? 'filtro-cat-quiz' : 'filtro-cat-scrittura';
+            
+            // Trova quali checkbox sono spuntati
+            let selectedTags = [];
+            document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`).forEach(cb => {
+                selectedTags.push(cb.value);
+            });
+
+            // Filtra il mazzo
+            let deck = vocaboli.filter(v => selectedTags.includes(v.tag));
+            deck = deck.sort(() => 0.5 - Math.random());
+            
+            if(type === 'quiz') activeDeckQuiz = deck; 
+            else activeDeckWrite = deck;
+            
             updateDeckStatus(type);
         }
 
@@ -270,8 +339,8 @@
             let statusId = (type === 'quiz') ? 'deck-status-quiz' : 'deck-status-write';
             let deck = (type === 'quiz') ? activeDeckQuiz : activeDeckWrite;
             let el = document.getElementById(statusId);
-            if(deck.length > 0) el.innerHTML = `Parole rimanenti nel mazzo: <span class="deck-badge">${deck.length}</span>`;
-            else el.innerHTML = `<span style="color:#28a745">★ Categoria Completata! ★</span>`;
+            if(deck.length > 0) el.innerHTML = `Parole nel mazzo: <span class="deck-badge">${deck.length}</span>`;
+            else el.innerHTML = `<span style="color:#dc3545">Nessuna categoria selezionata!</span>`;
         }
 
         function formatRomaji(text) { return text.replace(/([a-z])\1|ei|ou/gi, '<span class="hlt">$&</span>'); }
@@ -295,7 +364,7 @@
 
         function startWriteSession() {
             mode = 'scrittura';
-            if(activeDeckWrite.length === 0) { if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) { resetDeck('scrittura'); } else { return; } }
+            if(activeDeckWrite.length === 0) { alert("Seleziona almeno una categoria!"); return; }
             let n = Math.min(10, activeDeckWrite.length);
             writeSession = activeDeckWrite.splice(0, n);
             updateDeckStatus('scrittura');
@@ -330,14 +399,15 @@
             document.getElementById('write-area').classList.add('hidden'); document.getElementById('end-write-box').classList.remove('hidden');
             document.getElementById('end-write-msg').innerText = "Sessione Completata"; document.getElementById('end-write-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
             const btnRip = document.getElementById('btn-write-ripasso'); if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } else { btnRip.classList.add('hidden'); }
-            const btnCont = document.getElementById('btn-write-continue'); 
             
-            if(activeDeckWrite.length === 0) { 
-                btnCont.innerText = "🎉 Categoria Completata! (Ricomincia)"; 
-                btnCont.onclick = function() { resetDeck('scrittura'); startWriteSession(); } 
-            } else { 
-                btnCont.innerText = `Fai le ultime ${activeDeckWrite.length} parole →`; 
-                btnCont.onclick = startWriteSession; 
+            const btnCont = document.getElementById('btn-write-continue'); 
+            const remaining = activeDeckWrite.length;
+            if (remaining === 0) {
+                btnCont.innerText = "🎉 Categoria Completata! (Ricomincia)";
+                btnCont.onclick = function() { resetDeck('scrittura'); startWriteSession(); }
+            } else {
+                btnCont.innerText = `Prossime ${Math.min(10, remaining)} parole →`;
+                btnCont.onclick = function() { startWriteSession(); }
             }
         }
 
@@ -371,7 +441,7 @@
         function nuovaSessione() {
             if(mode === 'kana') { document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); errori = []; punteggio = { ok:0, err:0 }; prossima(); return; }
             
-            if(activeDeckQuiz.length === 0) { if(confirm("Hai completato tutte le parole di questa categoria! Vuoi ricominciare?")) { resetDeck('quiz'); } else { return; } }
+            if(activeDeckQuiz.length === 0) { alert("Seleziona almeno una categoria o ricomincia il mazzo!"); return; }
             
             document.getElementById('quiz-start-screen').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden');
             let n = Math.min(10, activeDeckQuiz.length); sessione = activeDeckQuiz.splice(0, n); updateDeckStatus('quiz');
@@ -422,13 +492,13 @@
             const btnRip = document.getElementById('btn-ripasso'); if(errori.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; } else { btnRip.classList.add('hidden'); }
             const btnNew = document.getElementById('btn-new-session');
             
-            // --- FIX LOGICA PULSANTE FINALE ---
             if(mode === 'vocab') { 
-                if(activeDeckQuiz.length === 0) { 
+                const remaining = activeDeckQuiz.length;
+                if(remaining === 0) { 
                     btnNew.innerText = "🎉 Categoria Completata! (Ricomincia)"; 
                     btnNew.onclick = function() { resetDeck('quiz'); nuovaSessione(); } 
                 } else { 
-                    btnNew.innerText = `Fai le ultime ${activeDeckQuiz.length} parole →`; 
+                    btnNew.innerText = `Prossime ${Math.min(10, remaining)} parole →`; 
                     btnNew.onclick = function() { nuovaSessione(); } 
                 } 
             }
@@ -474,19 +544,18 @@
             const lines = text.trim().split('\n'); let count = 0; 
             if(type === 'vocab') { 
                 vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_vocab_v39_3', JSON.stringify(vocaboli)); 
+                localStorage.setItem('srs_vocab_v41', JSON.stringify(vocaboli)); 
             } else if(type === 'frasi') { 
                 frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); 
-                localStorage.setItem('srs_frasi_v39_3', JSON.stringify(frasi)); 
+                localStorage.setItem('srs_frasi_v41', JSON.stringify(frasi)); 
             } else if(type === 'grammatica') {
                 grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } });
-                localStorage.setItem('srs_gramm_v39_3', JSON.stringify(grammatica));
+                localStorage.setItem('srs_gramm_v41', JSON.stringify(grammatica));
             }
             if(reload) location.reload(); return count; 
         }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
         function aggiornaConta() { document.getElementById('count-v').innerText = vocaboli.length; document.getElementById('count-f').innerText = frasi.length; document.getElementById('count-g').innerText = grammatica.length; }
-        function popolaFiltri() { const s = document.getElementById('filtro-cat'); s.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s2 = document.getElementById('filtro-studio'); s2.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const s3 = document.getElementById('filtro-scrittura'); s3.innerHTML = '<option value="TUTTI">Tutte le Categorie</option>'; const tags = new Set(vocaboli.map(v => v.tag)); tags.forEach(t => { s.innerHTML += `<option value="${t}">${t}</option>`; s2.innerHTML += `<option value="${t}">${t}</option>`; s3.innerHTML += `<option value="${t}">${t}</option>`; }); const f = document.getElementById('filtro-frasi'); f.innerHTML = '<option value="TUTTI">Tutti i Dialoghi</option>'; const fTags = new Set(frasi.map(v => v.tag)); fTags.forEach(t => f.innerHTML += `<option value="${t}">${t}</option>`); }
         function renderFrasi() { const div = document.getElementById('lista-frasi'); const spoiler = document.getElementById('spoiler-check').checked; const filter = document.getElementById('filtro-frasi').value; div.innerHTML = ''; const list = (filter === 'TUTTI') ? frasi : frasi.filter(f => f.tag === filter); if(list.length === 0) { div.innerHTML = '<p style="text-align:center">Nessuna frase</p>'; return; } div.innerHTML = list.map(f => { const jpnSafe = f.jpn.replace(/'/g,"\\'"); return `<div class="list-entry ${spoiler?'spoiler':''}"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(f.jpn)}</span><span class="txt-rom">${formatRomaji(f.rom)}</span><span class="txt-ita">${f.ita}</span></div></div>`; }).join(''); }
         function parla(t) { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(t); u.lang = 'ja-JP'; u.rate = 0.9; window.speechSynthesis.speak(u); } else { alert("Il tuo browser non supporta la sintesi vocale."); } }
     </script>
