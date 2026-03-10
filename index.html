@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v45.0 (Memoria Globale)</title>
+    <title>Giapponese SRS v46.0 (Tag nello Studio)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -225,15 +225,14 @@
         let isRipassoQuiz = false;
         let isRipassoWrite = false;
         
-        // MEMORIE GLOBALI SEPARATE
         let errGlobQuiz = [];
         let errGlobWrite = [];
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v45')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v45'));
-                if(localStorage.getItem('srs_frasi_v45')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v45'));
-                if(localStorage.getItem('srs_gramm_v45')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v45'));
+                if(localStorage.getItem('srs_vocab_v46')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v46'));
+                if(localStorage.getItem('srs_frasi_v46')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v46'));
+                if(localStorage.getItem('srs_gramm_v46')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v46'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -314,7 +313,6 @@
             let deck = vocaboli.filter(v => selectedTags.includes(v.tag));
             deck = deck.sort(() => 0.5 - Math.random());
             
-            // RESET DELLE MEMORIE GLOBALI QUANDO SI CREA UN NUOVO MAZZO
             if(type === 'quiz') { activeDeckQuiz = deck; errGlobQuiz = []; } 
             else { activeDeckWrite = deck; errGlobWrite = []; }
             
@@ -360,11 +358,8 @@
             }
         }
 
-        // --- SISTEMA DI REGISTRAZIONE ERRORI BLINDATO ---
         function registraErrore(card) {
-            errori.push(card); // Memoria a breve termine
-            
-            // Memoria Globale (solo se la parola non c'è già, così non raddoppia le voci)
+            errori.push(card); 
             if (mode === 'scrittura') {
                 if (!errGlobWrite.some(e => e.jpn === card.jpn)) { errGlobWrite.push(card); }
             } else if (mode === 'vocab') {
@@ -435,16 +430,13 @@
             const btnCont = document.getElementById('btn-write-continue'); 
             let isFineMazzo = activeDeckWrite.length === 0;
 
-            // LOGICA DI FINE MAZZO vs FINE BLOCCO
             if (isFineMazzo) { 
                 renderErrorList('error-list-write', errGlobWrite); 
                 if(errGlobWrite.length > 0) { 
                     btnRip.classList.remove('hidden'); 
                     btnRip.innerText = `🔁 Ripassa i ${errGlobWrite.length} Errori Totali`; 
                     btnRip.onclick = () => avviaRipassoGlobale('scrittura');
-                } else { 
-                    btnRip.classList.add('hidden'); 
-                }
+                } else { btnRip.classList.add('hidden'); }
                 btnCont.innerText = "🎉 Categoria Completata! (Ricomincia)"; 
                 btnCont.onclick = function() { resetDeck('scrittura'); startWriteSession(); }
             } else { 
@@ -453,9 +445,7 @@
                     btnRip.classList.remove('hidden'); 
                     btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; 
                     btnRip.onclick = () => avviaRipasso('scrittura');
-                } else { 
-                    btnRip.classList.add('hidden'); 
-                }
+                } else { btnRip.classList.add('hidden'); }
                 btnCont.innerText = `Prossime ${Math.min(10, activeDeckWrite.length)} parole →`; 
                 btnCont.onclick = function() { startWriteSession(); } 
             }
@@ -476,26 +466,14 @@
             errori = []; punteggio = { ok:0, err:0 }; prossima();
         }
 
-        // Ripasso a Breve Termine (Blocco da 10)
         function avviaRipasso(tipo) {
-            if(tipo === 'scrittura') { 
-                isRipassoWrite = true; writeSession = [...errori]; errori = []; 
-                document.getElementById('end-write-box').classList.add('hidden'); document.getElementById('write-area').classList.remove('hidden'); nextWriteCard(); 
-            } else { 
-                isRipassoQuiz = true; sessione = [...errori]; errori = []; 
-                document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); prossima(); 
-            }
+            if(tipo === 'scrittura') { isRipassoWrite = true; writeSession = [...errori]; errori = []; document.getElementById('end-write-box').classList.add('hidden'); document.getElementById('write-area').classList.remove('hidden'); nextWriteCard(); } 
+            else { isRipassoQuiz = true; sessione = [...errori]; errori = []; document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); prossima(); }
         }
 
-        // Ripasso a Lungo Termine (Tutti gli errori del mazzo)
         function avviaRipassoGlobale(tipo) {
-            if(tipo === 'scrittura') { 
-                isRipassoWrite = true; writeSession = [...errGlobWrite]; errori = []; errGlobWrite = []; 
-                document.getElementById('end-write-box').classList.add('hidden'); document.getElementById('write-area').classList.remove('hidden'); nextWriteCard(); 
-            } else { 
-                isRipassoQuiz = true; sessione = [...errGlobQuiz]; errori = []; errGlobQuiz = []; 
-                document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); prossima(); 
-            }
+            if(tipo === 'scrittura') { isRipassoWrite = true; writeSession = [...errGlobWrite]; errori = []; errGlobWrite = []; document.getElementById('end-write-box').classList.add('hidden'); document.getElementById('write-area').classList.remove('hidden'); nextWriteCard(); } 
+            else { isRipassoQuiz = true; sessione = [...errGlobQuiz]; errori = []; errGlobQuiz = []; document.getElementById('end-session-box').classList.add('hidden'); document.getElementById('quiz-area').classList.remove('hidden'); prossima(); }
         }
 
         function prossima() {
@@ -531,16 +509,13 @@
             
             let isFineMazzo = (mode === 'vocab' && activeDeckQuiz.length === 0) || mode === 'kana';
 
-            // LOGICA DI FINE MAZZO vs FINE BLOCCO
             if (isFineMazzo) { 
                 renderErrorList('error-list-quiz', errGlobQuiz); 
                 if(errGlobQuiz.length > 0) { 
                     btnRip.classList.remove('hidden'); 
                     btnRip.innerText = `🔁 Ripassa i ${errGlobQuiz.length} Errori Totali`; 
                     btnRip.onclick = () => avviaRipassoGlobale('quiz');
-                } else { 
-                    btnRip.classList.add('hidden'); 
-                }
+                } else { btnRip.classList.add('hidden'); }
                 
                 if(mode === 'vocab') {
                     btnNew.innerText = "🎉 Categoria Completata! (Ricomincia)"; 
@@ -556,9 +531,7 @@
                     btnRip.classList.remove('hidden'); 
                     btnRip.innerText = `🔁 Ripassa ${errori.length} Errori`; 
                     btnRip.onclick = () => avviaRipasso('quiz');
-                } else { 
-                    btnRip.classList.add('hidden'); 
-                }
+                } else { btnRip.classList.add('hidden'); }
                 
                 btnNew.innerText = `Prossime ${Math.min(10, activeDeckQuiz.length)} parole →`; 
                 btnNew.onclick = function() { nuovaSessione(); } 
@@ -609,7 +582,7 @@
             activePool = pool; 
             sessione = pool.sort(() => 0.5 - Math.random()); 
             mode = 'kana'; 
-            errGlobQuiz = []; // Reset memoria Kana
+            errGlobQuiz = []; 
             
             switchTab('quiz', document.querySelector(`button[onclick*="switchTab('${prefix==='h'?'hiragana':'katakana'}"]`)); 
             
@@ -620,14 +593,26 @@
             nuovaSessione(); 
         }
         
-        function renderStudio() { const div = document.getElementById('lista-studio'); const filter = document.getElementById('filtro-studio').value; div.innerHTML = ''; const list = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter); if(list.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessun vocabolo.</p>'; return; } div.innerHTML = list.map(v => { const jpnSafe = v.jpn.replace(/'/g,"\\'"); return `<div class="list-entry"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(v.jpn)}</span><span class="txt-rom">${formatRomaji(v.rom)}</span><span class="txt-ita">${v.ita}</span></div></div>`; }).join(''); }
+        // AGGIUNTA DEL TAG NELLA FUNZIONE DI RENDER STUDIO (Modifica richiesta)
+        function renderStudio() { 
+            const div = document.getElementById('lista-studio'); 
+            const filter = document.getElementById('filtro-studio').value; 
+            div.innerHTML = ''; 
+            const list = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter); 
+            if(list.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessun vocabolo.</p>'; return; } 
+            div.innerHTML = list.map(v => { 
+                const jpnSafe = v.jpn.replace(/'/g,"\\'"); 
+                return `<div class="list-entry"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(v.jpn)}</span><span class="txt-rom">${formatRomaji(v.rom)}</span><div><span class="txt-ita">${v.ita}</span> <span style="font-size:0.75rem; color:#666; background:#e2e8f0; padding:3px 6px; border-radius:8px; margin-left:8px; vertical-align:middle; white-space:nowrap; display:inline-block;">${v.tag}</span></div></div></div>`; 
+            }).join(''); 
+        }
+
         function renderGrammatica() { const div = document.getElementById('lista-grammatica'); div.innerHTML = ''; if(grammatica.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessuna regola caricata.</p>'; return; } grammatica.forEach((g, idx) => { const jpnSafe = g.es_jpn.replace(/'/g,"\\'"); const html = `<div class="gram-item"><div class="gram-header" onclick="toggleAccordion('g-${idx}')"><span>${g.titolo}</span><span style="color:#007aff">▼</span></div><div id="g-${idx}" class="gram-content"><p>${g.spiegazione}</p><div class="gram-example"><span class="gram-ex-jp">${g.es_jpn} <span style="cursor:pointer" onclick="parla('${jpnSafe}')">🔊</span></span><span class="gram-ex-rom">${g.es_rom}</span><span class="gram-ex-it">${g.es_ita}</span></div></div></div>`; div.innerHTML += html; }); }
         
         function parseCSV(text, type, reload) { 
             if(!text) return 0; const lines = text.trim().split('\n'); let count = 0; 
-            if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v45', JSON.stringify(vocaboli)); } 
-            else if(type === 'frasi') { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v45', JSON.stringify(frasi)); } 
-            else if(type === 'grammatica') { grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } }); localStorage.setItem('srs_gramm_v45', JSON.stringify(grammatica)); }
+            if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v46', JSON.stringify(vocaboli)); } 
+            else if(type === 'frasi') { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v46', JSON.stringify(frasi)); } 
+            else if(type === 'grammatica') { grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } }); localStorage.setItem('srs_gramm_v46', JSON.stringify(grammatica)); }
             if(reload) location.reload(); return count; 
         }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
