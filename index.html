@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v48.1 (Fix Tipologia Verbi)</title>
+    <title>Giapponese SRS v48.2 (Filtro Anti-Aiuto)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -227,9 +227,9 @@
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v48_1')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v48_1'));
-                if(localStorage.getItem('srs_frasi_v48_1')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v48_1'));
-                if(localStorage.getItem('srs_gramm_v48_1')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v48_1'));
+                if(localStorage.getItem('srs_vocab_v48_2')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v48_2'));
+                if(localStorage.getItem('srs_frasi_v48_2')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v48_2'));
+                if(localStorage.getItem('srs_gramm_v48_2')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v48_2'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -405,8 +405,10 @@
             
             const label = document.getElementById('prompt-scrittura'); const sub = document.getElementById('sub-scrittura'); 
             
-            // INSERITA LA CATEGORIA (Verbo U/RU) NELLA SCRITTURA
-            let noteExtraScrittura = card.eng ? ` <span style="color:#d97706; font-size:0.9rem; font-weight:bold; font-style:normal; margin-left:5px;">${card.eng}</span>` : '';
+            // FILTRO: Mostra la nota nella scrittura SOLO se inizia con "[" (è un verbo)
+            let isVerbNote = card.eng && card.eng.trim().startsWith('[');
+            let noteExtraScrittura = isVerbNote ? ` <span style="color:#d97706; font-size:0.9rem; font-weight:bold; font-style:normal; margin-left:5px;">${card.eng}</span>` : '';
+            
             sub.innerHTML = `(${card.ita})${noteExtraScrittura}<br><span style="font-size:0.85rem; color:#aaa; font-weight:normal; margin-top:5px; display:inline-block;">[ ${card.tag} ]</span>`; 
             
             if(!rev) { label.innerHTML = formatRomaji(card.rom); document.getElementById('write-label').innerText = "SCRIVI IL GIAPPONESE"; document.getElementById('canvas-container').classList.remove('hidden'); document.getElementById('btn-clear-canvas').classList.remove('hidden'); } 
@@ -487,18 +489,20 @@
                 
                 let tagHtml = `<br><span style="font-size:0.75rem; color:#888; font-weight:normal; letter-spacing:normal;">[ ${card.tag} ]</span>`;
                 
+                // FILTRO: Mostra la nota nel quiz SOLO se inizia con "[" (è un verbo)
+                let isVerbNote = card.eng && card.eng.trim().startsWith('[');
+                
                 if(dir === 'j2i') { 
                     document.getElementById('q-label').innerHTML = "TRADUCI IN ITALIANO" + tagHtml; 
                     document.getElementById('prompt-principale').innerHTML = `${formatKana(card.jpn)} <span style="font-size:1.5rem; cursor:pointer;" onclick="parla('${card.jpn.replace(/'/g,"\\'")} ')">🔊</span>`; 
                     
-                    // FIX: ORA LA CATEGORIA (es. [Verbo U]) APPARE ANCHE NELLA TRADUZIONE JP->ITA
-                    let noteExtraQuiz = card.eng ? ` <span style="color:#d97706; font-size:0.9rem; font-weight:bold; font-style:normal; margin-left:5px;">${card.eng}</span>` : '';
+                    let noteExtraQuiz = isVerbNote ? ` <span style="color:#d97706; font-size:0.9rem; font-weight:bold; font-style:normal; margin-left:5px;">${card.eng}</span>` : '';
                     document.getElementById('prompt-secondario').innerHTML = formatRomaji(card.rom) + noteExtraQuiz; 
                 }
                 else { 
                     document.getElementById('q-label').innerHTML = "TRADUCI IN GIAPPONESE (ROMAJI)" + tagHtml; 
                     document.getElementById('prompt-principale').innerText = card.ita; 
-                    document.getElementById('prompt-secondario').innerHTML = card.eng ? `<span style="color:#d97706; font-weight:bold; font-style:normal;">${card.eng}</span>` : ""; 
+                    document.getElementById('prompt-secondario').innerHTML = isVerbNote ? `<span style="color:#d97706; font-weight:bold; font-style:normal;">${card.eng}</span>` : ""; 
                 }
             } else {
                 let dir = 'k2r'; if(mixMode && Math.random() > 0.5) dir = 'r2k'; card.dir = dir;
@@ -606,9 +610,9 @@
         
         function parseCSV(text, type, reload) { 
             if(!text) return 0; const lines = text.trim().split('\n'); let count = 0; 
-            if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v48_1', JSON.stringify(vocaboli)); } 
-            else if(type === 'frasi') { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v48_1', JSON.stringify(frasi)); } 
-            else if(type === 'grammatica') { grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } }); localStorage.setItem('srs_gramm_v48_1', JSON.stringify(grammatica)); }
+            if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v48_2', JSON.stringify(vocaboli)); } 
+            else if(type === 'frasi') { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v48_2', JSON.stringify(frasi)); } 
+            else if(type === 'grammatica') { grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } }); localStorage.setItem('srs_gramm_v48_2', JSON.stringify(grammatica)); }
             if(reload) location.reload(); return count; 
         }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
