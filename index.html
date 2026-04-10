@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v48.2 (Filtro Anti-Aiuto)</title>
+    <title>Giapponese SRS v49.0 (Riproduzione Audio Automatica)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -70,7 +70,8 @@
         .soluzione-visibile { color: rgba(40, 167, 69, 0.6) !important; z-index: 10; }
 
         /* --- LISTE --- */
-        .list-entry { display: flex; align-items: flex-start; background: #ffffff; border-bottom: 1px solid #eee; padding: 15px 10px; gap: 15px; }
+        .list-entry { display: flex; align-items: flex-start; background: #ffffff; border-bottom: 1px solid #eee; padding: 15px 10px; gap: 15px; scroll-margin-top: 20px; transition: background-color 0.3s; }
+        .list-entry.active-audio { background-color: #e6f2ff; border-radius: 8px; }
         .play-btn { width: 48px; height: 48px; border-radius: 50%; background: #007aff; color: white; border: none; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px rgba(0,122,255,0.2); }
         .list-text { flex-grow: 1; }
         .txt-jpn { font-weight: bold; font-size: 1.25rem; display: block; color: #333; margin-bottom: 4px; }
@@ -90,21 +91,26 @@
     <div id="sync-status"></div>
     <h1>Set di Studio Giapponese</h1>
     <nav id="main-nav">
-        <button class="nav-btn" onclick="switchTab('studio', this)">📖 Studio</button>
+        <button class="nav-btn active" onclick="switchTab('studio', this)">📖 Studio</button>
         <button class="nav-btn" onclick="switchTab('grammatica', this)">🎓 Grammatica</button>
         <button class="nav-btn" onclick="switchTab('scrittura', this)">✍️ Scrittura</button>
-        <button class="nav-btn active" onclick="switchTab('quiz', this); openVocabQuiz()">Quiz Vocaboli</button>
+        <button class="nav-btn" onclick="switchTab('quiz', this); openVocabQuiz()">Quiz Vocaboli</button>
         <button class="nav-btn" onclick="switchTab('ascolto', this)">Ascolto</button>
         <button class="nav-btn" onclick="switchTab('hiragana', this)">Hiragana</button>
         <button class="nav-btn" onclick="switchTab('katakana', this)">Katakana</button>
         <button class="nav-btn" onclick="switchTab('gestione', this)">Gestione</button>
     </nav>
     <div class="container">
-        <div id="tab-studio" class="modulo-content hidden">
+        <div id="tab-studio" class="modulo-content">
             <div class="card">
                 <h2>Studia Vocaboli</h2>
-                <p style="font-size:0.9rem; color:#666; text-align:center;">Giallo = Allungamenti e Raddoppi</p>
-                <select id="filtro-studio" class="input-box" onchange="renderStudio()"><option value="TUTTI">Tutte le Categorie</option></select>
+                <p style="font-size:0.9rem; color:#666; text-align:center;">Scegli una categoria e clicca Ascolta per la lettura automatica!</p>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <select id="filtro-studio" class="input-box" style="margin-bottom: 0; flex: 2;" onchange="renderStudio()"><option value="TUTTI">Tutte le Categorie</option></select>
+                    <button id="btn-audio-studio" class="btn btn-blue" style="margin-top: 0; flex: 1; font-size: 0.95rem; padding: 10px;" onclick="toggleAudioStudio()">🎧 Riproduci</button>
+                </div>
+                
                 <div id="lista-studio"></div>
             </div>
         </div>
@@ -154,7 +160,7 @@
             </div>
         </div>
 
-        <div id="tab-quiz" class="modulo-content">
+        <div id="tab-quiz" class="modulo-content hidden">
             <div class="card">
                 <div style="text-align:center; margin-bottom:15px; color:#0056b3; font-weight:bold; background:#e7f3ff; padding:10px; border-radius:8px;" id="punteggio">Pronto</div>
                 
@@ -225,11 +231,17 @@
         let isRipassoQuiz = false; let isRipassoWrite = false;
         let errGlobQuiz = []; let errGlobWrite = [];
 
+        // AUDIO GLOBALS
+        let isPlayingAudio = false;
+        let audioList = [];
+        let currentAudioIdx = 0;
+        let synthTimeout = null;
+
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v48_2')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v48_2'));
-                if(localStorage.getItem('srs_frasi_v48_2')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v48_2'));
-                if(localStorage.getItem('srs_gramm_v48_2')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v48_2'));
+                if(localStorage.getItem('srs_vocab_v49')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v49'));
+                if(localStorage.getItem('srs_frasi_v49')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v49'));
+                if(localStorage.getItem('srs_gramm_v49')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v49'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -254,11 +266,17 @@
                 showNotification(`Aggiornato! V:${countV} F:${countF} G:${countG}`, "sync-success");
                 aggiornaConta(); popolaFiltri(); renderFrasi(); renderStudio(); renderGrammatica();
                 resetDeck('quiz'); resetDeck('scrittura');
-                if(vocaboli.length > 0) openVocabQuiz(); 
             });
         }
 
         function switchTab(id, btnElement) {
+            // STOP AUDIO SE SI CAMBIA SCHEDA
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+            isPlayingAudio = false;
+            clearTimeout(synthTimeout);
+            const btnAudio = document.getElementById('btn-audio-studio');
+            if (btnAudio) { btnAudio.innerHTML = '🎧 Riproduci'; btnAudio.classList.replace('btn-red', 'btn-blue'); }
+
             document.querySelectorAll('.modulo-content').forEach(d => d.classList.add('hidden'));
             document.getElementById('tab-'+id).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -405,7 +423,6 @@
             
             const label = document.getElementById('prompt-scrittura'); const sub = document.getElementById('sub-scrittura'); 
             
-            // FILTRO: Mostra la nota nella scrittura SOLO se inizia con "[" (è un verbo)
             let isVerbNote = card.eng && card.eng.trim().startsWith('[');
             let noteExtraScrittura = isVerbNote ? ` <span style="color:#d97706; font-size:0.9rem; font-weight:bold; font-style:normal; margin-left:5px;">${card.eng}</span>` : '';
             
@@ -488,8 +505,6 @@
                 card.dir = dir;
                 
                 let tagHtml = `<br><span style="font-size:0.75rem; color:#888; font-weight:normal; letter-spacing:normal;">[ ${card.tag} ]</span>`;
-                
-                // FILTRO: Mostra la nota nel quiz SOLO se inizia con "[" (è un verbo)
                 let isVerbNote = card.eng && card.eng.trim().startsWith('[');
                 
                 if(dir === 'j2i') { 
@@ -596,23 +611,114 @@
         }
         
         function renderStudio() { 
-            const div = document.getElementById('lista-studio'); const filter = document.getElementById('filtro-studio').value; div.innerHTML = ''; 
+            // Ferma l'audio se si cambia il filtro
+            stopAudioStudio();
+            
+            const div = document.getElementById('lista-studio'); 
+            const filter = document.getElementById('filtro-studio').value; 
+            div.innerHTML = ''; 
             const list = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter); 
+            
             if(list.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessun vocabolo.</p>'; return; } 
-            div.innerHTML = list.map(v => { 
+            
+            div.innerHTML = list.map((v, index) => { 
                 const jpnSafe = v.jpn.replace(/'/g,"\\'"); 
-                const noteExtra = v.eng ? `<span style="font-size:0.85rem; color:#d97706; margin-left:8px; font-weight:500; font-style:italic;">${v.eng}</span>` : '';
-                return `<div class="list-entry"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(v.jpn)}</span><span class="txt-rom">${formatRomaji(v.rom)}</span><div><span class="txt-ita">${v.ita}</span>${noteExtra} <span style="font-size:0.75rem; color:#666; background:#e2e8f0; padding:3px 6px; border-radius:8px; margin-left:8px; vertical-align:middle; white-space:nowrap; display:inline-block;">${v.tag}</span></div></div></div>`; 
+                let isVerbNote = v.eng && v.eng.trim().startsWith('[');
+                const noteExtra = isVerbNote ? `<span style="font-size:0.85rem; color:#d97706; margin-left:8px; font-weight:500; font-style:italic;">${v.eng}</span>` : '';
+                return `<div class="list-entry" id="studio-item-${index}"><button class="play-btn" onclick="parla('${jpnSafe}')">▶</button><div class="list-text"><span class="txt-jpn">${formatKana(v.jpn)}</span><span class="txt-rom">${formatRomaji(v.rom)}</span><div><span class="txt-ita">${v.ita}</span>${noteExtra} <span style="font-size:0.75rem; color:#666; background:#e2e8f0; padding:3px 6px; border-radius:8px; margin-left:8px; vertical-align:middle; white-space:nowrap; display:inline-block;">${v.tag}</span></div></div></div>`; 
             }).join(''); 
+        }
+
+        // --- FUNZIONI PER RIPRODUZIONE AUDIO AUTOMATICA ---
+        function toggleAudioStudio() {
+            if (isPlayingAudio) { stopAudioStudio(); } 
+            else { startAudioStudio(); }
+        }
+
+        function stopAudioStudio() {
+            isPlayingAudio = false;
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+            clearTimeout(synthTimeout);
+            const btn = document.getElementById('btn-audio-studio');
+            if(btn) { btn.innerHTML = '🎧 Riproduci'; btn.classList.replace('btn-red', 'btn-blue'); }
+            
+            // Rimuovi eventuali evidenziazioni
+            document.querySelectorAll('.list-entry').forEach(el => el.classList.remove('active-audio'));
+        }
+
+        function startAudioStudio() {
+            const filter = document.getElementById('filtro-studio').value;
+            audioList = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter);
+            if (audioList.length === 0) return;
+            
+            if (!('speechSynthesis' in window)) { alert("Il tuo browser non supporta la riproduzione audio."); return; }
+
+            isPlayingAudio = true;
+            currentAudioIdx = 0;
+            const btn = document.getElementById('btn-audio-studio');
+            btn.innerHTML = '⏹️ Ferma';
+            btn.classList.replace('btn-blue', 'btn-red');
+            
+            playNextAudioCard();
+        }
+
+        function playNextAudioCard() {
+            if (!isPlayingAudio) return;
+            if (currentAudioIdx >= audioList.length) {
+                stopAudioStudio();
+                return;
+            }
+
+            const card = audioList[currentAudioIdx];
+            
+            // Evidenziazione visiva e Autoscroll
+            document.querySelectorAll('.list-entry').forEach(el => el.classList.remove('active-audio'));
+            const currentEl = document.getElementById('studio-item-' + currentAudioIdx);
+            if (currentEl) {
+                currentEl.classList.add('active-audio');
+                currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Parla Italiano
+            const utIta = new SpeechSynthesisUtterance(card.ita);
+            utIta.lang = 'it-IT';
+            utIta.rate = 1.0;
+            
+            utIta.onend = function() {
+                if (!isPlayingAudio) return;
+                // Pausa breve tra Italiano e Giapponese
+                synthTimeout = setTimeout(() => {
+                    if (!isPlayingAudio) return;
+                    
+                    // Parla Giapponese
+                    const jpnText = card.jpn.replace(/'/g, ""); 
+                    const utJpn = new SpeechSynthesisUtterance(jpnText);
+                    utJpn.lang = 'ja-JP';
+                    utJpn.rate = 0.85; // Un po' rallentato per capire bene
+                    
+                    utJpn.onend = function() {
+                        if (!isPlayingAudio) return;
+                        // Pausa lunga prima della prossima parola
+                        synthTimeout = setTimeout(() => {
+                            currentAudioIdx++;
+                            playNextAudioCard();
+                        }, 1500); 
+                    };
+                    
+                    window.speechSynthesis.speak(utJpn);
+                }, 800); 
+            };
+            
+            window.speechSynthesis.speak(utIta);
         }
 
         function renderGrammatica() { const div = document.getElementById('lista-grammatica'); div.innerHTML = ''; if(grammatica.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessuna regola caricata.</p>'; return; } grammatica.forEach((g, idx) => { const jpnSafe = g.es_jpn.replace(/'/g,"\\'"); const html = `<div class="gram-item"><div class="gram-header" onclick="toggleAccordion('g-${idx}')"><span>${g.titolo}</span><span style="color:#007aff">▼</span></div><div id="g-${idx}" class="gram-content"><p>${g.spiegazione}</p><div class="gram-example"><span class="gram-ex-jp">${g.es_jpn} <span style="cursor:pointer" onclick="parla('${jpnSafe}')">🔊</span></span><span class="gram-ex-rom">${g.es_rom}</span><span class="gram-ex-it">${g.es_ita}</span></div></div></div>`; div.innerHTML += html; }); }
         
         function parseCSV(text, type, reload) { 
             if(!text) return 0; const lines = text.trim().split('\n'); let count = 0; 
-            if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v48_2', JSON.stringify(vocaboli)); } 
-            else if(type === 'frasi') { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v48_2', JSON.stringify(frasi)); } 
-            else if(type === 'grammatica') { grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } }); localStorage.setItem('srs_gramm_v48_2', JSON.stringify(grammatica)); }
+            if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v49', JSON.stringify(vocaboli)); } 
+            else if(type === 'frasi') { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v49', JSON.stringify(frasi)); } 
+            else if(type === 'grammatica') { grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } }); localStorage.setItem('srs_gramm_v49', JSON.stringify(grammatica)); }
             if(reload) location.reload(); return count; 
         }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
