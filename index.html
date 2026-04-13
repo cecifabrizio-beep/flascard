@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giapponese SRS v49.2 (Schermo Sempre Acceso)</title>
+    <title>Giapponese SRS v49.3 (Pausa e Riprendi)</title>
     <style>
         /* --- STILE GENERALE --- */
         body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -104,11 +104,12 @@
         <div id="tab-studio" class="modulo-content">
             <div class="card">
                 <h2>Studia Vocaboli</h2>
-                <p style="font-size:0.9rem; color:#666; text-align:center;">Scegli una categoria e clicca Ascolta per la lettura automatica!</p>
+                <p style="font-size:0.9rem; color:#666; text-align:center;">Scegli una categoria e clicca Riproduci per l'audio automatico.</p>
                 
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
                     <select id="filtro-studio" class="input-box" style="margin-bottom: 0; flex: 2;" onchange="renderStudio()"><option value="TUTTI">Tutte le Categorie</option></select>
-                    <button id="btn-audio-studio" class="btn btn-blue" style="margin-top: 0; flex: 1; font-size: 0.95rem; padding: 10px;" onclick="toggleAudioStudio()">🎧 Riproduci</button>
+                    <button id="btn-audio-studio" class="btn btn-blue" style="margin-top: 0; flex: 1.2; font-size: 0.95rem; padding: 10px;" onclick="togglePlayPauseAudio()">🎧 Riproduci</button>
+                    <button id="btn-stop-audio" class="btn btn-red hidden" style="margin-top: 0; flex: 0.4; font-size: 0.95rem; padding: 10px;" onclick="stopAudioStudio()">⏹️</button>
                 </div>
                 
                 <div id="lista-studio"></div>
@@ -151,9 +152,7 @@
                 <div id="end-write-box" class="hidden" style="text-align:center; padding:20px;">
                     <h2 id="end-write-msg">Sessione Completata!</h2>
                     <p id="end-write-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
-                    
                     <div id="error-list-write" class="error-list-container hidden"></div>
-
                     <button id="btn-write-ripasso" class="btn btn-orange hidden">🔁 Ripassa Errori</button>
                     <button id="btn-write-continue" class="btn btn-blue" style="margin-top:10px;">...</button>
                 </div>
@@ -171,7 +170,6 @@
                         <button class="btn btn-gray" onclick="toggleCats('quiz', false)">Nessuna</button>
                      </div>
                      <div id="filtro-cat-quiz" class="checkbox-grid"></div>
-
                      <div class="deck-status" id="deck-status-quiz" style="margin-bottom:15px;"></div>
                      
                      <label style="display:block; text-align:left; color:#666; font-size:0.9rem; margin-bottom:5px;">Modalità Quiz:</label>
@@ -198,9 +196,7 @@
                 <div id="end-session-box" class="hidden" style="text-align:center; padding:20px;">
                     <h2 id="end-msg">Sessione Completata!</h2>
                     <p id="end-stat" style="font-size:1.1rem; color:#555; margin-bottom:20px;">...</p>
-                    
                     <div id="error-list-quiz" class="error-list-container hidden"></div>
-
                     <button id="btn-ripasso" class="btn btn-orange hidden">🔁 Ripassa Errori</button>
                     <button id="btn-new-session" class="btn btn-blue" style="margin-top:10px;">...</button>
                 </div>
@@ -233,21 +229,19 @@
 
         // AUDIO & WAKE LOCK GLOBALS
         let isPlayingAudio = false;
+        let isPausedAudio = false;
         let audioList = [];
         let currentAudioIdx = 0;
         let synthTimeout = null;
         let wakeLock = null;
 
-        // Tenta di caricare le voci in background se disponibili
-        if (window.speechSynthesis) {
-            window.speechSynthesis.getVoices();
-        }
+        if (window.speechSynthesis) { window.speechSynthesis.getVoices(); }
 
         window.onload = function() {
             try {
-                if(localStorage.getItem('srs_vocab_v49_2')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v49_2'));
-                if(localStorage.getItem('srs_frasi_v49_2')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v49_2'));
-                if(localStorage.getItem('srs_gramm_v49_2')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v49_2'));
+                if(localStorage.getItem('srs_vocab_v49_3')) vocaboli = JSON.parse(localStorage.getItem('srs_vocab_v49_3'));
+                if(localStorage.getItem('srs_frasi_v49_3')) frasi = JSON.parse(localStorage.getItem('srs_frasi_v49_3'));
+                if(localStorage.getItem('srs_gramm_v49_3')) grammatica = JSON.parse(localStorage.getItem('srs_gramm_v49_3'));
             } catch(e) { localStorage.clear(); }
             
             aggiornaConta(); popolaFiltri(); renderTabelle('h', RAW_HIRAGANA); renderTabelle('k', RAW_KATAKANA); 
@@ -262,7 +256,6 @@
         };
 
         function showNotification(msg, type) { const el = document.getElementById('sync-status'); el.className = type; el.innerText = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
-        
         async function fetchSafe(url) { try { const response = await fetch(url + "?t=" + new Date().getTime()); if (!response.ok) return ""; return await response.text(); } catch (e) { return ""; } }
 
         function forceSync() {
@@ -276,13 +269,7 @@
         }
 
         function switchTab(id, btnElement) {
-            if (window.speechSynthesis) window.speechSynthesis.cancel();
-            isPlayingAudio = false;
-            clearTimeout(synthTimeout);
-            releaseWakeLock(); // RILASCIA SCHERMO SE CAMBI SCHEDA
-            const btnAudio = document.getElementById('btn-audio-studio');
-            if (btnAudio) { btnAudio.innerHTML = '🎧 Riproduci'; btnAudio.classList.replace('btn-red', 'btn-blue'); }
-
+            stopAudioStudio(); // Ferma tutto l'audio al cambio scheda
             document.querySelectorAll('.modulo-content').forEach(d => d.classList.add('hidden'));
             document.getElementById('tab-'+id).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -421,7 +408,6 @@
             document.getElementById('btn-check-write').classList.remove('hidden'); document.getElementById('btn-next-write').classList.add('hidden');
             
             updateScore(false); 
-            
             const label = document.getElementById('prompt-scrittura'); const sub = document.getElementById('sub-scrittura'); 
             let isVerbNote = card.eng && card.eng.trim().startsWith('[');
             let noteExtraScrittura = isVerbNote ? ` <span style="color:#d97706; font-size:0.9rem; font-weight:bold; font-style:normal; margin-left:5px;">${card.eng}</span>` : '';
@@ -445,11 +431,7 @@
         function endScritturaSession() {
             document.getElementById('write-area').classList.add('hidden'); document.getElementById('end-write-box').classList.remove('hidden');
             document.getElementById('end-write-msg').innerText = "Sessione Completata"; document.getElementById('end-write-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
-            
-            const btnRip = document.getElementById('btn-write-ripasso');
-            const btnCont = document.getElementById('btn-write-continue'); 
-            let isFineMazzo = activeDeckWrite.length === 0;
-
+            const btnRip = document.getElementById('btn-write-ripasso'); const btnCont = document.getElementById('btn-write-continue'); let isFineMazzo = activeDeckWrite.length === 0;
             if (isFineMazzo) { 
                 renderErrorList('error-list-write', errGlobWrite); 
                 if(errGlobWrite.length > 0) { btnRip.classList.remove('hidden'); btnRip.innerText = `🔁 Ripassa i ${errGlobWrite.length} Errori Totali`; btnRip.onclick = () => avviaRipassoGlobale('scrittura'); } else { btnRip.classList.add('hidden'); }
@@ -462,10 +444,7 @@
         }
 
         function quitWriteSession() { document.getElementById('write-area').classList.add('hidden'); document.getElementById('write-config').classList.remove('hidden'); updateDeckStatus('scrittura'); }
-
-        function openVocabQuiz() { 
-            mode = 'vocab'; document.getElementById('quiz-start-screen').classList.remove('hidden'); document.getElementById('quiz-area').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); updateDeckStatus('quiz');
-        }
+        function openVocabQuiz() { mode = 'vocab'; document.getElementById('quiz-start-screen').classList.remove('hidden'); document.getElementById('quiz-area').classList.add('hidden'); document.getElementById('end-session-box').classList.add('hidden'); updateDeckStatus('quiz'); }
 
         function nuovaSessione() {
             isRipassoQuiz = false;
@@ -492,7 +471,6 @@
             feed.classList.add('hidden'); feed.classList.remove('fb-corretto', 'fb-sbagliato'); btnNext.classList.add('hidden'); 
             
             updateScore(false); 
-            
             let showInput = true;
             if(mode === 'vocab') {
                 const modeSel = document.getElementById('quiz-mode-select').value; let dir = 'j2i';
@@ -525,11 +503,7 @@
         function concludiSessione() {
             document.getElementById('quiz-area').classList.add('hidden'); document.getElementById('end-session-box').classList.remove('hidden');
             let msg = "Sessione Completata"; document.getElementById('end-msg').innerText = msg; document.getElementById('end-stat').innerText = `Punteggio: ${punteggio.ok} giuste, ${punteggio.err} errori.`;
-            
-            const btnRip = document.getElementById('btn-ripasso');
-            const btnNew = document.getElementById('btn-new-session');
-            
-            let isFineMazzo = (mode === 'vocab' && activeDeckQuiz.length === 0) || mode === 'kana';
+            const btnRip = document.getElementById('btn-ripasso'); const btnNew = document.getElementById('btn-new-session'); let isFineMazzo = (mode === 'vocab' && activeDeckQuiz.length === 0) || mode === 'kana';
 
             if (isFineMazzo) { 
                 renderErrorList('error-list-quiz', errGlobQuiz); 
@@ -555,8 +529,7 @@
             const btns = document.querySelectorAll('.choice-btn'); btns.forEach(b => b.disabled = true); const feed = document.getElementById('feedback'); feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato');
             if(selezionata.k === corretta.k) { punteggio.ok++; btnElement.classList.add('btn-correct'); feed.classList.add('fb-corretto'); feed.innerText = "✅ Esatto!"; }
             else { punteggio.err++; registraErrore(card); btnElement.classList.add('btn-wrong'); feed.classList.add('fb-sbagliato'); feed.innerHTML = `❌ Sbagliato! Era: <b>${corretta.k}</b>`; btns.forEach(b => { if(b.innerText === corretta.k) b.classList.add('btn-correct'); }); }
-            document.getElementById('btn-next').classList.remove('hidden'); document.getElementById('btn-next').focus();
-            updateScore(true); 
+            document.getElementById('btn-next').classList.remove('hidden'); document.getElementById('btn-next').focus(); updateScore(true); 
         }
 
         function controlla() {
@@ -567,20 +540,15 @@
             } else { if(user == cleanText(card.r)) ok = true; ans = card.r; }
             feed.classList.remove('hidden', 'fb-corretto', 'fb-sbagliato'); const jpnSafe = (mode === 'vocab') ? card.jpn.replace(/'/g, "\\'") : ''; const audioBtn = (mode === 'vocab') ? ` <span style="cursor:pointer; font-size:1.2rem" onclick="parla('${jpnSafe}')">🔊</span>` : '';
             if(ok) { punteggio.ok++; feed.classList.add('fb-corretto'); feed.innerHTML = "✅ Esatto!" + audioBtn; } else { punteggio.err++; registraErrore(card); feed.classList.add('fb-sbagliato'); feed.innerHTML = `❌ Sbagliato! Era: <b>${ans}</b>` + audioBtn; }
-            input.readOnly = true; document.getElementById('btn-check').classList.add('hidden'); document.getElementById('btn-next').classList.remove('hidden'); 
-            updateScore(true); 
+            input.readOnly = true; document.getElementById('btn-check').classList.add('hidden'); document.getElementById('btn-next').classList.remove('hidden'); updateScore(true); 
         }
 
         function renderTabelle(prefix, data) { const t = document.getElementById(prefix+'-table'); let html = '<tr>'; for(let i=0; i<data.length; i++) { html += `<td><span class="kc">${data[i].k}</span><span class="kr">${data[i].r}</span></td>`; if((i+1)%5 === 0) html += '</tr><tr>'; } t.innerHTML = html; const conf = document.getElementById(prefix+'-config'); let chkHtml = ''; Object.keys(KANA_GROUPS).forEach(key => { chkHtml += `<label class="checkbox-label"><input type="checkbox" value="${key}" checked> ${key}</label>`; }); conf.innerHTML = chkHtml; }
         function toggleKana(prefix, state) { document.querySelectorAll(`#${prefix}-config input`).forEach(c => c.checked = state); }
         
         function startKanaQuiz(prefix) { 
-            currentKanaPrefix = prefix; 
-            const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; 
-            const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); 
-            const mixCheck = document.getElementById(prefix + '-mix-mode'); 
-            mixMode = mixCheck.checked; 
-            let pool = []; 
+            currentKanaPrefix = prefix; const dataset = (prefix==='h') ? RAW_HIRAGANA : RAW_KATAKANA; const checkboxes = document.querySelectorAll(`#${prefix}-config input:checked`); 
+            const mixCheck = document.getElementById(prefix + '-mix-mode'); mixMode = mixCheck.checked; let pool = []; 
             checkboxes.forEach(chk => { const range = KANA_GROUPS[chk.value]; if(range) pool = pool.concat(dataset.slice(range[0], range[1])); }); 
             if(pool.length === 0) { alert("Seleziona almeno una riga"); return; } 
             
@@ -590,7 +558,7 @@
         }
         
         function renderStudio() { 
-            stopAudioStudio();
+            stopAudioStudio(); // Se l'utente cambia filtro dal menu a tendina, azzera l'audio.
             const div = document.getElementById('lista-studio'); const filter = document.getElementById('filtro-studio').value; div.innerHTML = ''; 
             const list = (filter === 'TUTTI') ? vocaboli : vocaboli.filter(v => v.tag === filter); 
             if(list.length === 0) { div.innerHTML = '<p style="text-align:center; padding:20px;">Nessun vocabolo.</p>'; return; } 
@@ -607,23 +575,18 @@
             try {
                 if ('wakeLock' in navigator) {
                     wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Schermo mantenuto acceso per la riproduzione audio.');
+                    console.log('Schermo mantenuto acceso.');
                 }
-            } catch (err) {
-                console.error('Impossibile mantenere lo schermo acceso:', err);
-            }
+            } catch (err) { console.error('WakeLock error:', err); }
         }
 
         function releaseWakeLock() {
             if (wakeLock !== null) {
-                wakeLock.release().then(() => {
-                    wakeLock = null;
-                    console.log('Blocco schermo rilasciato.');
-                });
+                wakeLock.release().then(() => { wakeLock = null; console.log('Blocco schermo rilasciato.'); });
             }
         }
 
-        // --- IMPOSTA LE MIGLIORI VOCI PREMIUM DISPONIBILI ---
+        // --- IMPOSTA LE MIGLIORI VOCI PREMIUM ---
         function setBestVoice(utterance, langPrefix) {
             let voices = window.speechSynthesis.getVoices();
             let langVoices = voices.filter(v => v.lang.startsWith(langPrefix));
@@ -633,17 +596,64 @@
             }
         }
 
-        function toggleAudioStudio() {
-            if (isPlayingAudio) { stopAudioStudio(); } else { startAudioStudio(); }
+        // --- LOGICA PAUSA/PLAY ---
+        function togglePlayPauseAudio() {
+            if (!isPlayingAudio) {
+                // Avvia da zero
+                startAudioStudio();
+            } else if (isPlayingAudio && !isPausedAudio) {
+                // Metti in pausa
+                pauseAudioStudio();
+            } else if (isPlayingAudio && isPausedAudio) {
+                // Riprendi
+                resumeAudioStudio();
+            }
+        }
+
+        function pauseAudioStudio() {
+            isPausedAudio = true;
+            if (window.speechSynthesis) window.speechSynthesis.cancel(); // Ferma la voce corrente
+            clearTimeout(synthTimeout); // Blocca i timer del ciclo
+            
+            const btn = document.getElementById('btn-audio-studio');
+            btn.innerHTML = '▶️ Riprendi'; 
+            btn.classList.replace('btn-orange', 'btn-green');
+            // Lascia il WakeLock attivo oppure rilascialo. Meglio rilasciarlo in pausa per risparmiare batteria.
+            releaseWakeLock();
+        }
+
+        function resumeAudioStudio() {
+            isPausedAudio = false;
+            const btn = document.getElementById('btn-audio-studio');
+            btn.innerHTML = '⏸️ Pausa'; 
+            btn.classList.replace('btn-green', 'btn-orange');
+            
+            requestWakeLock(); // Riattiva lo schermo
+            
+            // Riavvia dalla carta corrente (reiniziando la lettura in italiano di quella specifica riga)
+            playNextAudioCard();
         }
 
         function stopAudioStudio() {
             isPlayingAudio = false;
-            releaseWakeLock(); // Ferma il blocco dello schermo
+            isPausedAudio = false;
+            currentAudioIdx = 0; // Azzera l'indice
+            
+            releaseWakeLock(); // Rilascia lo schermo
             if (window.speechSynthesis) window.speechSynthesis.cancel();
             clearTimeout(synthTimeout);
-            const btn = document.getElementById('btn-audio-studio');
-            if(btn) { btn.innerHTML = '🎧 Riproduci'; btn.classList.replace('btn-red', 'btn-blue'); }
+            
+            // Ripristina l'interfaccia
+            const btnPlay = document.getElementById('btn-audio-studio');
+            if(btnPlay) { 
+                btnPlay.innerHTML = '🎧 Riproduci'; 
+                btnPlay.classList.remove('btn-red', 'btn-orange', 'btn-green');
+                btnPlay.classList.add('btn-blue');
+            }
+            
+            const btnStop = document.getElementById('btn-stop-audio');
+            if(btnStop) btnStop.classList.add('hidden');
+            
             document.querySelectorAll('.list-entry').forEach(el => el.classList.remove('active-audio'));
         }
 
@@ -653,16 +663,26 @@
             if (audioList.length === 0) return;
             if (!('speechSynthesis' in window)) { alert("Il tuo browser non supporta la riproduzione audio."); return; }
 
-            isPlayingAudio = true; currentAudioIdx = 0;
+            isPlayingAudio = true; 
+            isPausedAudio = false;
+            currentAudioIdx = 0;
+            
             requestWakeLock(); // Blocca lo spegnimento dello schermo
 
-            const btn = document.getElementById('btn-audio-studio');
-            btn.innerHTML = '⏹️ Ferma'; btn.classList.replace('btn-blue', 'btn-red');
+            // Aggiorna interfaccia bottoni
+            const btnPlay = document.getElementById('btn-audio-studio');
+            btnPlay.innerHTML = '⏸️ Pausa'; 
+            btnPlay.classList.remove('btn-blue', 'btn-green');
+            btnPlay.classList.add('btn-orange');
+
+            const btnStop = document.getElementById('btn-stop-audio');
+            btnStop.classList.remove('hidden');
+
             playNextAudioCard();
         }
 
         function playNextAudioCard() {
-            if (!isPlayingAudio) return;
+            if (!isPlayingAudio || isPausedAudio) return;
             if (currentAudioIdx >= audioList.length) { stopAudioStudio(); return; }
 
             const card = audioList[currentAudioIdx];
@@ -678,16 +698,16 @@
             setBestVoice(utIta, 'it');
             
             utIta.onend = function() {
-                if (!isPlayingAudio) return;
+                if (!isPlayingAudio || isPausedAudio) return;
                 synthTimeout = setTimeout(() => {
-                    if (!isPlayingAudio) return;
+                    if (!isPlayingAudio || isPausedAudio) return;
                     const jpnText = card.jpn.replace(/'/g, ""); 
                     const utJpn = new SpeechSynthesisUtterance(jpnText);
                     utJpn.lang = 'ja-JP'; utJpn.rate = 0.85;
                     setBestVoice(utJpn, 'ja');
                     
                     utJpn.onend = function() {
-                        if (!isPlayingAudio) return;
+                        if (!isPlayingAudio || isPausedAudio) return;
                         synthTimeout = setTimeout(() => { currentAudioIdx++; playNextAudioCard(); }, 1500); 
                     };
                     window.speechSynthesis.speak(utJpn);
@@ -709,9 +729,9 @@
         
         function parseCSV(text, type, reload) { 
             if(!text) return 0; const lines = text.trim().split('\n'); let count = 0; 
-            if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v49_2', JSON.stringify(vocaboli)); } 
-            else if(type === 'frasi') { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v49_2', JSON.stringify(frasi)); } 
-            else if(type === 'grammatica') { grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } }); localStorage.setItem('srs_gramm_v49_2', JSON.stringify(grammatica)); }
+            if(type === 'vocab') { vocaboli = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 4) { vocaboli.push({ita:p[0].trim(), eng:p[1].trim(), jpn:p[2].trim(), rom:p[3].trim(), tag:p[4]?p[4].trim():'Gen'}); count++; } }); localStorage.setItem('srs_vocab_v49_3', JSON.stringify(vocaboli)); } 
+            else if(type === 'frasi') { frasi = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 3) { frasi.push({ita:p[0].trim(), rom:p[1].trim(), jpn:p[2].trim(), tag:p[3]?p[3].trim():'Gen'}); count++; } }); localStorage.setItem('srs_frasi_v49_3', JSON.stringify(frasi)); } 
+            else if(type === 'grammatica') { grammatica = []; lines.forEach(l => { const sep = l.includes('|') ? '|' : ','; const p = l.split(sep); if(p.length >= 5) { grammatica.push({titolo:p[0].trim(), spiegazione:p[1].trim(), es_jpn:p[2].trim(), es_rom:p[3].trim(), es_ita:p[4].trim(), tag:p[5]?p[5].trim():'Gen'}); count++; } }); localStorage.setItem('srs_gramm_v49_3', JSON.stringify(grammatica)); }
             if(reload) location.reload(); return count; 
         }
         function resetTotale() { if(confirm("Sicuro di voler cancellare tutti i dati salvati?")) { localStorage.clear(); location.reload(); } }
